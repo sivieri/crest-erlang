@@ -18,7 +18,7 @@ stop() ->
 
 loop(Req, DocRoot) ->
     "/" ++ Path = Req:get(path),
-    ContentType = Req:get_header_value("ContentType"),
+    ContentType = Req:get_header_value("content-type"),
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
@@ -39,13 +39,11 @@ loop(Req, DocRoot) ->
             end;
         'POST' ->
             case string:tokens(Path, "/") of
-                ["crest"|["spawn"]] when ContentType =:= "application/x-crest-serf" ->
-                    % POST request for a SPAWN - expecting application/x-crest-serf
+                ["crest"|["spawn"]] when ContentType =:= "application/x-www-form-urlencoded" ->
                     Params = Req:parse_post(),
                     Key = crest_exec:spawn_install(Params),
                     Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
-                ["crest"|["remote"]] when ContentType =:= "application/x-crest-serf" ->
-                    % POST request for a REMOTE - expecting application/x-crest-serf
+                ["crest"|["remote"]] when ContentType =:= "application/x-www-form-urlencoded" ->
                     Params = Req:parse_post(),
                     crest_exec:remote(Params);
                 ["crest"|T] ->
