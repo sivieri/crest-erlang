@@ -10,8 +10,14 @@ init() ->
     register(crest, spawn(fun() -> loop([]) end)).
 
 spawn_install(Params) ->
-    F = binary_to_term(Params),
-    rpc(crest, {install, F}).
+    spawn_install(Params, []).
+
+spawn_install([Param|T], Answer) ->
+    F = binary_to_term(Param),
+    Key = rpc(crest, {install, F}),
+    spawn_install(T, [Key|Answer]);
+spawn_install([], Answer) ->
+    Answer.
 
 spawn_exec([Key|T], Params) ->
     rpc(crest, {exec, Key, T, Params}).
