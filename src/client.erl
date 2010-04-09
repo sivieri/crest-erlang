@@ -6,16 +6,20 @@
 -export([main/0]).
 
 get_function() ->
-    fun() ->
+    F = fun(F) ->
         receive
             {Pid, _} ->
-                Pid ! {self(), {"text/plain", "Function called"}}
+                Pid ! {self(), {"text/plain", "Function called"}},
+                F(F)
         end
+    end,
+    fun() ->
+        F(F)
     end.
 
 main() ->
     inets:start(),
-    http:set_options([{proxy, {{"localhost", 8080}, []}}]),
+    % http:set_options([{proxy, {{"localhost", 8080}, []}}]),
     Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_function())}])}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
