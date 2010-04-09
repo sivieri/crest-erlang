@@ -10,20 +10,16 @@ init() ->
     register(crest, spawn(fun() -> loop([]) end)).
 
 spawn_install(Params) ->
-    spawn_install(Params, []).
+    {"code", Code} = first(Params),
+    F = binary_to_term(list_to_binary(Code)),
+    rpc(crest, {install, F}).
 
-spawn_install([Param|T], Answer) ->
-    F = binary_to_term(Param),
-    Key = rpc(crest, {install, F}),
-    spawn_install(T, [Key|Answer]);
-spawn_install([], Answer) ->
-    Answer.
+spawn_exec(Path, Params) ->
+    Key = first(Path),
+    rpc(crest, {exec, Key, Params}).
 
-spawn_exec([Key|T], Params) ->
-    rpc(crest, {exec, Key, T, Params}).
-
-remote(Params) ->
-    io:format("~p~n", [Params]).
+remote([Param|T]) ->
+    true.
 
 %% Internal API
 loop(List) ->
@@ -33,10 +29,10 @@ loop(List) ->
             Pid ! {self(), Key},
             io:format("SPAWN: registered a key of value ~p~n", [Key]),
             loop([{Key, Pid2}|List]);
-        {Pid, {exec, Key, T, Params}} ->
+        {Pid, {exec, Key, Params}} ->
             case spawn_search(List, Key) of
                 {ok, Pid2} ->
-                    Res = rpc(Pid2, {T, Params}),
+                    Res = rpc(Pid2, Params),
                     Pid ! {self(), {ok, Res}},
                     io:format("SPAWN: executed the key ~p~n", [Key]);
                 {error} ->
@@ -44,6 +40,7 @@ loop(List) ->
             end,
             loop(List);
         {'EXIT', Pid, Reason} ->
+            io:format("Pid ~p exited: ~p~n", [Pid, Reason]),
             loop(List);
         Other ->
             io:format("SPAWN: ~p~n", [Other]),
@@ -59,6 +56,9 @@ spawn_search([H|T], Index) ->
     end;
 spawn_search([], _) ->
     {error}.
+
+first([First|T]) ->
+    First.
 
 rpc(Pid, Message) ->
     Pid ! {self(), Message},

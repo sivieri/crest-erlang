@@ -1,3 +1,7 @@
+%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @copyright 2010 Alessandro Sivieri
+%% @doc Client test code
+
 -module(client).
 -export([main/0]).
 
