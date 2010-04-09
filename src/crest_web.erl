@@ -45,7 +45,12 @@ loop(Req, DocRoot) ->
                     Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
                 ["crest"|["remote"]] when ContentType =:= "application/x-www-form-urlencoded" ->
                     Params = Req:parse_post(),
-                    crest_exec:remote(Params);
+                    case crest_exec:remote(Params) of
+                        {ok, {CT, Message}} ->
+                            Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {error} ->
+                            Req:not_found()
+                    end;
                 ["crest"|T] ->
                     % POST request for a spawned app
                     Params = Req:parse_post(),

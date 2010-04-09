@@ -1,8 +1,8 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
 %% @copyright 2010 Alessandro Sivieri
-%% @doc Client test code
+%% @doc Spawn test code
 
--module(client).
+-module(spawn_test).
 -export([main/0]).
 
 get_function() ->

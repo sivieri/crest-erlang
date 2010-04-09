@@ -14,12 +14,16 @@ spawn_install(Params) ->
     F = binary_to_term(list_to_binary(Code)),
     rpc(crest, {install, F}).
 
-spawn_exec(Path, Params) ->
-    Key = first(Path),
+spawn_exec([Key], Params) ->
+    rpc(crest, {exec, Key, Params});
+spawn_exec(Key, Params) ->
     rpc(crest, {exec, Key, Params}).
 
 remote([Param|T]) ->
-    true.
+    Key = spawn_install(Param),
+    Answer = spawn_exec(Key, T),
+    rpc(crest, {delete, Key}),
+    Answer.
 
 %% Internal API
 loop(List) ->
@@ -27,24 +31,40 @@ loop(List) ->
         {Pid, {install, F}} ->
             {Key, Pid2} = crest_process:install(F),
             Pid ! {self(), Key},
-            io:format("SPAWN: registered a key of value ~p~n", [Key]),
+            io:format("EXEC: registered a key of value ~p~n", [Key]),
             loop([{Key, Pid2}|List]);
         {Pid, {exec, Key, Params}} ->
             case spawn_search(List, Key) of
                 {ok, Pid2} ->
                     Res = rpc(Pid2, Params),
                     Pid ! {self(), {ok, Res}},
-                    io:format("SPAWN: executed the key ~p~n", [Key]);
+                    io:format("EXEC: executed key ~p~n", [Key]);
                 {error} ->
                     Pid ! {self(), {error}}
             end,
             loop(List);
+        {Pid, {delete, Key}} ->
+            DeleteFun = delete_fun(Key),
+            NewList = lists:filter(DeleteFun, List),
+            Pid ! {self(), ok},
+            io:format("EXEC: deleted key ~p~n", [Key]),
+            loop(NewList);
         {'EXIT', Pid, Reason} ->
             io:format("Pid ~p exited: ~p~n", [Pid, Reason]),
             loop(List);
         Other ->
             io:format("SPAWN: ~p~n", [Other]),
             loop(List)
+    end.
+
+delete_fun(Index) ->
+    fun(Elem) ->
+        case Elem of
+            {Index, _} ->
+                false;
+            _ ->
+                true
+        end
     end.
 
 spawn_search([H|T], Index) ->
@@ -57,7 +77,9 @@ spawn_search([H|T], Index) ->
 spawn_search([], _) ->
     {error}.
 
-first([First|T]) ->
+first([First|_]) ->
+    First;
+first(First) ->
     First.
 
 rpc(Pid, Message) ->
