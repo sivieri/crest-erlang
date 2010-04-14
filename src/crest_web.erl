@@ -26,6 +26,15 @@ loop(Req, DocRoot) ->
                     Req:respond({405, [], []});
                 ["crest"|"remote"] ->
                     Req:respond({405, [], []});
+                ["crest"|["demo"]] ->
+                    Req:respond({200, [{"Content-Type", "text/html"}], [demo:start_demo()]});
+                ["crest"|["demo2"]] ->
+                    case demo:spawn_demo() of
+                        {ok, Message} ->
+                            Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
+                        {error} ->
+                            Req:respond({500, [], []})
+                    end;
                 ["crest"|T] ->
                     Params = Req:parse_qs(),
                     case crest_exec:spawn_exec(T, Params) of

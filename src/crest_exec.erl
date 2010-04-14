@@ -10,7 +10,7 @@ init() ->
     register(crest, spawn(fun() -> loop([]) end)).
 
 spawn_install(Params) ->
-    {"code", Code} = first(Params),
+    {"code", Code} = crest_utils:first(Params),
     F = binary_to_term(list_to_binary(Code)),
     rpc(crest, {install, F}).
 
@@ -76,11 +76,6 @@ spawn_search([H|T], Index) ->
     end;
 spawn_search([], _) ->
     {error}.
-
-first([First|_]) ->
-    First;
-first(First) ->
-    First.
 
 rpc(Pid, Message) ->
     Pid ! {self(), Message},
