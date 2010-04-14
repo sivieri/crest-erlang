@@ -47,7 +47,7 @@ loop(List) ->
             DeleteFun = delete_fun(Key),
             NewList = lists:filter(DeleteFun, List),
             Pid ! {self(), ok},
-            error_logger:info_msg("Deleted the key ~p", [Key]),
+            error_logger:info_msg("Deleted the key ~p~n", [Key]),
             loop(NewList);
         {'EXIT', Pid, Reason} ->
             error_logger:warning_msg("The spawned process ~p exited: ~p~n", [Pid, Reason]),

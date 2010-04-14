@@ -9,7 +9,7 @@
 start_demo() ->
     get_header() ++
         "<p>Press the button to start the demo...</p>" ++
-        "<form action=\"crest/demo2\" method=\"GET\">" ++
+        "<form action=\"demo2\" method=\"GET\">" ++
         "<input type=\"submit\" name=\"Submit\" value=\"Start the demo\"/>" ++
         "</form>" ++
         get_footer().
@@ -19,25 +19,28 @@ spawn_demo() ->
     Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_function())}])}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
-           get_header() ++
+           Answer = get_header() ++
                 "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
                 "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
-                get_footer();
+                get_footer(),
+           {ok, Answer};
         {ok, {_, Body}} ->
-            get_header() ++
+            Answer = get_header() ++
                 "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
                 "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
-                get_footer();
+                get_footer(),
+            {ok, Answer};
         {error, Reason} ->
-            get_header() ++
-                "Error in spawning the demo: " ++ Reason ++ get_footer
+            Answer = get_header() ++
+                "Error in spawning the demo: " ++ Reason ++ get_footer,
+            {ok, Answer}
     end.
 
 %% Internal API
