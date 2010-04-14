@@ -31,14 +31,14 @@ loop(List) ->
         {Pid, {install, F}} ->
             {Key, Pid2} = crest_process:install(F),
             Pid ! {self(), Key},
-            io:format("EXEC: registered a key of value ~p~n", [Key]),
+            error_logger:info_msg("Registered a new key ~p~n", [Key]),
             loop([{Key, Pid2}|List]);
         {Pid, {exec, Key, Params}} ->
             case spawn_search(List, Key) of
                 {ok, Pid2} ->
                     Res = rpc(Pid2, Params),
                     Pid ! {self(), {ok, Res}},
-                    io:format("EXEC: executed key ~p~n", [Key]);
+                    error_logger:info_msg("Executed the existing key ~p~n", [Key]);
                 {error} ->
                     Pid ! {self(), {error}}
             end,
@@ -47,13 +47,13 @@ loop(List) ->
             DeleteFun = delete_fun(Key),
             NewList = lists:filter(DeleteFun, List),
             Pid ! {self(), ok},
-            io:format("EXEC: deleted key ~p~n", [Key]),
+            error_logger:info_msg("Deleted the key ~p", [Key]),
             loop(NewList);
         {'EXIT', Pid, Reason} ->
-            io:format("Pid ~p exited: ~p~n", [Pid, Reason]),
+            error_logger:warning_msg("The spawned process ~p exited: ~p~n", [Pid, Reason]),
             loop(List);
         Other ->
-            io:format("SPAWN: ~p~n", [Other]),
+            error_logger:warning_msg("Crest unknown parameter: ~p~n", [Other]),
             loop(List)
     end.
 
