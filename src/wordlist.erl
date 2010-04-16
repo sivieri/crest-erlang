@@ -4,8 +4,8 @@
 %%      Code adapted from http://www.roberthorvick.com/2009/07/02/word-frequency-redux-erlang-list-comprehension-regex-and-list-folding/
 
 -module(wordlist).
--export([get_word_counts/1]).
- 
+-export([get_word_counts/1, print_dict/1]).
+
 %% External API
 get_word_counts(Filename) ->
     case file:open(Filename, read) of
@@ -13,6 +13,10 @@ get_word_counts(Filename) ->
             Dict = process_each_line(IoDevice, dict:new()),
             Dict
     end.
+
+print_dict(Dict) ->
+    dict:fold(fun(Word, Count, AccIn) -> 
+        io:format("~s: ~w~n", [Word, Count]), AccIn end, void, Dict).
 
 %% Internal API
 process_each_line(IoDevice, Dict) ->
@@ -26,7 +30,7 @@ process_each_line(IoDevice, Dict) ->
         Data ->
             NewDict = lists:foldl(
                         fun(W, D) -> dict:update(W, fun(C) -> C + 1 end, 1, D) end, 
-                        dict:new(), 
+                        Dict, 
                         words(Data)),
             process_each_line(IoDevice, NewDict)
     end.

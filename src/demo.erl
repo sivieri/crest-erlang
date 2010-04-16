@@ -64,11 +64,11 @@ get_function() ->
                 {Pid, [{"filename", Filename}, {"limit", Num}]} ->
                     {Limit, _} = string:to_integer(Num),
                     Dict = wordlist:get_word_counts(Filename),
-                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [io_lib:format("<tr><td>~p</td><td>~p</td></tr>", [Word, Count])|AccIn] end, [], Dict),
+                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [crest_utils:format("<tr><td>~s</td><td>~s</td></tr>", [Word, Count])|AccIn] end, [], Dict),
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
                     Pid ! {self(), {"text/html", Result ++ "</table>"}};
                 {Pid, Other} ->
-                    Pid ! {self(), {"text/plain", io_lib:format("Error: ~p", [Other])}}
+                    Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}}
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
@@ -87,13 +87,13 @@ get_function() ->
         receive
             {Pid, [{"limit", Num}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
                 {X, _} = string:to_integer(Num),
-                AddressList = re:split(Addresses, "\r", [{return, list}]),
+                AddressList = string:tokens(Addresses, "\r\n"),
                 Tables = lists:foldl(CalledFunction, [], AddressList),
                 Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", Tables),
-                Pid ! {self(), {"text/html", Result}},
+                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
                 F(F);
             {Pid, Other} ->
-                Pid ! {self(), {"text/plain", io_lib:format("Error: ~p", [Other])}},
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
                 F(F)
         end
     end,

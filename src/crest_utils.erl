@@ -3,13 +3,17 @@
 %% @doc Miscellaneous utilities.
 
 -module(crest_utils).
--export([first/1]).
+-export([first/1, format/2]).
 
 %% External API
 first([First|_]) ->
     First;
 first(First) ->
     First.
+
+format(String, Elements) ->
+    Pass = io_lib:format(String, Elements),
+    lists:flatten(Pass).
 
 %% Internal API
 
