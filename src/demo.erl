@@ -103,11 +103,11 @@ get_function() ->
             Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}, {"limit", integer_to_list(0)}])}, [], []),
             case Res of
                 {ok, {_, _, Body}} ->
-                    [Body|AccIn];
+                    [{Address, Body}|AccIn];
                 {ok, {_, Body}} ->
-                    [Body|AccIn];
+                    [{Address, Body}|AccIn];
                 {error, Reason} ->
-                    [Reason|AccIn]
+                    [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
@@ -117,7 +117,7 @@ get_function() ->
                 {X, _} = string:to_integer(Num),
                 AddressList = string:tokens(Addresses, "\r\n"),
                 Tables = lists:foldl(CalledFunction, [], AddressList),
-                Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", Tables),
+                Result = lists:foldl(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
                 Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
                 F(F);
             {Pid, Other} ->
