@@ -65,11 +65,11 @@ get_function() ->
                 {Pid, [{"filename", Filename}, {"limit", Num}]} ->
                     {Limit, _} = string:to_integer(Num),
                     Dict = wordlist:get_word_counts(Filename),
-                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [crest_utils:format("<tr><td>~s</td><td>~s</td></tr>", [Word, Count])|AccIn] end, [], Dict),
+                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~s</td></tr>", [Word, Count]))|AccIn] end, [], Dict),
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
                     Pid ! {self(), {"text/html", Result ++ "</table>"}};
                 {Pid, Other} ->
-                    Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}}
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
             end
         end,
     CalledFunction = fun(Address, AccIn) ->

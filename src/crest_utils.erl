@@ -3,7 +3,7 @@
 %% @doc Miscellaneous utilities.
 
 -module(crest_utils).
--export([first/1, format/2]).
+-export([first/1, format/2, rpc/2]).
 
 %% External API
 first([First|_]) ->
@@ -15,5 +15,11 @@ format(String, Elements) ->
     Pass = io_lib:format(String, Elements),
     lists:flatten(Pass).
 
-%% Internal API
+rpc(Pid, Message) ->
+    Pid ! {self(), Message},
+    receive
+        {_, Response} ->
+            Response
+    end.
 
+%% Internal API

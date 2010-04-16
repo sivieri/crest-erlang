@@ -11,19 +11,18 @@ init() ->
 
 spawn_install(Params) ->
     {"code", Code} = crest_utils:first(Params),
-    error_logger:info_msg("Code: ~p~n", [Code]),
     F = binary_to_term(list_to_binary(Code)),
-    rpc(crest, {install, F}).
+    crest_utils:rpc(crest, {install, F}).
 
 spawn_exec([Key], Params) ->
-    rpc(crest, {exec, Key, Params});
+    crest_utils:rpc(crest, {exec, Key, Params});
 spawn_exec(Key, Params) ->
-    rpc(crest, {exec, Key, Params}).
+    crest_utils:rpc(crest, {exec, Key, Params}).
 
 remote([Param|T]) ->
     Key = spawn_install(Param),
     Answer = spawn_exec(Key, T),
-    rpc(crest, {delete, Key}),
+    crest_utils:rpc(crest, {delete, Key}),
     Answer.
 
 %% Internal API
@@ -37,7 +36,7 @@ loop(List) ->
         {Pid, {exec, Key, Params}} ->
             case spawn_search(List, Key) of
                 {ok, Pid2} ->
-                    Res = rpc(Pid2, Params),
+                    Res = crest_utils:rpc(Pid2, Params),
                     Pid ! {self(), {ok, Res}},
                     error_logger:info_msg("Executed the existing key ~p~n", [Key]);
                 {error} ->
@@ -77,10 +76,3 @@ spawn_search([H|T], Index) ->
     end;
 spawn_search([], _) ->
     {error}.
-
-rpc(Pid, Message) ->
-    Pid ! {self(), Message},
-    receive
-        {_, Response} ->
-            Response
-    end.
