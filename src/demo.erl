@@ -21,7 +21,8 @@ spawn_demo() ->
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
                 "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
-                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
                 "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
@@ -30,9 +31,9 @@ spawn_demo() ->
         {ok, {_, Body}} ->
             Answer = get_header() ++
                 "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
-                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
+                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
                 get_footer(),

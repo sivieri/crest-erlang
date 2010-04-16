@@ -11,6 +11,7 @@ init() ->
 
 spawn_install(Params) ->
     {"code", Code} = crest_utils:first(Params),
+    error_logger:info_msg("Code: ~p~n", [Code]),
     F = binary_to_term(list_to_binary(Code)),
     rpc(crest, {install, F}).
 
