@@ -1,6 +1,8 @@
 include ../support/include.mk
 
-all: $(EBIN_FILES)
+all: $(EBIN_FILES_NO_DOCS)
+
+doc: $(ERL_DOCUMENTS)
 
 debug:
 	$(MAKE) DEBUG=-DDEBUG
