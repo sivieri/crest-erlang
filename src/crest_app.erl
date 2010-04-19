@@ -9,8 +9,6 @@
 %% External API
 start(_Type, _StartArgs) ->
     crest_deps:ensure(),
-    crest_exec:init(),
-    crest_discovery:init(),
     crest_sup:start_link().
 
 stop(_State) ->

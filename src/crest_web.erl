@@ -38,7 +38,7 @@ loop(Req, DocRoot) ->
                     end;
                 ["crest"|T] ->
                     Params = Req:parse_qs(),
-                    case crest_exec:spawn_exec(T, Params) of
+                    case crest_server:spawn_exec(T, Params) of
                         {ok, {CT, Message}} ->
                             Req:respond({200, [{"Content-Type", CT}], [Message]});
                         {error} ->
@@ -51,11 +51,11 @@ loop(Req, DocRoot) ->
             case string:tokens(Path, "/") of
                 ["crest"|["spawn"]] when ContentType =:= "application/x-www-form-urlencoded" ->
                     Params = Req:parse_post(),
-                    Key = crest_exec:spawn_install(Params),
+                    Key = crest_server:spawn_install(Params),
                     Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
                 ["crest"|["remote"]] when ContentType =:= "application/x-www-form-urlencoded" ->
                     Params = Req:parse_post(),
-                    case crest_exec:remote(Params) of
+                    case crest_server:remote(Params) of
                         {ok, {CT, Message}} ->
                             Req:respond({200, [{"Content-Type", CT}], [Message]});
                         {error} ->
@@ -64,7 +64,7 @@ loop(Req, DocRoot) ->
                 ["crest"|T] ->
                     % POST request for a spawned app
                     Params = Req:parse_post(),
-                    case crest_exec:spawn_exec(T, Params) of
+                    case crest_server:spawn_exec(T, Params) of
                         {ok, {CT, Message}} ->
                             Req:respond({200, [{"Content-Type", CT}], [Message]});
                         {error} ->
