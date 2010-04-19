@@ -20,10 +20,9 @@ spawn_demo() ->
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
-                "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
                 "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
-                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
                 get_footer(),
@@ -51,6 +50,7 @@ get_header() ->
     "<html xmlns=\"http://www.w3.org/1999/xhtml\">" ++
     "<head>" ++
     "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" ++
+    "<script src=\"numbers.js\" type=\"text/javascript\"></script>" ++
     "<title>Computational REST - Erlang - Demo</title>" ++
     "</head>" ++
     "<body>" ++
@@ -92,15 +92,16 @@ get_function() ->
                 {Pid, [{"filename", Filename}, {"limit", Num}]} ->
                     {Limit, _} = string:to_integer(Num),
                     Dict = GetWordCounts(Filename),
-                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], Dict),
+                    Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
+                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], Dict2),
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
                     Pid ! {self(), {"text/html", Result ++ "</table>"}};
                 {Pid, Other} ->
                     Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
             end
         end,
-    CalledFunction = fun(Address, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}, {"limit", integer_to_list(0)}])}, [], []),
+    CalledFunction = fun({Address, Limit}, AccIn) ->
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
             case Res of
                 {ok, {_, _, Body}} ->
                     [{Address, Body}|AccIn];
@@ -113,10 +114,10 @@ get_function() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"limit", Num}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
-                {X, _} = string:to_integer(Num),
+            {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
-                Tables = lists:foldl(CalledFunction, [], AddressList),
+                AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
+                Tables = lists:foldl(CalledFunction, [], AddressList2),
                 Result = lists:foldl(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
                 Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
                 F(F);
