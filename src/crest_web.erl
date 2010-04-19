@@ -28,9 +28,9 @@ loop(Req, DocRoot) ->
                 ["crest"|"remote"] ->
                     Req:respond({405, [], []});
                 ["crest"|["demo"]] ->
-                    Req:respond({200, [{"Content-Type", "text/html"}], [demo:start_demo()]});
+                    Req:respond({200, [{"Content-Type", "text/html"}], [crest_demo:start_demo()]});
                 ["crest"|["demo2"]] ->
-                    case demo:spawn_demo() of
+                    case crest_demo:spawn_demo() of
                         {ok, Message} ->
                             Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
                         {error} ->

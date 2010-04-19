@@ -4,14 +4,15 @@
   {modules, [
     crest,
     crest_app,
-    crest_sup,
-    crest_web,
+    crest_demo,
     crest_deps,
-    crest_server,
     crest_process,
+    crest_server,
+    crest_sup,
     crest_utils,
     crest_uuid,
-    wordlist
+    crest_web,
+    crest_wordlist
   ]},
   {registered, []},
   {mod, {crest_app, []}},

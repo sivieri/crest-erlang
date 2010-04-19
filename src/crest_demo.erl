@@ -2,7 +2,7 @@
 %% @copyright 2010 Alessandro Sivieri
 %% @doc The demo.
 
--module(demo).
+-module(crest_demo).
 -export([start_demo/0, spawn_demo/0]).
 
 %% External API

@@ -3,7 +3,7 @@
 %% @doc A module for obtaining a wordlist
 %%      Code adapted from http://www.roberthorvick.com/2009/07/02/word-frequency-redux-erlang-list-comprehension-regex-and-list-folding/
 
--module(wordlist).
+-module(crest_wordlist).
 -export([get_word_counts/1, print_dict/1]).
 
 %% External API
