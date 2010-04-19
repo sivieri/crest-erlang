@@ -22,8 +22,11 @@ spawn_exec([Key], Params) ->
 spawn_exec(Key, Params) ->
     gen_server:call(?MODULE, {exec, Key, Params}).
 
-remote(Params) ->
-    gen_server:call(?MODULE, {remote, Params}).
+remote([Param|T]) ->
+    Key = gen_server:call(?MODULE, {spawn, Param}),
+    Answer = gen_server:call(?MODULE, {exec, Key, T}),
+    gen_server:cast(?MODULE, {delete, Key}),
+    Answer.
 
 init(_Args) ->
     {ok, []}.
@@ -43,11 +46,6 @@ handle_call({exec, Key, Params}, _From, State) ->
         {error} ->
             {reply, {error}, State}
     end;
-handle_call({remote, [Param|T]}, _From, State) ->
-    Key = gen_server:call(?MODULE, {spawn, Param}),
-    Answer = gen_server:call(?MODULE, {exec, Key, T}),
-    gen_server:cast(?MODULE, {delete, Key}),
-    {reply, Answer, State};
 handle_call(_Request, _From, State) ->
     {noreply, State}.
 
