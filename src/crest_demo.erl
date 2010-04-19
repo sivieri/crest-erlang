@@ -118,7 +118,7 @@ get_function() ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
                 Tables = lists:foldl(CalledFunction, [], AddressList2),
-                Result = lists:foldl(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
+                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
                 Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
                 F(F);
             {Pid, Other} ->
