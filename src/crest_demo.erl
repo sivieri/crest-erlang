@@ -3,17 +3,9 @@
 %% @doc The demo.
 
 -module(crest_demo).
--export([start_demo/0, spawn_demo/0]).
+-export([spawn_demo/0]).
 
 %% External API
-start_demo() ->
-    get_header() ++
-        "<p>Press the button to start the demo...</p>" ++
-        "<form action=\"demo2\" method=\"GET\">" ++
-        "<input type=\"submit\" name=\"Submit\" value=\"Start the demo\"/>" ++
-        "</form>" ++
-        get_footer().
-
 spawn_demo() ->
     inets:start(),
     Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_function())}])}, [], []),
