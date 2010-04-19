@@ -1,8 +1,8 @@
 all:
 	(cd src;$(MAKE))
 
-doc:
-	(cd src;$(MAKE) doc)
+edoc:
+	(cd src;$(MAKE) edoc)
 
 clean:
 	(cd src;$(MAKE) clean)

@@ -1,8 +1,14 @@
 include ../support/include.mk
 
+APPLICATION=crest
+DOC_OPTS={dir,\"../doc\"}
+
 all: $(EBIN_FILES_NO_DOCS)
 
-doc: $(ERL_DOCUMENTS)
+edoc:
+	$(ERL) -noshell -pa ../ebin \
+		 -eval "edoc:application($(APPLICATION), \".\", [$(DOC_OPTS)])" \
+		 -s init stop
 
 debug:
 	$(MAKE) DEBUG=-DDEBUG
