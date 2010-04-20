@@ -29,31 +29,29 @@ remote([Param|T]) ->
     Answer.
 
 init(_Args) ->
-    {ok, []}.
+    {ok, dict:new()}.
 
 handle_call({spawn, Params}, _From, State) ->
-    {"code", Code} = crest_utils:first(Params),
+    {"code", Code} = hd(Params),
     F = binary_to_term(list_to_binary(Code)),
     {Key, Pid2} = crest_process:install(F),
     error_logger:info_msg("Registered a new key ~p~n", [Key]),
-    {reply, Key, [{Key, Pid2}|State]};
+    {reply, Key, [dict:append(Key, Pid2, State)]};
 handle_call({exec, Key, Params}, _From, State) ->
-    case spawn_search(State, Key) of
+    case dict:find(Key, State) of
         {ok, Pid2} ->
             Res = crest_utils:rpc(Pid2, Params),
             error_logger:info_msg("Executed the existing key ~p~n", [Key]),
             {reply, {ok, Res}, State};
-        {error} ->
+        error ->
             {reply, {error}, State}
     end;
 handle_call(_Request, _From, State) ->
     {noreply, State}.
 
 handle_cast({delete, Key}, State) ->
-    DeleteFun = delete_fun(Key),
-    NewState = lists:filter(DeleteFun, State),
     error_logger:info_msg("Deleted the key ~p~n", [Key]),
-    {noreply, NewState};
+    {noreply, dict:erase(Key, State)};
 handle_cast(_Request, State) ->
     {noreply, State}.
 
@@ -70,22 +68,3 @@ terminate(_Reason, _State) ->
     ok.
 
 %% Internal API
-delete_fun(Index) ->
-    fun(Elem) ->
-        case Elem of
-            {Index, _} ->
-                false;
-            _ ->
-                true
-        end
-    end.
-
-spawn_search([H|T], Index) ->
-    case H of
-        {Index, Pid} ->
-            {ok, Pid};
-        {_, _} ->
-            spawn_search(T, Index)
-    end;
-spawn_search([], _) ->
-    {error}.
