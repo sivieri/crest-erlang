@@ -29,42 +29,45 @@ remote([Param|T]) ->
     Answer.
 
 init(_Args) ->
-    {ok, dict:new()}.
+    Spawned = dict:new(),
+    {ok, Spawned}.
 
-handle_call({spawn, Params}, _From, State) ->
-    {"code", Code} = hd(Params),
+handle_call({spawn, Params}, _From, Spawned) ->
+    {"code", Code} = crest_utils:first(Params),
     F = binary_to_term(list_to_binary(Code)),
     {Key, Pid2} = crest_process:install(F),
+    NewSpawned = dict:store(Key, Pid2, Spawned),
     error_logger:info_msg("Registered a new key ~p~n", [Key]),
-    {reply, Key, [dict:append(Key, Pid2, State)]};
-handle_call({exec, Key, Params}, _From, State) ->
-    case dict:find(Key, State) of
+    {reply, Key, NewSpawned};
+handle_call({exec, Key, Params}, _From, Spawned) ->
+    case dict:find(Key, Spawned) of
         {ok, Pid2} ->
             Res = crest_utils:rpc(Pid2, Params),
             error_logger:info_msg("Executed the existing key ~p~n", [Key]),
-            {reply, {ok, Res}, State};
+            {reply, {ok, Res}, Spawned};
         error ->
-            {reply, {error}, State}
+            {reply, {error}, Spawned}
     end;
-handle_call(_Request, _From, State) ->
-    {noreply, State}.
+handle_call(_Request, _From, Spawned) ->
+    {noreply, Spawned}.
 
-handle_cast({delete, Key}, State) ->
+handle_cast({delete, Key}, Spawned) ->
+    NewSpawned = dict:erase(Key, Spawned),
     error_logger:info_msg("Deleted the key ~p~n", [Key]),
-    {noreply, dict:erase(Key, State)};
-handle_cast(_Request, State) ->
-    {noreply, State}.
+    {noreply, NewSpawned};
+handle_cast(_Request, Spawned) ->
+    {noreply, Spawned}.
 
-handle_info({'EXIT', Pid, Reason}, State) ->
+handle_info({'EXIT', Pid, Reason}, Spawned) ->
     error_logger:warning_msg("The spawned process ~p exited: ~p~n", [Pid, Reason]),
-    {noreply, State};
-handle_info(_Info, State) ->
-    {noreply, State}.
+    {noreply, Spawned};
+handle_info(_Info, Spawned) ->
+    {noreply, Spawned}.
 
-code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+code_change(_OldVsn, Spawned, _Extra) ->
+    {ok, Spawned}.
 
-terminate(_Reason, _State) ->
+terminate(_Reason, _Spawned) ->
     ok.
 
 %% Internal API
