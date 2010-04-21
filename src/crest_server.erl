@@ -37,13 +37,13 @@ handle_call({spawn, Params}, _From, Spawned) ->
     F = binary_to_term(list_to_binary(Code)),
     {Key, Pid2} = crest_process:install(F),
     NewSpawned = dict:store(Key, Pid2, Spawned),
-    error_logger:info_msg("Registered a new key ~p~n", [Key]),
+    log4erl:info("Registered a new key ~p~n", [Key]),
     {reply, Key, NewSpawned};
 handle_call({exec, Key, Params}, _From, Spawned) ->
     case dict:find(Key, Spawned) of
         {ok, Pid2} ->
             Res = crest_utils:rpc(Pid2, Params),
-            error_logger:info_msg("Executed the existing key ~p~n", [Key]),
+            log4erl:info("Executed the existing key ~p~n", [Key]),
             {reply, {ok, Res}, Spawned};
         error ->
             {reply, {error}, Spawned}
@@ -53,13 +53,13 @@ handle_call(_Request, _From, Spawned) ->
 
 handle_cast({delete, Key}, Spawned) ->
     NewSpawned = dict:erase(Key, Spawned),
-    error_logger:info_msg("Deleted the key ~p~n", [Key]),
+    log4erl:info("Deleted the key ~p~n", [Key]),
     {noreply, NewSpawned};
 handle_cast(_Request, Spawned) ->
     {noreply, Spawned}.
 
 handle_info({'EXIT', Pid, Reason}, Spawned) ->
-    error_logger:warning_msg("The spawned process ~p exited: ~p~n", [Pid, Reason]),
+    log4erl:warn("The spawned process ~p exited: ~p~n", [Pid, Reason]),
     {noreply, Spawned};
 handle_info(_Info, Spawned) ->
     {noreply, Spawned}.
