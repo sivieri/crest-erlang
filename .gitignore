@@ -1,3 +1,4 @@
 # Ignore binaries and docs (as usual)
 ebin
 doc
+logs

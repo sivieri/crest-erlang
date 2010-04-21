@@ -9,6 +9,8 @@
 start() ->
     crest_deps:ensure(),
     ensure_started(crypto),
+    application:start(log4erl),
+    log4erl:conf("config/log4erl.config"),
     application:start(crest).
 
 stop() ->
