@@ -3,16 +3,16 @@
 %% @doc The demo.
 
 -module(crest_demo).
--export([spawn_demo/0]).
+-export([spawn_demo_1/0, spawn_demo_2/0, spawn_demo_3/0]).
 
 %% External API
-spawn_demo() ->
+spawn_demo_1() ->
     inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_function())}])}, [], []),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_word_frequency())}])}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
-                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
                 "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
@@ -21,10 +21,61 @@ spawn_demo() ->
            {ok, Answer};
         {ok, {_, Body}} ->
             Answer = get_header() ++
-                "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
-                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
-                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+            {ok, Answer};
+        {error, Reason} ->
+            Answer = get_header() ++
+                "Error in spawning the demo: " ++ Reason ++ get_footer,
+            {ok, Answer}
+    end.
+
+spawn_demo_2() ->
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_inverse_document_frequency())}])}, [], []),
+    case Res of
+        {ok, {_, _, Body}} ->
+           Answer = get_header() ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+           {ok, Answer};
+        {ok, {_, Body}} ->
+            Answer = get_header() ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+            {ok, Answer};
+        {error, Reason} ->
+            Answer = get_header() ++
+                "Error in spawning the demo: " ++ Reason ++ get_footer,
+            {ok, Answer}
+    end.
+
+spawn_demo_3() ->
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_cosine_similarity())}])}, [], []),
+    case Res of
+        {ok, {_, _, Body}} ->
+           Answer = get_header() ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+           {ok, Answer};
+        {ok, {_, Body}} ->
+            Answer = get_header() ++
+                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
                 "</form>" ++
                 get_footer(),
@@ -49,44 +100,18 @@ get_header() ->
     "<h1>Computational REST - Erlang - Demo</h1>".
 
 get_footer() ->
-    "</body></html>".
+    "<br/><p><a href=\"../demo.html\" title=\"Back to demo page\">Back to demo page</a></body></html>".
 
-get_function() ->
+get_word_frequency() ->
     ClientFunction = fun() ->
-            Words = fun(String) ->
-                {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
-                [hd(C) || C<-Captures]
-            end,
-            ProcessEachLine = fun(ProcessEachLine, IoDevice, Dict) ->
-                case io:get_line(IoDevice, "") of
-                    eof -> 
-                        file:close(IoDevice),
-                        Dict;
-                    {error, Reason} ->
-                        file:close(IoDevice),
-                        throw(Reason);
-                    Data ->
-                        NewDict = lists:foldl(
-                            fun(W, D) -> dict:update(W, fun(C) -> C + 1 end, 1, D) end, 
-                            Dict, 
-                            Words(Data)),
-                        ProcessEachLine(ProcessEachLine, IoDevice, NewDict)
-                end
-            end,
-            GetWordCounts = fun(Filename) ->
-                case file:open(Filename, read) of
-                    {ok, IoDevice} ->
-                        Dict = ProcessEachLine(ProcessEachLine, IoDevice, dict:new()),
-                        Dict
-                end
-            end,
             receive
                 {Pid, [{"filename", Filename}, {"limit", Num}]} ->
                     {Limit, _} = string:to_integer(Num),
-                    Dict = GetWordCounts(Filename),
+                    Dict = crest_wordlist:get_word_counts(Filename),
                     Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
-                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], Dict2),
-                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
+                    OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
+                    HtmlList = lists:foldl(fun({Word, Count}, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], OrderedList),
+                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table><tr><th>Word</th><th>Frequency</th></tr>", HtmlList),
                     Pid ! {self(), {"text/html", Result ++ "</table>"}};
                 {Pid, Other} ->
                     Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
@@ -111,6 +136,127 @@ get_function() ->
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
                 Tables = lists:foldl(CalledFunction, [], AddressList2),
                 Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
+                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                F(F);
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                F(F)
+        end
+    end,
+    fun() ->
+        F(F)
+    end.
+
+get_inverse_document_frequency() ->
+    ClientFunction = fun() ->
+            receive
+                {Pid, [{"filename", Filename}]} ->
+                    Dict = crest_wordlist:get_word_counts(Filename),
+                    Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, Dict),
+                    Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, Dict),
+                    PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s-~p$", [Word, Count]))|AccIn] end, [], Dict2),
+                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
+                    Pid ! {self(), {"text/plain", Result}};
+                {Pid, Other} ->
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+            end
+        end,
+    CalledFunction = fun(Address, AccIn) ->
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}])}, [], []),
+            case Res of
+                {ok, {_, _, Body}} ->
+                    [{Address, Body}|AccIn];
+                {ok, {_, Body}} ->
+                    [{Address, Body}|AccIn];
+                {error, Reason} ->
+                    [{Address, Reason}|AccIn]
+            end
+        end,
+    F = fun(F) ->
+        inets:start(),
+        receive
+            {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                DocumentNumber = length(AddressList),
+                Counts = lists:foldl(CalledFunction, [], AddressList),
+                DictList = lists:map(fun(SingleList) ->
+                                             Elements = string:tokens(SingleList, "$"),
+                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "-") of [Word|[Count]] -> {Word, Count} end end, Elements),
+                                             dict:from_list(Lists)
+                                             end, Counts),
+                DictCount = lists:map(fun(Dict) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
+                MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
+                FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / Count) end, MainDict),
+                Tables = lists:map(fun(Dict) ->
+                                             dict:fold(fun(Word, Count, AccIn) ->
+                                                               NewCount = Count * dict:fetch(Word, FreqDict),
+                                                               AccIn ++ lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, NewCount]))
+                                                               end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"
+                                             end, DictList),
+                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
+                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                F(F);
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                F(F)
+        end
+    end,
+    fun() ->
+        F(F)
+    end.
+
+get_cosine_similarity() ->
+    ClientFunction = fun() ->
+            receive
+                {Pid, [{"filename", Filename}]} ->
+                    Dict = crest_wordlist:get_word_counts(Filename),
+                    Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, Dict),
+                    Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, Dict),
+                    PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s-~p$", [Word, Count]))|AccIn] end, [], Dict2),
+                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
+                    Pid ! {self(), {"text/plain", Result}};
+                {Pid, Other} ->
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+            end
+        end,
+    CalledFunction = fun(Address, AccIn) ->
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}])}, [], []),
+            case Res of
+                {ok, {_, _, Body}} ->
+                    [{Address, Body}|AccIn];
+                {ok, {_, Body}} ->
+                    [{Address, Body}|AccIn];
+                {error, Reason} ->
+                    [{Address, Reason}|AccIn]
+            end
+        end,
+    F = fun(F) ->
+        inets:start(),
+        receive
+            {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                DocumentNumber = length(AddressList),
+                Counts = lists:foldl(CalledFunction, [], AddressList),
+                DictList = lists:map(fun(SingleList) ->
+                                             Elements = string:tokens(SingleList, "$"),
+                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "-") of [Word|[Count]] -> {Word, Count} end end, Elements),
+                                             dict:from_list(Lists)
+                                             end, Counts),
+                DictCount = lists:map(fun(Dict) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
+                MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
+                FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / Count) end, MainDict),
+                IDFs = lists:map(fun(Dict) ->
+                                             dict:map(fun(Word, Count) ->
+                                                               Count * dict:fetch(Word, FreqDict)
+                                                               end, Dict)
+                                             end, DictList),
+                CosIDFs = lists:map(fun(Dict) ->
+                                             dict:fold(fun(_Word, IDF, AccIn) -> [IDF|AccIn] end, [], Dict)
+                                             end, IDFs),
+                Cosines = crest_utils:cosine_matrix(CosIDFs, []),
+                Result = lists:foldl(fun(Element, AccIn) ->
+                                             AccIn ++ lists:foldl(fun(Element2, AccIn2) -> AccIn2 ++ lists:flatten(io_lib:format("<td>~p</td>", [Element2])) end, "<tr>", Element) ++ "</tr>"
+                                             end, "<table>", Cosines) ++ "</table>",
                 Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
                 F(F);
             {Pid, Other} ->
