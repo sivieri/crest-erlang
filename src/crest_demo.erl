@@ -3,16 +3,16 @@
 %% @doc The demo.
 
 -module(crest_demo).
--export([spawn_demo/0]).
+-export([spawn_demo_1/0, spawn_demo_2/0, spawn_demo_3/0]).
 
 %% External API
-spawn_demo() ->
+spawn_demo_1() ->
     inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_function())}])}, [], []),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_word_frequency())}])}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
-                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
                 "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
@@ -22,7 +22,65 @@ spawn_demo() ->
         {ok, {_, Body}} ->
             Answer = get_header() ++
                 "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
-                "<form action=\"" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
+                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+            {ok, Answer};
+        {error, Reason} ->
+            Answer = get_header() ++
+                "Error in spawning the demo: " ++ Reason ++ get_footer,
+            {ok, Answer}
+    end.
+
+spawn_demo_2() ->
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_inverse_document_frequency())}])}, [], []),
+    case Res of
+        {ok, {_, _, Body}} ->
+           Answer = get_header() ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+           {ok, Answer};
+        {ok, {_, Body}} ->
+            Answer = get_header() ++
+                "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
+                "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+            {ok, Answer};
+        {error, Reason} ->
+            Answer = get_header() ++
+                "Error in spawning the demo: " ++ Reason ++ get_footer,
+            {ok, Answer}
+    end.
+
+spawn_demo_3() ->
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(get_cosine_similarity())}])}, [], []),
+    case Res of
+        {ok, {_, _, Body}} ->
+           Answer = get_header() ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
+                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
+                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
+                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
+                "</form>" ++
+                get_footer(),
+           {ok, Answer};
+        {ok, {_, Body}} ->
+            Answer = get_header() ++
+                "<p>Please, insert in the form below the addresses of the local network computers from which to gather the data; separate each address with a newline.</p>" ++
+                "<form action=\"crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<input type=\"hidden\" name=\"limit\" value=\"10\"/>" ++
                 "<textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
                 "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
@@ -51,7 +109,13 @@ get_header() ->
 get_footer() ->
     "</body></html>".
 
-get_function() ->
+get_inverse_document_frequency() ->
+    ok.
+
+get_cosine_similarity() ->
+    ok.
+
+get_word_frequency() ->
     ClientFunction = fun() ->
             Words = fun(String) ->
                 {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
