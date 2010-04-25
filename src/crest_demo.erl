@@ -107,15 +107,152 @@ get_header() ->
     "<h1>Computational REST - Erlang - Demo</h1>".
 
 get_footer() ->
-    "</body></html>".
-
-get_inverse_document_frequency() ->
-    ok.
-
-get_cosine_similarity() ->
-    ok.
+    "<br/><p><a href=\"../demo.html\" title=\"Back to demo page\">Back to demo page</a></body></html>".
 
 get_word_frequency() ->
+    ClientFunction = fun() ->
+            Words = fun(String) ->
+                {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
+                [hd(C) || C<-Captures]
+            end,
+            ProcessEachLine = fun(ProcessEachLine, IoDevice, Dict) ->
+                case io:get_line(IoDevice, "") of
+                    eof -> 
+                        file:close(IoDevice),
+                        Dict;
+                    {error, Reason} ->
+                        file:close(IoDevice),
+                        throw(Reason);
+                    Data ->
+                        NewDict = lists:foldl(
+                            fun(W, D) -> dict:update(W, fun(C) -> C + 1 end, 1, D) end, 
+                            Dict, 
+                            Words(Data)),
+                        ProcessEachLine(ProcessEachLine, IoDevice, NewDict)
+                end
+            end,
+            GetWordCounts = fun(Filename) ->
+                case file:open(Filename, read) of
+                    {ok, IoDevice} ->
+                        Dict = ProcessEachLine(ProcessEachLine, IoDevice, dict:new()),
+                        Dict
+                end
+            end,
+            receive
+                {Pid, [{"filename", Filename}, {"limit", Num}]} ->
+                    {Limit, _} = string:to_integer(Num),
+                    Dict = GetWordCounts(Filename),
+                    Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
+                    OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
+                    HtmlList = lists:foldl(fun({Count, Word}, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], OrderedList),
+                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
+                    Pid ! {self(), {"text/html", Result ++ "</table>"}};
+                {Pid, Other} ->
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+            end
+        end,
+    CalledFunction = fun({Address, Limit}, AccIn) ->
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
+            case Res of
+                {ok, {_, _, Body}} ->
+                    [{Address, Body}|AccIn];
+                {ok, {_, Body}} ->
+                    [{Address, Body}|AccIn];
+                {error, Reason} ->
+                    [{Address, Reason}|AccIn]
+            end
+        end,
+    F = fun(F) ->
+        inets:start(),
+        receive
+            {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
+                Tables = lists:foldl(CalledFunction, [], AddressList2),
+                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
+                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                F(F);
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                F(F)
+        end
+    end,
+    fun() ->
+        F(F)
+    end.
+
+get_inverse_document_frequency() ->
+    ClientFunction = fun() ->
+            Words = fun(String) ->
+                {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
+                [hd(C) || C<-Captures]
+            end,
+            ProcessEachLine = fun(ProcessEachLine, IoDevice, Dict) ->
+                case io:get_line(IoDevice, "") of
+                    eof -> 
+                        file:close(IoDevice),
+                        Dict;
+                    {error, Reason} ->
+                        file:close(IoDevice),
+                        throw(Reason);
+                    Data ->
+                        NewDict = lists:foldl(
+                            fun(W, D) -> dict:update(W, fun(C) -> C + 1 end, 1, D) end, 
+                            Dict, 
+                            Words(Data)),
+                        ProcessEachLine(ProcessEachLine, IoDevice, NewDict)
+                end
+            end,
+            GetWordCounts = fun(Filename) ->
+                case file:open(Filename, read) of
+                    {ok, IoDevice} ->
+                        Dict = ProcessEachLine(ProcessEachLine, IoDevice, dict:new()),
+                        Dict
+                end
+            end,
+            receive
+                {Pid, [{"filename", Filename}, {"limit", Num}]} ->
+                    {Limit, _} = string:to_integer(Num),
+                    Dict = GetWordCounts(Filename),
+                    Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
+                    HtmlList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], Dict2),
+                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table>", HtmlList),
+                    Pid ! {self(), {"text/html", Result ++ "</table>"}};
+                {Pid, Other} ->
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+            end
+        end,
+    CalledFunction = fun({Address, Limit}, AccIn) ->
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"code", term_to_binary(ClientFunction)}, {"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
+            case Res of
+                {ok, {_, _, Body}} ->
+                    [{Address, Body}|AccIn];
+                {ok, {_, Body}} ->
+                    [{Address, Body}|AccIn];
+                {error, Reason} ->
+                    [{Address, Reason}|AccIn]
+            end
+        end,
+    F = fun(F) ->
+        inets:start(),
+        receive
+            {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
+                Tables = lists:foldl(CalledFunction, [], AddressList2),
+                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
+                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                F(F);
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                F(F)
+        end
+    end,
+    fun() ->
+        F(F)
+    end.
+
+get_cosine_similarity() ->
     ClientFunction = fun() ->
             Words = fun(String) ->
                 {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
