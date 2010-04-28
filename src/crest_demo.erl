@@ -154,7 +154,7 @@ get_inverse_document_frequency() ->
                     Dict = crest_wordlist:get_word_counts(Filename),
                     Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, Dict),
                     Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, Dict),
-                    PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s-~p$", [Word, Count]))|AccIn] end, [], Dict2),
+                    PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s!~p$", [Word, Count]))|AccIn] end, [], Dict2),
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
                     Pid ! {self(), {"text/plain", Result}};
                 {Pid, Other} ->
@@ -179,19 +179,19 @@ get_inverse_document_frequency() ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
-                DictList = lists:map(fun(SingleList) ->
+                DictList = lists:map(fun({Address, SingleList}) ->
                                              Elements = string:tokens(SingleList, "$"),
-                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "-") of [Word|[Count]] -> {Word, Count} end end, Elements),
-                                             dict:from_list(Lists)
+                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "!") of [Word|[Count]] -> {Word, Count} end end, Elements),
+                                             {Address, dict:from_list(Lists)}
                                              end, Counts),
-                DictCount = lists:map(fun(Dict) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
+                DictCount = lists:map(fun({_Address, Dict}) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
                 MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
                 FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / Count) end, MainDict),
-                Tables = lists:map(fun(Dict) ->
-                                             dict:fold(fun(Word, Count, AccIn) ->
+                Tables = lists:map(fun({Address, Dict}) ->
+                                             {Address, dict:fold(fun(Word, Count, AccIn) ->
                                                                NewCount = Count * dict:fetch(Word, FreqDict),
                                                                AccIn ++ lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, NewCount]))
-                                                               end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"
+                                                               end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"}
                                              end, DictList),
                 Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
                 Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
