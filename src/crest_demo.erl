@@ -187,8 +187,10 @@ get_inverse_document_frequency() ->
                 DictCount = lists:map(fun({_Address, Dict}) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
                 MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
                 FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / Count) end, MainDict),
+                log4erl:info("~p~n", [FreqDict]),
                 Tables = lists:map(fun({Address, Dict}) ->
                                              {Address, dict:fold(fun(Word, Count, AccIn) ->
+                                                               log4erl:info("~p ~p~n", [Count, dict:fetch(Word, FreqDict)]),
                                                                NewCount = Count * dict:fetch(Word, FreqDict),
                                                                AccIn ++ lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, NewCount]))
                                                                end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"}
