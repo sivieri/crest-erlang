@@ -22,9 +22,9 @@ spawn_exec([Key], Params) ->
 spawn_exec(Key, Params) ->
     gen_server:call(?MODULE, {exec, Key, Params}).
 
-remote([Param|T]) ->
-    Key = gen_server:call(?MODULE, {spawn, Param}),
-    Answer = gen_server:call(?MODULE, {exec, Key, T}),
+remote(Params) ->
+    Key = gen_server:call(?MODULE, {spawn, lists:sublist(Params, 4)}),
+    Answer = gen_server:call(?MODULE, {exec, Key, lists:sublist(Params, 5, length(Params))}),
     gen_server:cast(?MODULE, {delete, Key}),
     Answer.
 
@@ -33,8 +33,7 @@ init(_Args) ->
     {ok, Spawned}.
 
 handle_call({spawn, Params}, _From, Spawned) ->
-    {"code", Code} = crest_utils:first(Params),
-    F = binary_to_term(list_to_binary(Code)),
+    F = crest_utils:get_lambda(Params),
     {Key, Pid2} = crest_process:install(F),
     NewSpawned = dict:store(Key, Pid2, Spawned),
     log4erl:info("Registered a new key ~p~n", [Key]),
