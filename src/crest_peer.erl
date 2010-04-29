@@ -2,7 +2,7 @@
 %% @copyright 2010 Alessandro Sivieri
 %% @doc Main launcher.
 
--module(crest_server).
+-module(crest_peer).
 -behaviour(gen_server).
 -export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
@@ -33,7 +33,7 @@ init(_Args) ->
     {ok, Spawned}.
 
 handle_call({spawn, Params}, _From, Spawned) ->
-    F = crest_utils:get_lambda(Params),
+    F = crest_process:get_lambda(Params),
     {Key, Pid2} = crest_process:install(F),
     NewSpawned = dict:store(Key, Pid2, Spawned),
     log4erl:info("Registered a new key ~p~n", [Key]),

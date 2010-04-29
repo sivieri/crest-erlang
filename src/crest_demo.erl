@@ -8,7 +8,7 @@
 %% External API
 spawn_demo_1() ->
     inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, get_word_frequency())}, [], []),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, get_word_frequency())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
@@ -36,7 +36,7 @@ spawn_demo_1() ->
 
 spawn_demo_2() ->
     inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, get_inverse_document_frequency())}, [], []),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, get_inverse_document_frequency())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
@@ -62,7 +62,7 @@ spawn_demo_2() ->
 
 spawn_demo_3() ->
     inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, get_cosine_similarity())}, [], []),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, get_cosine_similarity())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
            Answer = get_header() ++
@@ -118,7 +118,7 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
             case Res of
                 {ok, {_, _, Body}} ->
                     [{Address, Body}|AccIn];
@@ -162,7 +162,7 @@ get_inverse_document_frequency() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
                 {ok, {_, _, Body}} ->
                     [{Address, Body}|AccIn];
@@ -222,7 +222,7 @@ get_cosine_similarity() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(crest_demo, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
                 {ok, {_, _, Body}} ->
                     [{Address, Body}|AccIn];

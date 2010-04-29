@@ -37,9 +37,9 @@ init([]) ->
     Web = {crest_web,
            {crest_web, start, [WebConfig]},
            permanent, 5000, worker, dynamic},
-    Exec = {crest_server,
-            {crest_server, start, []},
-            permanent, 5000, worker, [crest_server]},
+    Peer = {crest_peer,
+            {crest_peer, start, []},
+            permanent, 5000, worker, [crest_peer]},
 
-    Processes = [Web, Exec],
+    Processes = [Web, Peer],
     {ok, {{one_for_one, 10, 10}, Processes}}.
