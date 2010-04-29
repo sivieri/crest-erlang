@@ -58,4 +58,3 @@ dot_product(List1, List2) ->
     
 magnitude(List) ->
     math:sqrt(lists:foldl(fun(Element, AccIn) -> AccIn + math:pow(Element, 2) end, 0, List)).
-
