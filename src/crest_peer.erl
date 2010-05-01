@@ -59,7 +59,9 @@ handle_cast(_Request, Spawned) ->
 
 handle_info({'EXIT', Pid, Reason}, Spawned) ->
     log4erl:warn("The spawned process ~p exited: ~p~n", [Pid, Reason]),
-    {noreply, Spawned};
+    Keys = dict:fold(fun(Key, Value, AccIn) -> if Value =:= Pid -> [Key|AccIn]; true -> AccIn end end, [], Spawned),
+    NewSpawned = lists:foldl(fun(Key, Dict) -> dict:erase(Key, Dict) end, Spawned, Keys),
+    {noreply, NewSpawned};
 handle_info(_Info, Spawned) ->
     {noreply, Spawned}.
 
