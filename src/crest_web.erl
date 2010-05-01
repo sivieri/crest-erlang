@@ -23,10 +23,6 @@ loop(Req, DocRoot) ->
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
-                ["crest"|"spawn"] ->
-                    Req:respond({405, [], []});
-                ["crest"|"remote"] ->
-                    Req:respond({405, [], []});
                 ["demo"|["1"]] ->
                     case crest_demo:spawn_demo_1() of
                         {ok, Message} ->
@@ -49,39 +45,16 @@ loop(Req, DocRoot) ->
                             Req:respond({500, [], []})
                     end;
                 ["crest"|T] ->
-                    Params = Req:parse_qs(),
-                    case crest_peer:spawn_exec(T, Params) of
-                        {ok, {CT, Message}} ->
-                            Req:respond({200, [{"Content-Type", CT}], [Message]});
-                        {error} ->
-                            Req:not_found()
-                    end;
+                    Answer = crest_router:route(Method, T, Req:parse_qs(), ContentType),
+                    Req:respond(Answer);
                 _ ->
                     Req:serve_file(Path, DocRoot)
             end;
         'POST' ->
             case string:tokens(Path, "/") of
-                ["crest"|["spawn"]] when ContentType =:= "application/x-www-form-urlencoded" ->
-                    Params = Req:parse_post(),
-                    Key = crest_peer:spawn_install(Params),
-                    Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
-                ["crest"|["remote"]] when ContentType =:= "application/x-www-form-urlencoded" ->
-                    Params = Req:parse_post(),
-                    case crest_peer:remote(Params) of
-                        {ok, {CT, Message}} ->
-                            Req:respond({200, [{"Content-Type", CT}], [Message]});
-                        {error} ->
-                            Req:not_found()
-                    end;
                 ["crest"|T] ->
-                    % POST request for a spawned app
-                    Params = Req:parse_post(),
-                    case crest_peer:spawn_exec(T, Params) of
-                        {ok, {CT, Message}} ->
-                            Req:respond({200, [{"Content-Type", CT}], [Message]});
-                        {error} ->
-                            Req:not_found()
-                    end;
+                    Answer = crest_router:route('POST', T, Req:parse_post(), ContentType),
+                    Req:respond(Answer);
                 _ ->
                     Req:serve_file(Path, DocRoot)
             end;
