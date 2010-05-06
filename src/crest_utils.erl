@@ -3,7 +3,7 @@
 %% @doc Miscellaneous utilities.
 
 -module(crest_utils).
--export([format/2, rpc/2, first/1, pmap/2, cosine_similarity/2, cosine_matrix/2]).
+-export([format/2, rpc/2, first/1, pmap/2]).
 
 %% External API
 first(Params) ->
@@ -33,15 +33,6 @@ pmap(F, L) ->
            end, L),
     gather(Pids, Ref).
 
-cosine_similarity(List1, List2) ->
-    dot_product(List1, List2) / (magnitude(List1) * magnitude(List2)).
-
-cosine_matrix([H|T], AccIn) ->
-    CosineList = lists:map(fun(Element) -> cosine_similarity(H, Element) end, T),
-    cosine_matrix(T, [CosineList|AccIn]);
-cosine_matrix([], AccIn) ->
-    lists:reverse(AccIn).
-
 %% Internal API
 do_f(Parent, Ref, F, I) ->                      
     Parent ! {self(), Ref, (catch F(I))}.
@@ -52,9 +43,3 @@ gather([Pid|T], Ref) ->
     end;
 gather([], _) ->
     [].
-
-dot_product(List1, List2) ->
-    lists:foldl(fun(Element, AccIn) -> Element + AccIn end, 0, lists:zipwith(fun(Element1, Element2) -> Element1 * Element2 end, List1, List2)).
-    
-magnitude(List) ->
-    math:sqrt(lists:foldl(fun(Element, AccIn) -> AccIn + math:pow(Element, 2) end, 0, List)).

@@ -240,7 +240,7 @@ get_cosine_similarity() ->
                 CosIDFs = lists:map(fun(Dict) ->
                                              dict:fold(fun(_Word, IDF, AccIn) -> [IDF|AccIn] end, [], Dict)
                                              end, IDFs),
-                Cosines = crest_utils:cosine_matrix(CosIDFs, []),
+                Cosines = cosine_matrix(CosIDFs, []),
                 Result = lists:foldl(fun(Element, AccIn) ->
                                              AccIn ++ lists:foldl(fun(Element2, AccIn2) -> AccIn2 ++ lists:flatten(io_lib:format("<td>~p</td>", [Element2])) end, "<tr>", Element) ++ "</tr>"
                                              end, "<table>", Cosines) ++ "</table>",
@@ -254,3 +254,18 @@ get_cosine_similarity() ->
     fun() ->
         F(F)
     end.
+
+cosine_similarity(List1, List2) ->
+    dot_product(List1, List2) / (magnitude(List1) * magnitude(List2)).
+
+cosine_matrix([H|T], AccIn) ->
+    CosineList = lists:map(fun(Element) -> cosine_similarity(H, Element) end, T),
+    cosine_matrix(T, [CosineList|AccIn]);
+cosine_matrix([], AccIn) ->
+    lists:reverse(AccIn).
+
+dot_product(List1, List2) ->
+    lists:foldl(fun(Element, AccIn) -> Element + AccIn end, 0, lists:zipwith(fun(Element1, Element2) -> Element1 * Element2 end, List1, List2)).
+    
+magnitude(List) ->
+    math:sqrt(lists:foldl(fun(Element, AccIn) -> AccIn + math:pow(Element, 2) end, 0, List)).
