@@ -7,10 +7,10 @@
 
 %% External API
 spawn_demo_1() ->
-    inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, get_word_frequency())}, [], []),
+    ibrowse:start(),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_word_frequency())),
     case Res of
-        {ok, {_, _, Body}} ->
+        {ok, "200", _Params, Body} ->
            Answer = get_header() ++
                 "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
@@ -19,14 +19,9 @@ spawn_demo_1() ->
                 "</form>" ++
                 get_footer(),
            {ok, Answer};
-        {ok, {_, Body}} ->
+        {ok, Status, _Params, _Body} ->
             Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
+                "Error in spawning the demo: " ++ Status ++ get_footer,
             {ok, Answer};
         {error, Reason} ->
             Answer = get_header() ++
@@ -35,10 +30,10 @@ spawn_demo_1() ->
     end.
 
 spawn_demo_2() ->
-    inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [], []),
+    ibrowse:start(),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_inverse_document_frequency())),
     case Res of
-        {ok, {_, _, Body}} ->
+        {ok, "200", _Params, Body} ->
            Answer = get_header() ++
                 "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
@@ -46,13 +41,9 @@ spawn_demo_2() ->
                 "</form>" ++
                 get_footer(),
            {ok, Answer};
-        {ok, {_, Body}} ->
+        {ok, Status, _Params, _Body} ->
             Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
+                "Error in spawning the demo: " ++ Status ++ get_footer,
             {ok, Answer};
         {error, Reason} ->
             Answer = get_header() ++
@@ -61,10 +52,10 @@ spawn_demo_2() ->
     end.
 
 spawn_demo_3() ->
-    inets:start(),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, get_cosine_similarity())}, [], []),
+    ibrowse:start(),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_cosine_similarity())),
     case Res of
-        {ok, {_, _, Body}} ->
+        {ok, "200", _Params, Body} ->
            Answer = get_header() ++
                 "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
                 "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
@@ -72,13 +63,9 @@ spawn_demo_3() ->
                 "</form>" ++
                 get_footer(),
            {ok, Answer};
-        {ok, {_, Body}} ->
+        {ok, Status, _Params, _Body} ->
             Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
+                "Error in spawning the demo: " ++ Status ++ get_footer,
             {ok, Answer};
         {error, Reason} ->
             Answer = get_header() ++
@@ -118,18 +105,18 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])),
             case Res of
-                {ok, {_, _, Body}} ->
+                {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
-                {ok, {_, Body}} ->
-                    [{Address, Body}|AccIn];
+                {ok, Status, _Params, _Body} ->
+                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        inets:start(),
+        ibrowse:start(),
         receive
             {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
@@ -162,18 +149,18 @@ get_inverse_document_frequency() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
             case Res of
-                {ok, {_, _, Body}} ->
+                {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
-                {ok, {_, Body}} ->
-                    [{Address, Body}|AccIn];
+                {ok, Status, _Params, _Body} ->
+                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        inets:start(),
+        ibrowse:start(),
         receive
             {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
@@ -220,18 +207,18 @@ get_cosine_similarity() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
             case Res of
-                {ok, {_, _, Body}} ->
+                {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
-                {ok, {_, Body}} ->
-                    [{Address, Body}|AccIn];
+                {ok, Status, _Params, _Body} ->
+                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        inets:start(),
+        ibrowse:start(),
         receive
             {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
