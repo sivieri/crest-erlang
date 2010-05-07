@@ -1,26 +1,27 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
 %% @copyright 2010 Alessandro Sivieri 
-%% @doc Process operations
+%% @doc Process operations module; it is designed as a supervisor_bridge process.
+%%      It does not have the capability to restart a child.
 
 -module(crest_process).
--export([install/1, get_lambda_params/2, get_lambda_params/3, get_lambda/1]).
+-export([install/1, start/1, init/1, terminate/2]).
 
 %% External API
 install(F) ->
     Key = crest_uuid:uuid(),
-    Pid = spawn_link(fun() -> F() end),
-    {Key, Pid}.
+    ChildPid = proc_lib:spawn_link(fun() -> F() end),
+    Params = {Key, {?MODULE, start, [ChildPid]}, temporary, infinity, supervisor, ?MODULE},
+    {ok, _BridgePid} = supervisor:start_child(crest_sup, Params),
+    {Key, ChildPid}.
 
-get_lambda_params(ModuleName, Fun) ->
-    get_lambda_params(ModuleName, Fun, []).
-get_lambda_params(ModuleName, Fun, OtherList) ->
-    {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
-    FunBinary = term_to_binary(Fun),
-    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
+start([ChildPid]) -> 
+    supervisor_bridge:start_link(?MODULE, [ChildPid]).
 
-get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}]) ->
-    code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
-    binary_to_term(list_to_binary(FunBinary)).
+init([ChildPid]) ->
+    {ok, ChildPid, ChildPid}.
+
+terminate(_Reason, ChildPid) ->
+    exit(ChildPid, kill).
 
 %% Internal API
 

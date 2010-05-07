@@ -33,15 +33,15 @@ init(_Args) ->
     {ok, Spawned}.
 
 handle_call({spawn, Params}, _From, Spawned) ->
-    F = crest_process:get_lambda(Params),
-    {Key, Pid2} = crest_process:install(F),
-    NewSpawned = dict:store(Key, Pid2, Spawned),
+    F = crest_utils:get_lambda(Params),
+    {Key, ChildPid} = crest_process:install(F),
+    NewSpawned = dict:store(Key, ChildPid, Spawned),
     log4erl:info("Registered a new key ~p~n", [Key]),
     {reply, Key, NewSpawned};
 handle_call({exec, Key, Params}, _From, Spawned) ->
     case dict:find(Key, Spawned) of
-        {ok, Pid2} ->
-            Res = crest_utils:rpc(Pid2, Params),
+        {ok, ChildPid} ->
+            Res = crest_utils:rpc(ChildPid, Params),
             log4erl:info("Executed the existing key ~p~n", [Key]),
             {reply, {ok, Res}, Spawned};
         error ->
@@ -51,17 +51,17 @@ handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 
 handle_cast({delete, Key}, Spawned) ->
-    NewSpawned = dict:erase(Key, Spawned),
-    log4erl:info("Deleted the key ~p~n", [Key]),
+    case supervisor:terminate_child(crest_sup, Key) of
+        ok ->
+            NewSpawned = dict:erase(Key, Spawned),
+            log4erl:info("Deleted the key ~p~n", [Key]);
+        {error, not_found} ->
+            NewSpawned = Spawned
+    end,
     {noreply, NewSpawned};
 handle_cast(_Request, Spawned) ->
     {noreply, Spawned}.
 
-handle_info({'EXIT', Pid, Reason}, Spawned) ->
-    log4erl:warn("The spawned process ~p exited: ~p~n", [Pid, Reason]),
-    Keys = dict:fold(fun(Key, Value, AccIn) -> if Value =:= Pid -> [Key|AccIn]; true -> AccIn end end, [], Spawned),
-    NewSpawned = lists:foldl(fun(Key, Dict) -> dict:erase(Key, Dict) end, Spawned, Keys),
-    {noreply, NewSpawned};
 handle_info(_Info, Spawned) ->
     {noreply, Spawned}.
 

@@ -8,7 +8,7 @@
 %% External API
 spawn_demo_1() ->
     ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_word_frequency())),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_word_frequency())),
     case Res of
         {ok, "200", _Params, Body} ->
            Answer = get_header() ++
@@ -31,7 +31,7 @@ spawn_demo_1() ->
 
 spawn_demo_2() ->
     ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_inverse_document_frequency())),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())),
     case Res of
         {ok, "200", _Params, Body} ->
            Answer = get_header() ++
@@ -53,7 +53,7 @@ spawn_demo_2() ->
 
 spawn_demo_3() ->
     ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, get_cosine_similarity())),
+    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())),
     case Res of
         {ok, "200", _Params, Body} ->
            Answer = get_header() ++
@@ -105,7 +105,7 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])),
             case Res of
                 {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
@@ -149,7 +149,7 @@ get_inverse_document_frequency() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
             case Res of
                 {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
@@ -207,7 +207,7 @@ get_cosine_similarity() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_process:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
+            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
             case Res of
                 {ok, "200", _Params, Body} ->
                     [{Address, Body}|AccIn];
