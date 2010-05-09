@@ -2,3 +2,4 @@
 ebin
 doc
 logs
+erl_crash.dump
