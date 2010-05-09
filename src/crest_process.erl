@@ -10,8 +10,10 @@
 install(F) ->
     Key = crest_uuid:uuid(),
     ChildPid = proc_lib:spawn_link(fun() -> F() end),
+    io:format("Spawned~n", []),
     Params = {Key, {?MODULE, start, [ChildPid]}, temporary, infinity, supervisor, ?MODULE},
     {ok, _BridgePid} = supervisor:start_child(crest_sup, Params),
+    io:format("Bridged~n", []),
     {Key, ChildPid}.
 
 start([ChildPid]) -> 
