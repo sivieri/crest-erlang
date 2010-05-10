@@ -1,0 +1,27 @@
+UUID module for Erlang
+======================
+
+This Erlang module was designed to be a simple library for generating UUIDs. It
+conforms to RFC 4122 whenever possible.
+
+EXAMPLES
+========
+
+1> U1 = uuid:srandom().
+<<122,97,138,207,167,45,65,66,150,221,37,217,237,251,255,116>>
+
+2> U2 = uuid:sha(oid, "this is a test").
+<<203,67,89,104,89,217,94,22,172,75,82,90,165,42,233,118>>
+
+3> U3 = uuid:md5(oid, "this is a test").
+<<24,14,17,80,45,119,57,252,184,124,101,1,169,248,103,153>>
+
+4> uuid:to_string(U1).
+"7a618acf-a72d-4142-96dd-25d9edfbff74"
+
+DOCUMENTATION
+=============
+
+To generate the edoc:
+
+  $ erl -noshell -run edoc file uuid.erl -run init stop

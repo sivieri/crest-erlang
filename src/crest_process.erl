@@ -8,7 +8,7 @@
 
 %% External API
 install(F) ->
-    Key = crest_uuid:uuid(),
+    Key = uuid:to_string(uuid:srandom()),
     ChildPid = proc_lib:spawn_link(fun() -> F() end),
     Params = {Key, {?MODULE, start, [ChildPid]}, temporary, infinity, supervisor, [?MODULE]},
     {ok, _BridgePid} = supervisor:start_child(crest_sup, Params),
