@@ -53,12 +53,13 @@ handle_call(_Request, _From, Spawned) ->
 handle_cast({delete, Key}, Spawned) ->
     case supervisor:terminate_child(crest_sup, Key) of
         ok ->
+            supervisor:delete_child(crest_sup, Key),
             NewSpawned = dict:erase(Key, Spawned),
-            log4erl:info("Deleted the key ~p~n", [Key]);
+            log4erl:info("Deleted the key ~p~n", [Key]),
+            {noreply, NewSpawned};
         {error, not_found} ->
-            NewSpawned = Spawned
-    end,
-    {noreply, NewSpawned};
+            {noreply, Spawned}
+    end;
 handle_cast(_Request, Spawned) ->
     {noreply, Spawned}.
 
