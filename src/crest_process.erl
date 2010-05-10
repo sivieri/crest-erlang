@@ -14,10 +14,10 @@ install(F) ->
     {ok, _BridgePid} = supervisor:start_child(crest_sup, Params),
     {Key, ChildPid}.
 
-start([ChildPid]) ->
-    supervisor_bridge:start_link(?MODULE, [ChildPid]).
+start(ChildPid) ->
+    supervisor_bridge:start_link(?MODULE, ChildPid).
 
-init([ChildPid]) ->
+init(ChildPid) ->
     {ok, ChildPid, ChildPid}.
 
 terminate(_Reason, ChildPid) ->
