@@ -25,7 +25,7 @@ init({Key, F}) ->
     {ok, ChildPid, ChildPid}.
 
 terminate(Reason, ChildPid) ->
-    log4erl:info("Terminating ~p: ~p~n", [ChildPid, Reason]),
+    log4erl:info("Supervisor bridge ~p: terminating child ~p (~p)~n", [self(), ChildPid, Reason]),
     exit(ChildPid, Reason).
 
 %% Internal API
