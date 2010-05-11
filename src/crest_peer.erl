@@ -4,7 +4,7 @@
 
 -module(crest_peer).
 -behaviour(gen_server).
--export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2]).
+-export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -28,16 +28,17 @@ remote(Params) ->
     gen_server:cast(?MODULE, {delete, Key}),
     Answer.
 
+add_child(Key, Pid) ->
+    gen_server:cast(?MODULE, {add_child, Key, Pid}).
+
 init(_Args) ->
     Spawned = dict:new(),
     {ok, Spawned}.
 
 handle_call({spawn, Params}, _From, Spawned) ->
     F = crest_utils:get_lambda(Params),
-    {Key, ChildPid} = crest_process:install(F),
-    NewSpawned = dict:store(Key, ChildPid, Spawned),
-    log4erl:info("Registered a new key ~p~n", [Key]),
-    {reply, Key, NewSpawned};
+    Key = crest_process:install(F),
+    {reply, Key, Spawned};
 handle_call({exec, Key, Params}, _From, Spawned) ->
     case dict:find(Key, Spawned) of
         {ok, ChildPid} ->
@@ -50,6 +51,10 @@ handle_call({exec, Key, Params}, _From, Spawned) ->
 handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 
+handle_cast({add_child, Key, Pid}, Spawned) ->
+    NewSpawned = dict:store(Key, Pid, Spawned),
+    log4erl:info("Registered a new key ~p~n", [Key]),
+    {noreply, NewSpawned};
 handle_cast({delete, Key}, Spawned) ->
     case supervisor:terminate_child(crest_sup, Key) of
         ok ->
