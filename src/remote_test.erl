@@ -12,9 +12,8 @@ get_function() ->
                 {X, _} = string:to_integer(Num),
                 Pid ! {self(), {"text/plain", integer_to_list(X*X)}},
                 F(F);
-            {Pid, Other} ->
-                io:format("Error: ~p~n", [Other]),
-                Pid ! {self(), {"text/plain", "error"}},
+            Any ->
+                io:format("Spawned: ~p~n", [Any]),
                 F(F)
         end
     end,

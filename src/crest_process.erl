@@ -20,8 +20,9 @@ start(ChildPid) ->
 init(ChildPid) ->
     {ok, ChildPid, ChildPid}.
 
-terminate(_Reason, ChildPid) ->
-    exit(ChildPid, kill).
+terminate(Reason, ChildPid) ->
+    log4erl:info("Terminating ~p: ~p~n", [ChildPid, Reason]),
+    exit(ChildPid, Reason).
 
 %% Internal API
 

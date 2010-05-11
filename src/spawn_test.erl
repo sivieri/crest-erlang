@@ -10,6 +10,9 @@ get_function() ->
         receive
             {Pid, _} ->
                 Pid ! {self(), {"text/plain", "Function called"}},
+                F(F);
+            Any ->
+                io:format("Spawned: ~p~n", [Any]),
                 F(F)
         end
     end,
