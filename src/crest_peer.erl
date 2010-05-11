@@ -37,7 +37,7 @@ init(_Args) ->
 
 handle_call({spawn, Params}, _From, Spawned) ->
     F = crest_utils:get_lambda(Params),
-    Key = crest_process:install(F),
+    Key = crest_spawn:install(F),
     {reply, Key, Spawned};
 handle_call({exec, Key, Params}, _From, Spawned) ->
     case dict:find(Key, Spawned) of

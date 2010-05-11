@@ -3,7 +3,7 @@
 %% @doc Process operations module; it is designed as a supervisor_bridge process.
 %%      It does not have the capability to restart a child.
 
--module(crest_process).
+-module(crest_spawn).
 -export([install/1, start/2, init/1, terminate/2]).
 
 %% External API
