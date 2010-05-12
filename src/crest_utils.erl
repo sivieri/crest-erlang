@@ -40,6 +40,12 @@ get_lambda_params(ModuleName, Fun, OtherList) ->
     FunBinary = term_to_binary(Fun),
     mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
 
+%% Attention here: because of code load, if the same module is sent to the server
+%% more than two times, then the older processes are killed (cfr. the standard
+%% Erlang policy); thus, maybe some version control has to be inserted (if possible),
+%% or remote closures have to be spawned inside some update-savvy module (well, I
+%% don't think this solves the problem, but anyway...).
+%% Remember: this is not a bug, it's a feature!
 get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}]) ->
     code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
     binary_to_term(list_to_binary(FunBinary)).
