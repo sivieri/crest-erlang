@@ -1,12 +1,15 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @doc A module for obtaining a wordlist.
+%% @reference See http://www.roberthorvick.com/2009/07/02/word-frequency-redux-erlang-list-comprehension-regex-and-list-folding/
 %% @copyright 2010 Alessandro Sivieri
-%% @doc A module for obtaining a wordlist
-%%      Code adapted from http://www.roberthorvick.com/2009/07/02/word-frequency-redux-erlang-list-comprehension-regex-and-list-folding/
 
 -module(crest_wordlist).
 -export([get_word_counts/1, print_dict/1]).
 
 %% External API
+
+%% @doc Get the word count as a dictionary from the specified file.
+%% @spec get_word_counts(string()) -> dictionary()
 get_word_counts(Filename) ->
     case file:open(Filename, read) of
         {ok, IoDevice} ->
@@ -14,11 +17,14 @@ get_word_counts(Filename) ->
             Dict
     end.
 
+%% @doc Print the dictionary.
+%% @spec print_dict(dictionary()) -> ok
 print_dict(Dict) ->
     dict:fold(fun(Word, Count, AccIn) -> 
         io:format("~s: ~w~n", [Word, Count]), AccIn end, void, Dict).
 
 %% Internal API
+
 process_each_line(IoDevice, Dict) ->
     case io:get_line(IoDevice, "") of
         eof -> 

@@ -1,6 +1,6 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
-%% @copyright 2010 Alessandro Sivieri
 %% @doc Remote test code
+%% @copyright 2010 Alessandro Sivieri
 
 -module(remote_test).
 -export([main/0]).

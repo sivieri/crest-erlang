@@ -1,11 +1,15 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
-%% @copyright 2010 Alessandro Sivieri
 %% @doc CREST requests router.
+%% @copyright 2010 Alessandro Sivieri
 
 -module(crest_router).
 -export([route/4]).
 
 %% External API
+
+%% @doc Routing method, it takes HTTP requests and routes them
+%% to the correct peer server method.
+%% @spec route('GET' | 'POST', [string()], {atom(), any()}, string()) -> {integer(), [{string(), any()}], [any()]}
 route(Method, Params, ReqParams, ContentType) ->
     case Method of
         'GET' ->
@@ -48,4 +52,3 @@ route(Method, Params, ReqParams, ContentType) ->
     end.
 
 %% Internal API
-

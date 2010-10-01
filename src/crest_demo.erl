@@ -1,11 +1,14 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @doc The demo module: it generates a few Web pages and calls a
+%% CREST peer through HTTP.
 %% @copyright 2010 Alessandro Sivieri
-%% @doc The demo.
 
 -module(crest_demo).
 -export([spawn_demo_1/0, spawn_demo_2/0, spawn_demo_3/0]).
 
 %% External API
+
+%% @doc Spawn the first demo.
 spawn_demo_1() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_word_frequency())),
@@ -29,6 +32,7 @@ spawn_demo_1() ->
             {ok, Answer}
     end.
 
+%% @doc Spawn the second demo.
 spawn_demo_2() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())),
@@ -51,6 +55,7 @@ spawn_demo_2() ->
             {ok, Answer}
     end.
 
+%% @doc Spawn the third demo.
 spawn_demo_3() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())),
@@ -74,6 +79,7 @@ spawn_demo_3() ->
     end.
 
 %% Internal API
+
 get_header() ->
     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"++
     "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" ++

@@ -1,6 +1,9 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @doc Server module of a CREST peer.
+%% It offers all the standard server start, stop and response
+%% methods, plus the two specific CREST operations: spawn (split
+%% into the installation and the execution parts) and remote.
 %% @copyright 2010 Alessandro Sivieri
-%% @doc Main launcher.
 
 -module(crest_peer).
 -behaviour(gen_server).
@@ -8,26 +11,41 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
+
+%% @doc Start this peer
+%% @spec start() -> ok
 start() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
+%% @doc Stop this peer
+%% @spec stop() -> ok
 stop() ->
     gen_server:call(?MODULE, stop).
 
+%% @doc Install a new operation on this peer, using the given
+%% parameters.
+%% @spec spawn_install([{string(), any()}]) -> {reply, string(), dictionary()}
 spawn_install(Params) ->
     gen_server:call(?MODULE, {spawn, Params}).
 
+%% @doc Execute an already installed operation, specified by the given
+%% unique key.
+%% @spec spawn_exec([Key], [{atom(), any()}]) -> {reply, {ok, any()}, dictionary()} | {reply, {error}, dictionary()}
 spawn_exec([Key], Params) ->
     gen_server:call(?MODULE, {exec, Key, Params});
 spawn_exec(Key, Params) ->
     gen_server:call(?MODULE, {exec, Key, Params}).
 
+%% @doc Install and execute a new operation on this peer, and then delete it.
+%% @spec remote([{string(), any()}]) -> {reply, {ok, any()}, dictionary()} | {reply, {error}, dictionary()}
 remote(Params) ->
     Key = gen_server:call(?MODULE, {spawn, lists:sublist(Params, 4)}),
     Answer = gen_server:call(?MODULE, {exec, Key, lists:sublist(Params, 5, length(Params))}),
     gen_server:cast(?MODULE, {delete, Key}),
     Answer.
 
+%% @doc Add a new process linked to this server, with the associated key.
+%% @spec add_child(string(), pid()) -> {noreply, dictionary()}
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).
 

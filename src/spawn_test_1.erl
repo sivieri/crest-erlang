@@ -1,6 +1,6 @@
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
-%% @copyright 2010 Alessandro Sivieri
 %% @doc Spawn test code
+%% @copyright 2010 Alessandro Sivieri
 
 -module(spawn_test_1).
 -export([main/0]).
