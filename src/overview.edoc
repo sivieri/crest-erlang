@@ -1,0 +1,7 @@
+@author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+@doc This code is an Erlang implementation of the Computational REST
+architectural paradigm.
+It is constituted by a Web server and a CREST peer, which is able to
+spawn a function passed as mobile code and execute it through HTTP
+calls, returning any result to the caller.
+@copyright 2010 Alessandro Sivieri
