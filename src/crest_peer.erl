@@ -44,7 +44,7 @@ remote(Params) ->
     gen_server:cast(?MODULE, {delete, Key}),
     Answer.
 
-%% @doc Add a new process linked to this server, with the associated key.
+%% @doc Add a new process to the internal server list, with the associated key.
 %% @spec add_child(string(), pid()) -> {noreply, dictionary()}
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).

@@ -4,6 +4,7 @@
 %% @copyright 2010 Alessandro Sivieri 
 
 -module(crest_spawn).
+-behaviour(supervisor_bridge).
 -export([install/1, start/2, init/1, terminate/2]).
 
 %% External API
