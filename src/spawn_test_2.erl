@@ -22,8 +22,8 @@ get_function() ->
 
 main() ->
     inets:start(),
-    % http:set_options([{proxy, {{"localhost", 8080}, []}}]),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
+    % httpc:set_options([{proxy, {{"localhost", 8080}, []}}]),
+    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
             io:format("Invocazione 1: ~p~n", [http:request("http://localhost:8001/crest/" ++ Body)]),
