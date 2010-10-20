@@ -4,29 +4,34 @@ $(document).ready(function()
 	$("input[name='demo']").change(function(){
 	    if ($("input[name='demo']:checked").val() == 'word')
 	    {
-	    	$("#form2").show('slow');
+	    	$("#form2div").show('slow');
 	    	$("#limit").show('fast');
 	    	$("#limitlabel").show('fast');
 	    }
 	    else if ($("input[name='demo']:checked").val() == 'idf')
 	    {
-	    	$("#form2").show('slow');
+	    	$("#form2div").show('slow');
 	    	$("#limit").hide('fast');
 	    	$("#limitlabel").hide('fast');
 	    }
 	    else
 	    {
-	    	$("#form2").show('slow');
+	    	$("#form2div").show('slow');
 	    	$("#limit").hide('fast');
 	    	$("#limitlabel").hide('fast');
 	    }
+	    $.ajax({
+    		url:"localhost",
+    		type:"GET",
+    		data:"type=" + $("input[name='demo']:checked").val(),
+    		timeout:6000,
+    		success: function(data) {
+    			$("#form2div form").attr("action", data);
+    			$("#form2div form input[name='Submit']").attr("disabled", false);
+    		}
+    	});
 	});
 });
-
-function sendFirstForm(id)
-{
-	
-}
 
 // copyright 1999 Idocs, Inc. http://www.idocs.com
 // Distribute this script freely but keep this notice in place
