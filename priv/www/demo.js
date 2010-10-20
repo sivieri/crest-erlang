@@ -1,7 +1,32 @@
 // jQuery things
-$(document).ready(function() {
-	
+$(document).ready(function()
+{
+	$("input[name='demo']").change(function(){
+	    if ($("input[name='demo']:checked").val() == 'word')
+	    {
+	    	$("#form2").show('slow');
+	    	$("#limit").show('fast');
+	    	$("#limitlabel").show('fast');
+	    }
+	    else if ($("input[name='demo']:checked").val() == 'idf')
+	    {
+	    	$("#form2").show('slow');
+	    	$("#limit").hide('fast');
+	    	$("#limitlabel").hide('fast');
+	    }
+	    else
+	    {
+	    	$("#form2").show('slow');
+	    	$("#limit").hide('fast');
+	    	$("#limitlabel").hide('fast');
+	    }
+	});
 });
+
+function sendFirstForm(id)
+{
+	
+}
 
 // copyright 1999 Idocs, Inc. http://www.idocs.com
 // Distribute this script freely but keep this notice in place

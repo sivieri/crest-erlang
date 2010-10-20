@@ -15,9 +15,18 @@ body {
 #form2div {
 	float: left;
 	width: auto;
+	display: none;
 }
 
 #results {
 	float: left;
 	width: 100%;
+}
+
+input#limit {
+	display: none;
+}
+
+label#limitlabel {
+	display: none;
 }
