@@ -1,3 +1,8 @@
+// jQuery things
+$(document).ready(function() {
+	
+});
+
 // copyright 1999 Idocs, Inc. http://www.idocs.com
 // Distribute this script freely but keep this notice in place
 function numbersonly(myfield, e, dec)
