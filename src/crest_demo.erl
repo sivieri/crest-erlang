@@ -25,22 +25,11 @@ spawn_demo_1() ->
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_word_frequency())),
     case Res of
         {ok, "200", _Params, Body} ->
-           Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"limit\">Lower limit for word frequency: </label><input type=\"text\" size=\"5\" maxlength=\"5\" name=\"limit\" value=\"10\" onKeyPress=\"return numbersonly(this, event)\" />" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
-           {ok, Answer};
-        {ok, Status, _Params, _Body} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Status ++ get_footer,
-            {ok, Answer};
-        {error, Reason} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Reason ++ get_footer,
-            {ok, Answer}
+           {ok, Body};
+        {ok, _Status, _Params, _Body} ->
+            {error};
+        {error, _Reason} ->
+            {error}
     end.
 
 spawn_demo_2() ->
@@ -48,21 +37,11 @@ spawn_demo_2() ->
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())),
     case Res of
         {ok, "200", _Params, Body} ->
-           Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
-           {ok, Answer};
-        {ok, Status, _Params, _Body} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Status ++ get_footer,
-            {ok, Answer};
-        {error, Reason} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Reason ++ get_footer,
-            {ok, Answer}
+           {ok, Body};
+        {ok, _Status, _Params, _Body} ->
+            {error};
+        {error, _Reason} ->
+            {error}
     end.
 
 spawn_demo_3() ->
@@ -70,37 +49,12 @@ spawn_demo_3() ->
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())),
     case Res of
         {ok, "200", _Params, Body} ->
-           Answer = get_header() ++
-                "<form action=\"../crest/" ++ Body ++ "\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">" ++
-                "<label for=\"addresses\">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name=\"addresses\" rows=\"5\" cols=\"60\"></textarea><br/>" ++
-                "<input type=\"submit\" name=\"Submit\" value=\"Query\"/>" ++
-                "</form>" ++
-                get_footer(),
-           {ok, Answer};
-        {ok, Status, _Params, _Body} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Status ++ get_footer,
-            {ok, Answer};
-        {error, Reason} ->
-            Answer = get_header() ++
-                "Error in spawning the demo: " ++ Reason ++ get_footer,
-            {ok, Answer}
+           {ok, Body};
+        {ok, _Status, _Params, _Body} ->
+            {error};
+        {error, _Reason} ->
+            {error}
     end.
-
-get_header() ->
-    "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"++
-    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" ++
-    "<html xmlns=\"http://www.w3.org/1999/xhtml\">" ++
-    "<head>" ++
-    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />" ++
-    "<script src=\"../numbers.js\" type=\"text/javascript\"></script>" ++
-    "<title>Computational REST - Erlang - Demo</title>" ++
-    "</head>" ++
-    "<body>" ++
-    "<h1>Computational REST - Erlang - Demo</h1>".
-
-get_footer() ->
-    "<br/><p><a href=\"../demo.html\" title=\"Back to demo page\">Back to demo page</a></body></html>".
 
 get_word_frequency() ->
     ClientFunction = fun() ->
@@ -136,7 +90,7 @@ get_word_frequency() ->
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
                 Tables = lists:foldl(CalledFunction, [], AddressList2),
                 Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
-                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                Pid ! {self(), {"text/html", Result}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
@@ -194,7 +148,7 @@ get_inverse_document_frequency() ->
                                                                end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"}
                                              end, DictList),
                 Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
-                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                Pid ! {self(), {"text/html", Result}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
@@ -257,7 +211,7 @@ get_cosine_similarity() ->
                 Result = lists:foldl(fun(Element, AccIn) ->
                                              AccIn ++ lists:foldl(fun(Element2, AccIn2) -> AccIn2 ++ lists:flatten(io_lib:format("<td>~p</td>", [Element2])) end, "<tr>", Element) ++ "</tr>"
                                              end, "<table>", Cosines) ++ "</table>",
-                Pid ! {self(), {"text/html", get_header() ++ Result ++ get_footer()}},
+                Pid ! {self(), {"text/html", Result}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
