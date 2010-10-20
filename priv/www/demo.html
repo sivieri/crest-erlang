@@ -3,17 +3,30 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<script src="../numbers.js" type="text/javascript"></script>
+<!--[if IE]><script language="javascript" type="text/javascript" src="excanvas.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="jquery-1.4.2.min.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="numbers.js"></script>
+<link rel="stylesheet" type="text/css" href="jquery.jqplot.css" />
+<link rel="stylesheet" type="text/css" href="demo.css" />
 <title>Computational REST - Erlang - Demo</title>
 </head>
 <body>
-<h1>Computational REST - Erlang - Demo</h1>
-<p>Choose the type of text analysis to be performed:
-	<ul>
-		<li><a href="demo/1" title="Word frequency">Word frequency</a></li>
-		<li><a href="demo/2" title="Inverse document frequency">Inverse document frequency</a></li>
-		<!--<li><a href="demo/3" title="Cosine similarity">Cosine similarity</a></li>-->
-	</ul>
-</p>
+<h1 id="title">Computational REST - Erlang - Demo</h1>
+<div id="form1">
+	<p>Choose the type of text analysis to be performed:
+		<ul>
+			<li><a href="demo/1" title="Word frequency">Word frequency</a></li>
+			<li><a href="demo/2" title="Inverse document frequency">Inverse document frequency</a></li>
+			<li><a href="demo/3" title="Cosine similarity">Cosine similarity</a></li>
+		</ul>
+	</p>
+</div>
+<div id="form2">
+	
+</div>
+<div id="results">
+	
+</div>
 </body>
 </html>
