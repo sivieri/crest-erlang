@@ -24,10 +24,7 @@ body {
 	display: none;
 }
 
-input#limit {
-	display: none;
-}
-
-label#limitlabel {
+#limitfield {
+	width: inherit;
 	display: none;
 }

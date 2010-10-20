@@ -4,11 +4,22 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_demo).
--export([spawn_demo_1/0, spawn_demo_2/0, spawn_demo_3/0]).
+-export([spawn_demo/1]).
 
 %% External API
 
-%% @doc Spawn the first demo.
+%% @doc Spawn the correct demo based on the parameter.
+spawn_demo([{"type", "word"}]) ->
+	spawn_demo_1();
+spawn_demo([{"type", "idf"}]) ->
+	spawn_demo_2();
+spawn_demo([{"type", "cosine"}]) ->
+	spawn_demo_3();
+spawn_demo(_) ->
+	{error}.
+
+%% Internal API
+
 spawn_demo_1() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_word_frequency())),
@@ -32,7 +43,6 @@ spawn_demo_1() ->
             {ok, Answer}
     end.
 
-%% @doc Spawn the second demo.
 spawn_demo_2() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())),
@@ -55,7 +65,6 @@ spawn_demo_2() ->
             {ok, Answer}
     end.
 
-%% @doc Spawn the third demo.
 spawn_demo_3() ->
     ibrowse:start(),
     Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())),
@@ -77,8 +86,6 @@ spawn_demo_3() ->
                 "Error in spawning the demo: " ++ Reason ++ get_footer,
             {ok, Answer}
     end.
-
-%% Internal API
 
 get_header() ->
     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"++

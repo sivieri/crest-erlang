@@ -31,22 +31,8 @@ loop(Req, DocRoot) ->
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
-                ["demo"|["1"]] ->
-                    case crest_demo:spawn_demo_1() of
-                        {ok, Message} ->
-                            Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
-                        {error} ->
-                            Req:respond({500, [], []})
-                    end;
-                ["demo"|["2"]] ->
-                    case crest_demo:spawn_demo_2() of
-                        {ok, Message} ->
-                            Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
-                        {error} ->
-                            Req:respond({500, [], []})
-                    end;
-                ["demo"|["3"]] ->
-                    case crest_demo:spawn_demo_3() of
+                ["demo"] ->
+                    case crest_demo:spawn_demo(Req:parse_qs()) of
                         {ok, Message} ->
                             Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
                         {error} ->

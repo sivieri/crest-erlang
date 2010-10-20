@@ -2,33 +2,31 @@
 $(document).ready(function()
 {
 	$("input[name='demo']").change(function(){
-	    if ($("input[name='demo']:checked").val() == 'word')
+		$("#form2div form input[name='Submit']").attr("disabled", "true");
+	    if ($("input[name='demo']:checked").val() == "word")
 	    {
-	    	$("#form2div").show('slow');
-	    	$("#limit").show('fast');
-	    	$("#limitlabel").show('fast');
+	    	$("#form2div").show("slow");
+	    	$("#limitfield").show("fast");
 	    }
-	    else if ($("input[name='demo']:checked").val() == 'idf')
+	    else if ($("input[name='demo']:checked").val() == "idf")
 	    {
-	    	$("#form2div").show('slow');
-	    	$("#limit").hide('fast');
-	    	$("#limitlabel").hide('fast');
+	    	$("#form2div").show("slow");
+	    	$("#limitfield").hide("fast");
 	    }
 	    else
 	    {
-	    	$("#form2div").show('slow');
-	    	$("#limit").hide('fast');
-	    	$("#limitlabel").hide('fast');
+	    	$("#form2div").show("slow");
+	    	$("#limitfield").hide("fast");
 	    }
 	    $.ajax({
-    		url:"localhost",
+    		url:"demo",
     		type:"GET",
     		data:"type=" + $("input[name='demo']:checked").val(),
     		dataType:"text",
     		timeout:6000,
     		success: function(data) {
     			$("#form2div form").attr("action", data);
-    			$("#form2div form input[name='Submit']").attr("disabled", false);
+    			$("#form2div form input[name='Submit']").removeAttr("disabled");
     		}
     	});
 	});
@@ -36,11 +34,11 @@ $(document).ready(function()
 		$.ajax({
 			url:$("#form2div form").attr("action"),
 			type:"POST",
-			data:"",
+			data:$("#form2").serialize(),
 			dataType:"json",
 			timeout:6000,
 			success: function(data) {
-				
+				alert(data);
 			}
 		});
 	});
