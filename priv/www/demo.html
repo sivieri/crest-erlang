@@ -13,20 +13,26 @@
 </head>
 <body>
 <h1 id="title">Computational REST - Erlang - Demo</h1>
-<div id="form1">
+<div id="form1div">
 	<p>Choose the type of text analysis to be performed:
-		<ul>
-			<li><a href="demo/1" title="Word frequency">Word frequency</a></li>
-			<li><a href="demo/2" title="Inverse document frequency">Inverse document frequency</a></li>
-			<li><a href="demo/3" title="Cosine similarity">Cosine similarity</a></li>
-		</ul>
+		<form id="form1">
+			<input id="radio1" type="radio" name="demo" value="word" checked="checked"/><label for="radio1">Word frequency</label><br/>
+			<input id="radio2" type="radio" name="demo" value="idf"/><label for="radio2">Inverse document frequency</label><br/>
+			<input id="radio3" type="radio" name="demo" value="cosine"/><label for="radio3">Cosine similarity</label>
+		</form>
 	</p>
 </div>
-<div id="form2">
-	
+<div id="form2div">
+	<p>Select demo details:
+	   <form id="form2" action="" method="POST" enctype="application/x-www-form-urlencoded">
+	       <label for="limit">Lower limit for word frequency: </label><input id="limit" type="text" size="5" maxlength="5" name="limit" value="10" onKeyPress="return numbersonly(this, event)" />
+           <label for="addresses">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name="addresses" rows="5" cols="60"></textarea><br/>
+           <input type="submit" name="Submit" value="Launch" disabled="true"/>
+	   </form>
+	</p>
 </div>
 <div id="results">
-	
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis congue erat nec enim porttitor pulvinar. Vestibulum orci sem, venenatis vel consectetur eu, sollicitudin ut odio. Nullam vel lacus ornare tellus tincidunt pretium a vel elit. Mauris ut ipsum at elit hendrerit adipiscing. Suspendisse enim ligula, pulvinar sed pharetra egestas, varius eget dolor. Cras aliquet, orci non lacinia rutrum, purus libero luctus augue, sit amet egestas tortor augue eu risus. Quisque scelerisque enim nec risus accumsan rhoncus. Suspendisse eu convallis nulla. Ut pharetra erat ut lectus pretium egestas. Duis auctor ornare porttitor. Nullam auctor neque sed diam interdum id tristique ipsum facilisis.</p>
 </div>
 </body>
 </html>
