@@ -24,12 +24,25 @@ $(document).ready(function()
     		url:"localhost",
     		type:"GET",
     		data:"type=" + $("input[name='demo']:checked").val(),
+    		dataType:"text",
     		timeout:6000,
     		success: function(data) {
     			$("#form2div form").attr("action", data);
     			$("#form2div form input[name='Submit']").attr("disabled", false);
     		}
     	});
+	});
+	$("#form2").submit(function(){
+		$.ajax({
+			url:$("#form2div form").attr("action"),
+			type:"POST",
+			data:"",
+			dataType:"json",
+			timeout:6000,
+			success: function(data) {
+				
+			}
+		});
 	});
 });
 

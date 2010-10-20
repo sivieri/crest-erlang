@@ -24,9 +24,9 @@
 </div>
 <div id="form2div">
 	<p>Select demo details:
-	   <form id="form2" action="" method="POST" enctype="application/x-www-form-urlencoded">
-	       <label id="limitlabel" for="limit">Lower limit for word frequency: </label><input id="limit" type="text" size="5" maxlength="5" name="limit" value="10" onKeyPress="return numbersonly(this, event)" /><br/>
-           <label for="addresses">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name="addresses" rows="5" cols="60"></textarea><br/>
+	   <form id="form2" action="" onsubmit="return false;" method="POST" enctype="application/x-www-form-urlencoded">
+	       <label for="addresses">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name="addresses" rows="5" cols="60"></textarea><br/>
+		   <label id="limitlabel" for="limit">Lower limit for word frequency: </label><input id="limit" type="text" size="5" maxlength="5" name="limit" value="10" onKeyPress="return numbersonly(this, event)" /><br/>
            <input type="submit" name="Submit" value="Launch" disabled="true"/>
 	   </form>
 	</p>

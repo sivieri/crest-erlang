@@ -21,6 +21,7 @@ body {
 #results {
 	float: left;
 	width: 100%;
+	display: none;
 }
 
 input#limit {
