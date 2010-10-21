@@ -4,6 +4,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_demo).
+-compile(export_all).
 -export([spawn_demo/1]).
 
 %% External API
@@ -21,37 +22,31 @@ spawn_demo(_) ->
 %% Internal API
 
 spawn_demo_1() ->
-    ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_word_frequency())),
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [], []),
     case Res of
-        {ok, "200", _Params, Body} ->
-           {ok, Body};
-        {ok, _Status, _Params, _Body} ->
-            {error};
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
         {error, _Reason} ->
             {error}
     end.
 
 spawn_demo_2() ->
-    ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())),
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [], []),
     case Res of
-        {ok, "200", _Params, Body} ->
-           {ok, Body};
-        {ok, _Status, _Params, _Body} ->
-            {error};
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
         {error, _Reason} ->
             {error}
     end.
 
 spawn_demo_3() ->
-    ibrowse:start(),
-    Res = ibrowse:send_req("http://localhost:8001/crest/spawn", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())),
+    inets:start(),
+    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [], []),
     case Res of
-        {ok, "200", _Params, Body} ->
-           {ok, Body};
-        {ok, _Status, _Params, _Body} ->
-            {error};
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
         {error, _Reason} ->
             {error}
     end.
@@ -72,18 +67,16 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
             case Res of
-                {ok, "200", _Params, Body} ->
+                {ok, {{_,200,_}, _, Body}} ->
                     [{Address, Body}|AccIn];
-                {ok, Status, _Params, _Body} ->
-                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        ibrowse:start(),
+        inets:start(),
         receive
             {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
@@ -116,18 +109,16 @@ get_inverse_document_frequency() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
-                {ok, "200", _Params, Body} ->
+                {ok, {{_,200,_}, _, Body}} ->
                     [{Address, Body}|AccIn];
-                {ok, Status, _Params, _Body} ->
-                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        ibrowse:start(),
+        inets:start(),
         receive
             {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
@@ -174,18 +165,16 @@ get_cosine_similarity() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = ibrowse:send_req("http://" ++ Address ++ ":8001/crest/remote", ["Content-Type", "application/x-www-form-urlencoded"], post, crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
-                {ok, "200", _Params, Body} ->
+                {ok, {{_,200,_}, _, Body}} ->
                     [{Address, Body}|AccIn];
-                {ok, Status, _Params, _Body} ->
-                    [{Address, Status}|AccIn];
                 {error, Reason} ->
                     [{Address, Reason}|AccIn]
             end
         end,
     F = fun(F) ->
-        ibrowse:start(),
+        inets:start(),
         receive
             {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
