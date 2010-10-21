@@ -59,9 +59,9 @@ get_word_frequency() ->
                     Dict = crest_wordlist:get_word_counts(Filename),
                     Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
                     OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
-                    HtmlList = lists:foldl(fun({Word, Count}, AccIn) -> [lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, Count]))|AccIn] end, [], OrderedList),
-                    Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "<table><tr><th>Word</th><th>Frequency</th></tr>", HtmlList),
-                    Pid ! {self(), {"text/html", Result ++ "</table>"}};
+                    StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, OrderedList),
+                    Result = {struct, [{erlang:iolist_to_binary("words"), StructList}]},
+                    Pid ! {self(), {"application/json", Result}};
                 {Pid, Other} ->
                     Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
             end
@@ -70,9 +70,9 @@ get_word_frequency() ->
             Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
-                    [{Address, Body}|AccIn];
+                    [mochijson2:decode(Body)|AccIn];
                 {error, Reason} ->
-                    [{Address, Reason}|AccIn]
+                    [Reason|AccIn]
             end
         end,
     F = fun(F) ->
@@ -81,9 +81,8 @@ get_word_frequency() ->
             {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
-                Tables = lists:foldl(CalledFunction, [], AddressList2),
-                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
-                Pid ! {self(), {"text/html", Result}},
+                Result = lists:foldl(CalledFunction, [], AddressList2),
+                Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
@@ -132,14 +131,13 @@ get_inverse_document_frequency() ->
                 DictCount = lists:map(fun({_Address, Dict}) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
                 MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
                 FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / (1 + Count)) end, MainDict),
-                Tables = lists:map(fun({Address, Dict}) ->
+                Result = lists:map(fun({Address, Dict}) ->
                                              {Address, dict:fold(fun(Word, Count, AccIn) ->
                                                                NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
                                                                AccIn ++ lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, NewCount]))
                                                                end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"}
                                              end, DictList),
-                Result = lists:foldr(fun({Address, Element}, AccIn) -> AccIn ++ lists:flatten(io_lib:format("<h1>~s</h1>", [Address])) ++ Element end, "", Tables),
-                Pid ! {self(), {"text/html", Result}},
+                Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
@@ -196,11 +194,8 @@ get_cosine_similarity() ->
                 CosIDFs = lists:map(fun(Dict) ->
                                              dict:fold(fun(_Word, IDF, AccIn) -> [IDF|AccIn] end, [], Dict)
                                              end, IDFs),
-                Cosines = cosine_matrix(CosIDFs, []),
-                Result = lists:foldl(fun(Element, AccIn) ->
-                                             AccIn ++ lists:foldl(fun(Element2, AccIn2) -> AccIn2 ++ lists:flatten(io_lib:format("<td>~p</td>", [Element2])) end, "<tr>", Element) ++ "</tr>"
-                                             end, "<table>", Cosines) ++ "</table>",
-                Pid ! {self(), {"text/html", Result}},
+                Result = cosine_matrix(CosIDFs, []),
+                Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
