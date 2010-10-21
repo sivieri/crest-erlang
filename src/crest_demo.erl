@@ -54,20 +54,20 @@ spawn_demo_3() ->
 get_word_frequency() ->
     ClientFunction = fun() ->
             receive
-                {Pid, [{"filename", Filename}, {"limit", Num}]} ->
+                {Pid, [{"filename", Filename}, {"limit", Num}, {"address", Address}]} ->
                     {Limit, _} = string:to_integer(Num),
                     Dict = crest_wordlist:get_word_counts(Filename),
                     Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; Value < Limit -> false end end, Dict),
                     OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
                     StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, OrderedList),
-                    Result = {struct, [{erlang:iolist_to_binary("words"), StructList}]},
+                    Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},{erlang:iolist_to_binary("words"), StructList}]},
                     Pid ! {self(), {"application/json", mochijson2:encode(Result)}};
                 {Pid, Other} ->
                     Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~p", [Other]))}}
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}])}, [], []),
+            Res = http:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}, {"address", Address}])}, [], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [mochijson2:decode(Body)|AccIn];

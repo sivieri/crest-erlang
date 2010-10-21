@@ -50,34 +50,37 @@ $(document).ready(function()
 	});
 });
 
-// Example: [{words:[{word:"and", frequency:10}, {word:"to", frequency:11}, {word:"the", frequency:19}]}]
 function plotResults(obj)
 {
-	values = [];
-	terms = [];
-	for(i = 0; i < obj[0].words.length; i++)
+	for(j = 0; j < obj.length; ++j)
 	{
-		values.push(obj[0].words[i].frequency);
-		terms.push(obj[0].words[i].word);
+		$("#results").append('<div id="result' + j + '"></div>');
+		values = new Array();
+		terms = new Array();
+		for(i = 0; i < obj[j].words.length; ++i)
+		{
+			values.push(obj[j].words[i].frequency);
+			terms.push(obj[j].words[i].word);
+		}
+		plot1 = $.jqplot('result' + j, [values], {
+		    legend:{show:false, location:'ne'},
+		    title:obj[j].ip,
+		    seriesDefaults:{
+		        renderer:$.jqplot.BarRenderer, 
+		        rendererOptions:{barDirection:'horizontal', barPadding: 6, barMargin:15}, 
+		        shadowAngle:135},
+		    series:[
+		        {label:'Words'}, 
+		    ],
+		    axes:{
+		        xaxis:{min:0}, 
+		        yaxis:{
+		            renderer:$.jqplot.CategoryAxisRenderer,
+		            //ticks:terms
+		        }
+		    }
+		});
 	}
-	plot1 = $.jqplot('results', [values], {
-	    legend:{show:false, location:'ne'},
-	    title:'Word frequency',
-	    seriesDefaults:{
-	        renderer:$.jqplot.BarRenderer, 
-	        rendererOptions:{barDirection:'horizontal', barPadding: 6, barMargin:15}, 
-	        shadowAngle:135},
-	    series:[
-	        {label:'Words'}, 
-	    ],
-	    axes:{
-	        xaxis:{min:0}, 
-	        yaxis:{
-	            renderer:$.jqplot.CategoryAxisRenderer,
-	            //ticks:terms
-	        }
-	    }
-	});
 }
 
 // copyright 1999 Idocs, Inc. http://www.idocs.com
