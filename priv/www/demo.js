@@ -25,8 +25,11 @@ $(document).ready(function()
     		dataType:"text",
     		timeout:6000,
     		success: function(data) {
-    			$("#form2div form").attr("action", data);
+    			$("#form2div form").attr("action", "crest/" + data);
     			$("#form2div form input[name='Submit']").removeAttr("disabled");
+    		},
+    		error: function(data, error) {
+    			alert("Error: " + error);
     		}
     	});
 	});
@@ -39,7 +42,10 @@ $(document).ready(function()
 			timeout:6000,
 			success: function(data) {
 				alert(data);
-			}
+			},
+			error: function(data, error) {
+    			alert("Error: " + error);
+    		}
 		});
 	});
 });

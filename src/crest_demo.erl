@@ -63,7 +63,7 @@ get_word_frequency() ->
                     Result = {struct, [{erlang:iolist_to_binary("words"), StructList}]},
                     Pid ! {self(), {"application/json", Result}};
                 {Pid, Other} ->
-                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~p", [Other]))}}
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
@@ -78,14 +78,14 @@ get_word_frequency() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"limit", Limit}, {"addresses", Addresses}, {"Submit", "Query"}]} ->
+            {Pid, [{"addresses", Addresses}, {"limit", Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
                 Result = lists:foldl(CalledFunction, [], AddressList2),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
                 F(F)
         end
     end,
@@ -104,7 +104,7 @@ get_inverse_document_frequency() ->
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
                     Pid ! {self(), {"text/plain", Result}};
                 {Pid, Other} ->
-                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~p", [Other]))}}
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
@@ -119,7 +119,7 @@ get_inverse_document_frequency() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
+            {Pid, [{"addresses", Addresses}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
@@ -140,7 +140,7 @@ get_inverse_document_frequency() ->
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
                 F(F)
         end
     end,
@@ -159,7 +159,7 @@ get_cosine_similarity() ->
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
                     Pid ! {self(), {"text/plain", Result}};
                 {Pid, Other} ->
-                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~s", [Other]))}}
+                    Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~p", [Other]))}}
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
@@ -174,7 +174,7 @@ get_cosine_similarity() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"addresses", Addresses}, {"Submit", "Query"}]} ->
+            {Pid, [{"addresses", Addresses}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
@@ -198,7 +198,7 @@ get_cosine_similarity() ->
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~s", [Other])}},
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
                 F(F)
         end
     end,
