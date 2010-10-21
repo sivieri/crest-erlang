@@ -41,7 +41,7 @@ $(document).ready(function()
 			dataType:"json",
 			timeout:6000,
 			success: function(data) {
-				alert(data);
+				plotResults(data);
 			},
 			error: function(data, error) {
     			alert("Error: " + error);
@@ -49,6 +49,36 @@ $(document).ready(function()
 		});
 	});
 });
+
+// Example: [{words:[{word:"and", frequency:10}, {word:"to", frequency:11}, {word:"the", frequency:19}]}]
+function plotResults(obj)
+{
+	values = [];
+	terms = [];
+	for(i = 0; i < obj[0].words.length; i++)
+	{
+		values.push(obj[0].words[i].frequency);
+		terms.push(obj[0].words[i].word);
+	}
+	plot1 = $.jqplot('results', [values], {
+	    legend:{show:false, location:'ne'},
+	    title:'Word frequency',
+	    seriesDefaults:{
+	        renderer:$.jqplot.BarRenderer, 
+	        rendererOptions:{barDirection:'horizontal', barPadding: 6, barMargin:15}, 
+	        shadowAngle:135},
+	    series:[
+	        {label:'Words'}, 
+	    ],
+	    axes:{
+	        xaxis:{min:0}, 
+	        yaxis:{
+	            renderer:$.jqplot.CategoryAxisRenderer,
+	            //ticks:terms
+	        }
+	    }
+	});
+}
 
 // copyright 1999 Idocs, Inc. http://www.idocs.com
 // Distribute this script freely but keep this notice in place

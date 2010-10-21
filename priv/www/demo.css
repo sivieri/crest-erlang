@@ -20,8 +20,8 @@ body {
 
 #results {
 	float: left;
-	width: 100%;
-	display: none;
+	width: 90%;
+	margin-left: 5%;
 }
 
 #limitfield {
