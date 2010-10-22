@@ -135,7 +135,7 @@ get_inverse_document_frequency() ->
                                              Folded = dict:fold(fun(Word, Count, AccIn) ->
                                                                NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
                                                                if
-                                                                   NewCount >= 0.01 ->
+                                                                   NewCount >= 0.001 ->
                                                                         NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
                                                                         [NewElement|AccIn];
                                                                    true ->
