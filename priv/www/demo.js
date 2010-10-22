@@ -57,9 +57,12 @@ function plotResults(obj)
 		$("#results").append('<div id="result' + j + '" class="result"></div>');
 		var values = new Array();
 		var terms = new Array();
+		var maxVal = 0;
 		for(i = 0; i < obj[j].words.length; ++i)
 		{
 			values[i] = new Array(obj[j].words[i].frequency, i+1);
+			if (obj[j].words[i].frequency > maxVal)
+				maxVal = obj[j].words[i].frequency;
 			terms.push(obj[j].words[i].word);
 		}
 		$("#result" + j).height(terms.length*40);
@@ -74,7 +77,7 @@ function plotResults(obj)
 		        {label:'Words'}, 
 		    ],
 		    axes:{
-		        xaxis:{min:0}, 
+		        xaxis:{min:0, max:maxVal}, 
 		        yaxis:{
 		            renderer:$.jqplot.CategoryAxisRenderer,
 		            ticks:terms
