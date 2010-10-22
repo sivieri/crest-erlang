@@ -4,6 +4,7 @@
   {modules, [
     crest,
     crest_app,
+    crest_cosine,
     crest_demo,
     crest_deps,
     crest_peer,
