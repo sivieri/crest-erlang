@@ -132,10 +132,12 @@ get_inverse_document_frequency() ->
                 MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
                 FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / (1 + Count)) end, MainDict),
                 Result = lists:map(fun({Address, Dict}) ->
-                                             {Address, dict:fold(fun(Word, Count, AccIn) ->
+                                             Folded = dict:fold(fun(Word, Count, AccIn) ->
                                                                NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
-                                                               AccIn ++ lists:flatten(io_lib:format("<tr><td>~s</td><td>~p</td></tr>", [Word, NewCount]))
-                                                               end, "<table><tr><th>Word</th><th>IDF</th></tr>", Dict) ++ "</table>"}
+                                                               NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
+                                                               [NewElement|AccIn]
+                                                               end, [], Dict),
+                                             {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},{erlang:iolist_to_binary("words"), Folded}]}
                                              end, DictList),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
