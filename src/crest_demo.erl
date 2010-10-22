@@ -182,7 +182,7 @@ get_cosine_similarity() ->
                 Counts = lists:foldl(CalledFunction, [], AddressList),
                 DictList = lists:map(fun({Address, SingleList}) ->
                                              Elements = string:tokens(SingleList, "$"),
-                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "!") of [Word|[Count]] -> {Word, Count} end end, Elements),
+                                             Lists = lists:map(fun(Element) -> case string:tokens(Element, "!") of [Word|[Count]] -> {Word, list_to_float(Count)} end end, Elements),
                                              {Address, dict:from_list(Lists)}
                                              end, Counts),
                 Cosines = crest_cosine:cosine_documents(DictList),

@@ -58,27 +58,28 @@ function plotResults(obj, type)
 		var terms = new Array();
 		for(i = 0; i < obj.length; ++i)
 		{
-			values[i] = new Array(obj[i].value, i+1);
-			terms.push(obj[i].ip1 + "\n" + obj[i].ip2);
+			values.push(obj[i].value);
+			terms.push(obj[i].ip1 + "<br/>" + obj[i].ip2);
 		}
 		plot = $.jqplot('results', [values], {
-                legend:{show:false, location:'ne'},
-                title:obj[j].ip,
-                seriesDefaults:{
-                    renderer:$.jqplot.BarRenderer, 
-                    rendererOptions:{barDirection:'vertical', barMargin:8}, 
-                    shadowAngle:135},
-                series:[
-                    {label:'Addresses'}, 
-                ],
-                axes:{
-					xaxis:{
-                        renderer:$.jqplot.CategoryAxisRenderer,
-                        ticks:terms
-                    },
-                    yaxis:{min:0, max:1}
-                }
-            });
+		    legend:{show:false, location:'ne', xoffset:55},
+		    title:'Cosine similarities',
+		    seriesDefaults:{
+		        renderer:$.jqplot.BarRenderer, 
+		        rendererOptions:{ barMargin: 20},
+				shadowAngle:135
+		    },
+		    series:[
+		        {label:'Addresses'}, 
+		    ],
+		    axes:{
+		        xaxis:{
+		            renderer:$.jqplot.CategoryAxisRenderer, 
+		            ticks:terms
+		        }, 
+		        yaxis:{min:0, max:1}
+		    }
+		});
 	}
 	else {
 		var plots = new Array();
