@@ -98,9 +98,8 @@ get_inverse_document_frequency() ->
             receive
                 {Pid, [{"filename", Filename}]} ->
                     Dict = crest_wordlist:get_word_counts(Filename),
-                    FilteredDict = dict:filter(fun(_Key, Value) -> if Value >= 0.1 -> true; true -> false end end, Dict),
-                    Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, FilteredDict),
-                    Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, FilteredDict),
+                    Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, Dict),
+                    Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, Dict),
                     PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s!~p$", [Word, Count]))|AccIn] end, [], Dict2),
                     Result = lists:foldl(fun(Element, AccIn) -> AccIn ++ Element end, "", PlainList),
                     Pid ! {self(), {"text/plain", Result}};
@@ -135,9 +134,14 @@ get_inverse_document_frequency() ->
                 Result = lists:map(fun({Address, Dict}) ->
                                              Folded = dict:fold(fun(Word, Count, AccIn) ->
                                                                NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
-                                                               NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
-                                                               [NewElement|AccIn]
-                                                               end, [], Dict),
+                                                               if
+                                                                   NewCount >= 0.01 ->
+                                                                        NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
+                                                                        [NewElement|AccIn];
+                                                                   true ->
+                                                                       AccIn
+                                                               end
+                                                      end, [], Dict),
                                              {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},{erlang:iolist_to_binary("words"), Folded}]}
                                              end, DictList),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
