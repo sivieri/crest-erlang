@@ -41,7 +41,8 @@ $(document).ready(function()
 			dataType:"json",
 			timeout:6000,
 			success: function(data) {
-				plotResults(data);
+				$("#results").children().remove();
+				plotResults(data, $("input[name='demo']:checked").val());
 			},
 			error: function(data, error) {
     			alert("Error: " + error);
@@ -50,39 +51,80 @@ $(document).ready(function()
 	});
 });
 
-function plotResults(obj)
+function plotResults(obj, type)
 {
-	for(j = 0; j < obj.length; ++j)
-	{
-		$("#results").append('<div id="result' + j + '" class="result"></div>');
+	if (type == "cosine") {
 		var values = new Array();
 		var terms = new Array();
-		var maxVal = 0;
-		for(i = 0; i < obj[j].words.length; ++i)
+		for(i = 0; i < obj.length; ++i)
 		{
-			values[i] = new Array(obj[j].words[i].frequency, i+1);
-			if (obj[j].words[i].frequency > maxVal)
-				maxVal = obj[j].words[i].frequency;
-			terms.push(obj[j].words[i].word);
+			values[i] = new Array(obj[i].value, i+1);
+			terms.push(obj[i].ip1 + "\n" + obj[i].ip2);
 		}
-		$("#result" + j).height(terms.length*40);
-		plot1 = $.jqplot('result' + j, [values], {
-		    legend:{show:false, location:'ne'},
-		    title:obj[j].ip,
-		    seriesDefaults:{
-		        renderer:$.jqplot.BarRenderer, 
-		        rendererOptions:{barDirection:'horizontal', barMargin:8}, 
-		        shadowAngle:135},
-		    series:[
-		        {label:'Words'}, 
-		    ],
-		    axes:{
-		        xaxis:{min:0, max:maxVal}, 
-		        yaxis:{
-		            renderer:$.jqplot.CategoryAxisRenderer,
-		            ticks:terms
-		        }
-		    }
+		plot = $.jqplot('results', [values], {
+                legend:{show:false, location:'ne'},
+                title:obj[j].ip,
+                seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer, 
+                    rendererOptions:{barDirection:'vertical', barMargin:8}, 
+                    shadowAngle:135},
+                series:[
+                    {label:'Addresses'}, 
+                ],
+                axes:{
+					xaxis:{
+                        renderer:$.jqplot.CategoryAxisRenderer,
+                        ticks:terms
+                    },
+                    yaxis:{min:0, max:1}
+                }
+            });
+	}
+	else {
+		var plots = new Array();
+		for(j = 0; j < obj.length; ++j)
+		{
+			$("#results").append('<div id="tab' + j + '"><div id="chart' + j + '"></div></div>');
+			var values = new Array();
+			var terms = new Array();
+			var maxVal = 0;
+			for(i = 0; i < obj[j].words.length; ++i)
+			{
+				values[i] = new Array(obj[j].words[i].frequency, i+1);
+				if (obj[j].words[i].frequency > maxVal)
+					maxVal = obj[j].words[i].frequency;
+				terms.push(obj[j].words[i].word);
+			}
+			$("#result" + j).height(terms.length*40);
+			plot = $.jqplot('chart' + j, [values], {
+			    legend:{show:false, location:'ne'},
+			    title:obj[j].ip,
+			    seriesDefaults:{
+			        renderer:$.jqplot.BarRenderer, 
+			        rendererOptions:{barDirection:'horizontal', barMargin:8}, 
+			        shadowAngle:135},
+			    series:[
+			        {label:'Words'}, 
+			    ],
+			    axes:{
+			        xaxis:{min:0, max:maxVal}, 
+			        yaxis:{
+			            renderer:$.jqplot.CategoryAxisRenderer,
+			            ticks:terms
+			        }
+			    }
+			});
+			plots.push(plot);
+		}
+		$("#results").tabs();
+		$("#results").bind("tabsshow", function(event, ui) {
+			for(j = 0; j < obj.length; ++j)
+			{
+				if (ui.index == j + 1 && plots[j].__drawCount == 0)
+				{
+					plots[j].replot();
+				}
+			}
 		});
 	}
 }

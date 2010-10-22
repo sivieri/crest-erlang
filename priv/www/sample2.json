@@ -1,29 +1,17 @@
 [
     {
-    	"ip": "192.168.1.1",
-        "words":
-		  [
-		      {"word": "someword1", "frequency": 10},
-			  {"word": "someword2", "frequency": 8},
-			  {"word": "someword3", "frequency": 3}
-		  ]
+    	"ip1": "192.168.1.1",
+		"ip2": "192.168.1.2",
+		"value": "0.9"
     },
 	{
-		"ip": "192.168.1.2",
-        "words":
-          [
-              {"word": "someword1", "frequency": 2},
-              {"word": "someword2", "frequency": 1},
-              {"word": "someword3", "frequency": 5}
-          ]
+        "ip1": "192.168.1.1",
+        "ip2": "192.168.1.3",
+        "value": "0.8"
     },
 	{
-		"ip": "192.168.1.3",
-        "words":
-          [
-              {"word": "someword1", "frequency": 4},
-              {"word": "someword2", "frequency": 9},
-              {"word": "someword3", "frequency": 12}
-          ]
+        "ip1": "192.168.1.2",
+        "ip2": "192.168.1.3",
+        "value": "0.85"
     }
 ]

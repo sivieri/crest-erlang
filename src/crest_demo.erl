@@ -185,7 +185,12 @@ get_cosine_similarity() ->
                                              Lists = lists:map(fun(Element) -> case string:tokens(Element, "!") of [Word|[Count]] -> {Word, Count} end end, Elements),
                                              {Address, dict:from_list(Lists)}
                                              end, Counts),
-                Result = crest_cosine:cosine_documents(DictList),
+                Cosines = crest_cosine:cosine_documents(DictList),
+                Result = lists:map(fun({Address1, Address2, Value}) ->
+                                           {struct, [{erlang:iolist_to_binary("ip1"), erlang:iolist_to_binary(Address1)},
+                                                     {erlang:iolist_to_binary("ip2"), erlang:iolist_to_binary(Address2)},
+                                                     {erlang:iolist_to_binary("value"), Value}]}
+                                           end, Cosines),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->

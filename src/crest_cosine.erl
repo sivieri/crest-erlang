@@ -3,7 +3,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_cosine).
--export([cosine_documents/1, cosine_similarity/2]).
+-export([cosine_documents/1]).
 
 %% External API
 
@@ -13,12 +13,21 @@ cosine_documents(ListOfDict) ->
     NormFreq = lists:map(fun({Address, SingleDict}) ->
                                  {Address, lists:map(fun(Word) -> find(Word, SingleDict) end, WordList)}
                                  end, ListOfDict),
-    NormFreq.
-
-cosine_similarity(List1, List2) ->
-    dot_product(List1, List2) / (magnitude(List1) * magnitude(List2)).
+    Max1 = lists:seq(1, length(NormFreq) - 1),
+    Cosines = lists:foldl(fun(Index1, AccIn) ->
+                          Max2 = lists:seq(Index1 + 1, length(NormFreq)),
+                          Int = lists:map(fun(Index2) ->
+                                                cosine_similarity(lists:nth(Index1, NormFreq), lists:nth(Index2, NormFreq))
+                                                end, Max2),
+                          [Int|AccIn]
+                          end, [], Max1),
+    lists:flatten(Cosines).
 
 %% Internal API
+
+cosine_similarity({Address1, List1}, {Address2, List2}) ->
+    Dot = dot_product(List1, List2) / (magnitude(List1) * magnitude(List2)),
+    {Address1, Address2, Dot}.
 
 find(Key, Dict) ->
     case dict:find(Key, Dict) of
