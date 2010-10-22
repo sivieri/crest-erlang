@@ -42,5 +42,9 @@ process_each_line(IoDevice, Dict) ->
     end.
 
 words(String) ->
-    {match, Captures} = re:run(String, "\\b\\w{4,}\\b", [global,{capture,first,list}]),
-    [hd(C) || C<-Captures].
+    case re:run(String, "\\b\\w{4,}\\b", [global,{capture,first,list}]) of
+        {match, Captures} ->
+            [hd(C) || C<-Captures];
+        nomatch ->
+            []
+    end.
