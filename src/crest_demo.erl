@@ -119,7 +119,7 @@ get_inverse_document_frequency() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"addresses", Addresses}]} ->
+            {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
@@ -176,7 +176,7 @@ get_cosine_similarity() ->
     F = fun(F) ->
         inets:start(),
         receive
-            {Pid, [{"addresses", Addresses}]} ->
+            {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
