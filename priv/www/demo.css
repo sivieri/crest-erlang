@@ -20,6 +20,11 @@ body {
 
 #results {
 	float: left;
+	width: 100%;
+}
+
+.result {
+	float: left;
 	width: 90%;
 	margin-left: 5%;
 }

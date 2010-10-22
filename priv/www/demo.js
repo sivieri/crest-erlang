@@ -54,20 +54,21 @@ function plotResults(obj)
 {
 	for(j = 0; j < obj.length; ++j)
 	{
-		$("#results").append('<div id="result' + j + '"></div>');
-		values = new Array();
-		terms = new Array();
+		$("#results").append('<div id="result' + j + '" class="result"></div>');
+		var values = new Array();
+		var terms = new Array();
 		for(i = 0; i < obj[j].words.length; ++i)
 		{
-			values.push(obj[j].words[i].frequency);
+			values[i] = new Array(obj[j].words[i].frequency, i+1);
 			terms.push(obj[j].words[i].word);
 		}
+		$("#result" + j).height(terms.length*40);
 		plot1 = $.jqplot('result' + j, [values], {
 		    legend:{show:false, location:'ne'},
 		    title:obj[j].ip,
 		    seriesDefaults:{
 		        renderer:$.jqplot.BarRenderer, 
-		        rendererOptions:{barDirection:'horizontal', barPadding: 6, barMargin:15}, 
+		        rendererOptions:{barDirection:'horizontal', barMargin:8}, 
 		        shadowAngle:135},
 		    series:[
 		        {label:'Words'}, 
@@ -76,7 +77,7 @@ function plotResults(obj)
 		        xaxis:{min:0}, 
 		        yaxis:{
 		            renderer:$.jqplot.CategoryAxisRenderer,
-		            //ticks:terms
+		            ticks:terms
 		        }
 		    }
 		});
