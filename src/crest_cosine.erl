@@ -7,6 +7,10 @@
 
 %% External API
 
+%% @doc This function takes a list of dictionaries, each of them
+%% containing words with their frequency, and calculates the cosine
+%% similarity between all pairs of dictionaries (that are documents).
+%% @spec cosine_documents([{string(), dict()}]) -> [{string(), string(), float()}]
 cosine_documents(ListOfDict) ->
     WordLists = lists:map(fun({_Address, SingleDict}) -> lists:sort(dict:fold(fun(Word, _Count, AccIn) -> [Word|AccIn] end, [], SingleDict)) end, ListOfDict),
     WordList = lists:umerge(WordLists),

@@ -82,7 +82,6 @@ function plotResults(obj, type)
 		});
 	}
 	else {
-		var plots = new Array();
 		for(j = 0; j < obj.length; ++j)
 		{
 			$("#results").append('<div id="tab' + j + '"><div id="chart' + j + '"></div></div>');
@@ -115,18 +114,7 @@ function plotResults(obj, type)
 			        }
 			    }
 			});
-			plots.push(plot);
 		}
-		$("#results").tabs();
-		$("#results").bind("tabsshow", function(event, ui) {
-			for(j = 0; j < obj.length; ++j)
-			{
-				if (ui.index == j + 1 && plots[j].__drawCount == 0)
-				{
-					plots[j].replot();
-				}
-			}
-		});
 	}
 }
 
