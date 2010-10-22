@@ -179,25 +179,13 @@ get_cosine_similarity() ->
         receive
             {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
-                DocumentNumber = length(AddressList),
                 Counts = lists:foldl(CalledFunction, [], AddressList),
                 DictList = lists:map(fun({Address, SingleList}) ->
                                              Elements = string:tokens(SingleList, "$"),
                                              Lists = lists:map(fun(Element) -> case string:tokens(Element, "!") of [Word|[Count]] -> {Word, Count} end end, Elements),
                                              {Address, dict:from_list(Lists)}
                                              end, Counts),
-                DictCount = lists:map(fun({_Address, Dict}) -> dict:map(fun(_Word, _Count) -> 1 end, Dict) end, DictList),
-                MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
-                FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / (1 + Count)) end, MainDict),
-                IDFs = lists:map(fun({_Address, Dict}) ->
-                                             dict:map(fun(Word, Count) ->
-                                                               list_to_float(Count) * dict:fetch(Word, FreqDict)
-                                                               end, Dict)
-                                             end, DictList),
-                CosIDFs = lists:map(fun(Dict) ->
-                                             dict:fold(fun(_Word, IDF, AccIn) -> [IDF|AccIn] end, [], Dict)
-                                             end, IDFs),
-                Result = crest_cosine:cosine_matrix(CosIDFs, []),
+                Result = crest_cosine:cosine_documents(DictList),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
