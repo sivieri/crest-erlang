@@ -98,7 +98,7 @@ get_inverse_document_frequency() ->
             receive
                 {Pid, [{"filename", Filename}]} ->
                     Dict = crest_wordlist:get_word_counts(Filename),
-                    FilteredDict = dict:filter(fun(_Key, Value) -> if Value >= 0.05 -> true; true -> false end end, Dict),
+                    FilteredDict = dict:filter(fun(_Key, Value) -> if Value >= 0.1 -> true; true -> false end end, Dict),
                     Total = dict:fold(fun(_Word, Count, AccIn) -> Count + AccIn end, 0, FilteredDict),
                     Dict2 = dict:map(fun(_Word, Count) -> Count / Total end, FilteredDict),
                     PlainList = dict:fold(fun(Word, Count, AccIn) -> [lists:flatten(io_lib:format("~s!~p$", [Word, Count]))|AccIn] end, [], Dict2),
@@ -140,7 +140,6 @@ get_inverse_document_frequency() ->
                                                                end, [], Dict),
                                              {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},{erlang:iolist_to_binary("words"), Folded}]}
                                              end, DictList),
-                io:format("~p~n", [Result]),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
                 F(F);
             {Pid, Other} ->
