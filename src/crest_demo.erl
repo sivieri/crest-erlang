@@ -132,16 +132,12 @@ get_inverse_document_frequency() ->
                 MainDict = lists:foldl(fun(Dict, AccIn) -> dict:merge(fun(_Word, Count1, Count2) -> Count1 + Count2 end, Dict, AccIn) end, dict:new(), DictCount),
                 FreqDict = dict:map(fun(_Word, Count) -> math:log(DocumentNumber / (1 + Count)) end, MainDict),
                 Result = lists:map(fun({Address, Dict}) ->
-                                             Folded = dict:fold(fun(Word, Count, AccIn) ->
-                                                               NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
-                                                               if
-                                                                   NewCount >= 0.001 ->
-                                                                        NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
-                                                                        [NewElement|AccIn];
-                                                                   true ->
-                                                                       AccIn
-                                                               end
-                                                      end, [], Dict),
+                                             DescOrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 >= Count2 -> true; Count1 < Count2 -> false end end, dict:to_list(Dict)),
+                                             Folded = lists:foldl(fun({Word, Count}, AccIn) ->
+                                                NewCount = list_to_float(Count) * dict:fetch(Word, FreqDict),
+                                                NewElement = {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), NewCount}]},
+                                                [NewElement|AccIn]
+                                             end, [], lists:sublist(DescOrderedList, 20)),
                                              {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},{erlang:iolist_to_binary("words"), Folded}]}
                                              end, DictList),
                 Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
