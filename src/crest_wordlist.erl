@@ -37,10 +37,10 @@ process_each_line(IoDevice, Dict) ->
             NewDict = lists:foldl(
                         fun(W, D) -> dict:update(W, fun(C) -> C + 1 end, 1, D) end, 
                         Dict, 
-                        words(Data)),
+                        words(string:to_lower(Data))),
             process_each_line(IoDevice, NewDict)
     end.
 
 words(String) ->
-    {match, Captures} = re:run(String, "\\b\\w+\\b", [global,{capture,first,list}]),
+    {match, Captures} = re:run(String, "\\b\\w{4,}\\b", [global,{capture,first,list}]),
     [hd(C) || C<-Captures].
