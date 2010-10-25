@@ -8,6 +8,9 @@
 get_function() ->
     F = fun(F) ->
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Remote test"},
+                F(F);
             {Pid, [{"param", Num}]} ->
                 {X, _} = string:to_integer(Num),
                 Pid ! {self(), {"text/plain", integer_to_list(X*X)}},

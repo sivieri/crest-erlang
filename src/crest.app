@@ -7,6 +7,7 @@
     crest_cosine,
     crest_demo,
     crest_deps,
+    crest_manager,
     crest_peer,
     crest_router,
     crest_spawn,

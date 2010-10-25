@@ -78,6 +78,9 @@ get_word_frequency() ->
     F = fun(F) ->
         inets:start(),
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Word frequency demo"},
+                F(F);
             {Pid, [{"addresses", Addresses}, {"limit", Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
@@ -119,6 +122,9 @@ get_inverse_document_frequency() ->
     F = fun(F) ->
         inets:start(),
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Inverse document frequency demo"},
+                F(F);
             {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
@@ -177,6 +183,9 @@ get_cosine_similarity() ->
     F = fun(F) ->
         inets:start(),
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Cosine similarity demo"},
+                F(F);
             {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 Counts = lists:foldl(CalledFunction, [], AddressList),

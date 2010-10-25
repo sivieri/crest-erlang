@@ -77,7 +77,7 @@ handle_call({list, Param}, _From, Spawned) ->
                                [Val|AccIn]
                                end, [], Spawned),
     log4erl:info("Collected all responses for parameter ~p~n", [Param]),
-    {reply, Result};
+    {reply, Result, Spawned};
 handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 

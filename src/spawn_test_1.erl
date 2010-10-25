@@ -8,6 +8,9 @@
 get_function() ->
     F = fun(F) ->
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Spawn test 1"},
+                F(F);
             {Pid, _} ->
                 Pid ! {self(), {"text/plain", "Function 1 called"}},
                 F(F);
