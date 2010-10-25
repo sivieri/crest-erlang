@@ -38,6 +38,8 @@ loop(Req, DocRoot) ->
                         {error} ->
                             Req:respond({500, [], []})
                     end;
+                ["manager"] ->
+                    Req:respond({200, [{"Content-Type", "text/html"}], [crest_manager:get_manager()]});
                 ["crest"|T] ->
                     Answer = crest_router:route(Method, T, Req:parse_qs(), ContentType),
                     Req:respond(Answer);

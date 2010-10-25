@@ -7,7 +7,7 @@
 
 -module(crest_peer).
 -behaviour(gen_server).
--export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2]).
+-export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2, get_list/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -49,6 +49,11 @@ remote(Params) ->
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).
 
+%% @doc Get a list of responses from all childs, passing to all the given parameter.
+%% @spec get_list({string(), string()}) -> [{string(), string()}]
+get_list(Param) ->
+    gen_server:call(?MODULE, {list, Param}).
+
 init(_Args) ->
     Spawned = dict:new(),
     {ok, Spawned}.
@@ -66,6 +71,13 @@ handle_call({exec, Key, Params}, _From, Spawned) ->
         error ->
             {reply, {error}, Spawned}
     end;
+handle_call({list, Param}, _From, Spawned) ->
+    Result = dict:fold(fun(Key, Pid, AccIn) ->
+                               Val = {Key, crest_utils:rpc(Pid, Param)},
+                               [Val|AccIn]
+                               end, [], Spawned),
+    log4erl:info("Collected all responses for parameter ~p~n", [Param]),
+    {reply, Result};
 handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 
