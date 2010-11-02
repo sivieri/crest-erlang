@@ -33,13 +33,13 @@ invocation(Max, Body) ->
 	List = lists:seq(1, Max),
 	crest_utils:pmap(fun(Index) ->
 							 io:format("Spawning ~p~n", [Index]),
-							 http:request("http://localhost:8001/crest/" ++ Body)
+							 httpc:request("http://localhost:8001/crest/" ++ Body)
 					 end, List).
 
 main() ->
     inets:start(),
-    % http:set_options([{proxy, {{"localhost", 8080}, []}}]),
-    Res = http:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
+    % httpc:set_options([{proxy, {{"localhost", 8080}, []}}]),
+    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
             invocation(1000, Body);
