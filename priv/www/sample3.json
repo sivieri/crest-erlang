@@ -1,0 +1,5 @@
+{"aaData": [
+	["aabbcc","Prima chiusura","GET",""],
+	["ddeeff","Seconda chiusura","POST","module: binary()"],
+	["gghhii","Terza chiusura","GET/POST","filename: string()"],
+]}
