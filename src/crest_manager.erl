@@ -25,7 +25,7 @@ get_data() ->
 											   erlang:iolist_to_binary(Params)],
 								   [ElemList|AccIn]
 								   end, [], Temp2),
-	{struct, [{erlang:iolist_to_binary("aaData"), [ResultList]}]}.
+	{struct, [{erlang:iolist_to_binary("aaData"), ResultList}]}.
 
 %% Internal API
 
