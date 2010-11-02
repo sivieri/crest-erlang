@@ -7,7 +7,7 @@
 
 -module(crest_peer).
 -behaviour(gen_server).
--export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2, get_list/1]).
+-export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2, remove_child/1, get_list/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -48,6 +48,12 @@ remote(Params) ->
 %% @spec add_child(string(), pid()) -> {noreply, dictionary()}
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).
+
+%% @doc Remove a child process from the internal server list, and terminate
+%% it.
+%% @spec remove_child(string()) -> {noreply, dictionary()}
+remove_child(Key) ->
+	gen_server:cast(?MODULE, {delete, Key}).
 
 %% @doc Get a dictionary of responses from all childs, passing to all the given parameter;
 %% the key is the child process UUID.
