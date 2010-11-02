@@ -49,8 +49,9 @@ remote(Params) ->
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).
 
-%% @doc Get a list of responses from all childs, passing to all the given parameter.
-%% @spec get_list({string(), string()}) -> [{string(), string()}]
+%% @doc Get a dictionary of responses from all childs, passing to all the given parameter;
+%% the key is the child process UUID.
+%% @spec get_list({string(), string()}) -> dict()
 get_list(Param) ->
     gen_server:call(?MODULE, {list, Param}).
 
@@ -77,7 +78,7 @@ handle_call({list, Param}, _From, Spawned) ->
                                [Val|AccIn]
                                end, [], Spawned),
     log4erl:info("Collected all responses for parameter ~p~n", [Param]),
-    {reply, Result, Spawned};
+    {reply, dict:from_list(Result), Spawned};
 handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 

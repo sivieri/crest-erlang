@@ -11,6 +11,12 @@ get_function() ->
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Spawn test 2"},
                 F(F);
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET"},
+                F(F);
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), []},
+                F(F);
             {Pid, _} ->
                 Pid ! {self(), {"text/plain", "Function 2 called"}},
                 F(F);

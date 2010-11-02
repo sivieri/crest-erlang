@@ -81,6 +81,12 @@ get_word_frequency() ->
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Word frequency demo"},
                 F(F);
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                F(F);
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"limit", "integer()"}]},
+                F(F);
             {Pid, [{"addresses", Addresses}, {"limit", Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 AddressList2 = lists:map(fun(Element) -> {Element, Limit} end, AddressList),
@@ -124,6 +130,12 @@ get_inverse_document_frequency() ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Inverse document frequency demo"},
+                F(F);
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                F(F);
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"limit", "integer()"}]},
                 F(F);
             {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
@@ -185,6 +197,12 @@ get_cosine_similarity() ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Cosine similarity demo"},
+                F(F);
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                F(F);
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"limit", "integer()"}]},
                 F(F);
             {Pid, [{"addresses", Addresses}, {"limit", _Limit}]} ->
                 AddressList = string:tokens(Addresses, "\r\n"),
