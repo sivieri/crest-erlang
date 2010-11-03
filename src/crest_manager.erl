@@ -19,7 +19,7 @@ get_data() ->
 	Temp1 = dict:merge(fun(_Key, Value1, Value2) -> {Value1, Value2} end, NameDict, OperationDict),
     Temp2 = dict:merge(fun(_Key, Value1, Value2) -> {Value1, compat(Value2)} end, Temp1, ParamsDict),
 	ResultList = dict:fold(fun(Key, {{Name, Operation}, Params}, AccIn) ->
-								   ElemList = [erlang:iolist_to_binary(Key),
+								   ElemList = [erlang:iolist_to_binary(make_link(Key)),
 											   erlang:iolist_to_binary(Name),
 											   erlang:iolist_to_binary(Operation),
 											   erlang:iolist_to_binary(Params)],
@@ -29,5 +29,10 @@ get_data() ->
 
 %% Internal API
 
+make_link(Value) ->
+	"<a href=\"crest/" ++ Value ++ "\" title=\"" ++ Value ++ "\">" ++ Value ++ "</a>".
+
+compat([]) ->
+	"<em>None</em>";
 compat(List) ->
-	lists:foldl(fun({Name, Type}, AccIn) -> AccIn ++ Name ++ " " ++ Type ++ "<br/>" end, "", List).
+	lists:foldl(fun({Name, Type}, AccIn) -> AccIn ++ Name ++ ": " ++ Type ++ "<br/>" end, "", List).
