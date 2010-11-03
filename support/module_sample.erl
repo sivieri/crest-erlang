@@ -23,6 +23,12 @@ get_function() ->
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Closure service name"},
                 F(F);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET/POST"},
+                F(F);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"param1", "string()"}, {"param2", "integer()"}]},
+                F(F);
             {Pid, [{Parameter1, Value1}, {Parameter2, Value2}]} ->
                 computation(Value1, Value2),
                 Pid ! {self(), {"text/plain", ComputationResults}},
