@@ -3,21 +3,6 @@ $(document).ready(function()
 {
 	$("input[name='demo']").change(function(){
 		$("#form2div form input[name='Submit']").attr("disabled", "true");
-	    if ($("input[name='demo']:checked").val() == "word")
-	    {
-	    	$("#form2div").show("slow");
-	    	$("#limitfield").show("fast");
-	    }
-	    else if ($("input[name='demo']:checked").val() == "idf")
-	    {
-	    	$("#form2div").show("slow");
-	    	$("#limitfield").hide("fast");
-	    }
-	    else
-	    {
-	    	$("#form2div").show("slow");
-	    	$("#limitfield").hide("fast");
-	    }
 	    $.ajax({
     		url:"demo",
     		type:"GET",
