@@ -3,6 +3,7 @@ $(document).ready(function()
 {
 	$("input[name='demo']").change(function(){
 		$("#form2div form input[name='Submit']").attr("disabled", "true");
+        $("#form2div").show("slow");
 	    $.ajax({
     		url:"demo",
     		type:"GET",
