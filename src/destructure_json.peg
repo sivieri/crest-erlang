@@ -1,0 +1,30 @@
+object <- var path `
+[_Var, PathFun] = Node,
+fun(JSON) ->
+  PathFun(JSON)
+end
+`;
+path <- "." var path? / "[" int "]" path? `
+case Node of
+  [".", Key, []] ->
+    fun({struct, Obj}) ->
+      proplists:get_value(Key, Obj)
+    end;
+  [".", Key, PathFun] ->
+    fun({struct, Obj}) ->
+      V = proplists:get_value(Key, Obj),
+      PathFun(V)
+    end;
+  ["[", I, "]", []] ->
+    fun(Array) ->
+      lists:nth(I + 1, Array)
+    end;
+  ["[", I, "]", PathFun] ->
+    fun(Array) ->
+      V = lists:nth(I + 1, Array),
+      PathFun(V)
+    end
+end
+`;
+int <- [0-9]+ `list_to_integer(Node)`;
+var <- [_a-zA-Z] [_a-zA-Z0-9]* `list_to_binary(Node)`;
