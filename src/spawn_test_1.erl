@@ -31,15 +31,15 @@ get_function() ->
 
 main() ->
     inets:start(),
-    % httpc:set_options([{proxy, {{"localhost", 8080}, []}}]),
-    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
+	ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
     case Res of
         {ok, {_, _, Body}} ->
-            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8001/crest/" ++ Body)]),
-            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8001/crest/" ++ Body)]);
+            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]),
+            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]);
         {ok, {_, Body}} ->
-            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8001/crest/" ++ Body)]),
-            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8001/crest/" ++ Body)]);
+            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]),
+            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]);
         {error, Reason} ->
             io:format("Error: ~p~n", [Reason])
     end,

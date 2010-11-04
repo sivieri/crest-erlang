@@ -23,7 +23,8 @@ spawn_demo(_) ->
 
 spawn_demo_1() ->
     inets:start(),
-    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [], []),
+	ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -33,7 +34,8 @@ spawn_demo_1() ->
 
 spawn_demo_2() ->
     inets:start(),
-    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [], []),
+	ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -43,7 +45,8 @@ spawn_demo_2() ->
 
 spawn_demo_3() ->
     inets:start(),
-    Res = httpc:request(post, {"http://localhost:8001/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [], []),
+	ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -67,7 +70,7 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = httpc:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}, {"address", Address}])}, [], []),
+            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}, {"address", Address}])}, [], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [mochijson2:decode(Body)|AccIn];
@@ -77,6 +80,7 @@ get_word_frequency() ->
         end,
     F = fun(F) ->
         inets:start(),
+		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Word frequency demo"},
@@ -117,7 +121,7 @@ get_inverse_document_frequency() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = httpc:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [{Address, Body}|AccIn];
@@ -127,6 +131,7 @@ get_inverse_document_frequency() ->
         end,
     F = fun(F) ->
         inets:start(),
+		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Inverse document frequency demo"},
@@ -184,7 +189,7 @@ get_cosine_similarity() ->
             end
         end,
     CalledFunction = fun(Address, AccIn) ->
-            Res = httpc:request(post, {"http://" ++ Address ++ ":8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
+            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}])}, [], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [{Address, Body}|AccIn];
@@ -194,6 +199,7 @@ get_cosine_similarity() ->
         end,
     F = fun(F) ->
         inets:start(),
+		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Cosine similarity demo"},

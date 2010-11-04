@@ -23,7 +23,7 @@ get_function() ->
 
 main() ->
     inets:start(),
-    % httpc:set_options([{proxy, {{"localhost", 8080}, []}}]),
-    Res = httpc:request(post, {"http://localhost:8001/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function(), [{"param", 4}])}, [], []),
+	ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function(), [{"param", 4}])}, [], []),
     io:format("Answer: ~p~n", [Res]),
     halt(0).
