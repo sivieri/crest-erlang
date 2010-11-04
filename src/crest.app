@@ -14,9 +14,10 @@
     crest_sup,
     crest_utils,
     crest_web,
+    crest_web_ssl,
     crest_wordlist
   ]},
   {registered, []},
   {mod, {crest_app, []}},
   {env, []},
-  {applications, [kernel, stdlib, crypto]}]}.
+  {applications, [kernel, stdlib, crypto, ssl]}]}.

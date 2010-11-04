@@ -32,15 +32,31 @@ upgrade() ->
 init([]) ->
     Ip = case os:getenv("MOCHIWEB_IP") of false -> "0.0.0.0"; Any -> Any end,   
     WebConfig = [
-         {ip, Ip},
-                 {port, 8001},
+         		 {ip, Ip},
+                 {port, 8080},
                  {docroot, crest_deps:local_path(["priv", "www"])}],
     Web = {crest_web,
            {crest_web, start, [WebConfig]},
+           permanent, 5000, worker, dynamic},
+	WebConfigSSL = [
+                 {ip, Ip},
+                 {port, 8443},
+                 {docroot, crest_deps:local_path(["priv", "www"])},
+                 {ssl, true},
+                 {ssl_opts, [
+                    {certfile, crest_deps:local_path(["ca", "certs", "01.pem"])},
+                    {keyfile, crest_deps:local_path(["ca", "private", "crest.eky"])},
+                    {verify, verify_peer},
+                    {cacertfile, crest_deps:local_path(["ca", "cacert.pem"])},
+                    {fail_if_no_peer_cert, false},
+                    {verify_fun, fun(_) -> false end}
+                 ]}],
+    WebSSL = {crest_web_ssl,
+           {crest_web_ssl, start, [WebConfigSSL]},
            permanent, 5000, worker, dynamic},
     Peer = {crest_peer,
             {crest_peer, start, []},
             permanent, 5000, worker, [crest_peer]},
 
-    Processes = [Web, Peer],
+    Processes = [Web, WebSSL, Peer],
     {ok, {{one_for_one, 10, 10}, Processes}}.
