@@ -1,6 +1,6 @@
 {application, crest,
  [{description, "crest"},
-  {vsn, "0.3.1"},
+  {vsn, "0.4.2"},
   {modules, [
     crest,
     crest_app,
@@ -20,4 +20,4 @@
   {registered, []},
   {mod, {crest_app, []}},
   {env, []},
-  {applications, [kernel, stdlib, crypto, ssl]}]}.
+  {applications, [kernel, stdlib, crypto]}]}.

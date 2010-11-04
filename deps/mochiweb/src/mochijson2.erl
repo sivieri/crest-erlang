@@ -95,19 +95,22 @@ json_encode(false, _State) ->
     <<"false">>;
 json_encode(null, _State) ->
     <<"null">>;
-json_encode(I, _State) when is_integer(I) andalso I >= -2147483648 andalso I =< 2147483647 ->
-    %% Anything outside of 32-bit integers should be encoded as a float
-    integer_to_list(I);
 json_encode(I, _State) when is_integer(I) ->
-    mochinum:digits(float(I));
+    integer_to_list(I);
 json_encode(F, _State) when is_float(F) ->
     mochinum:digits(F);
 json_encode(S, State) when is_binary(S); is_atom(S) ->
     json_encode_string(S, State);
-json_encode(Array, State) when is_list(Array) ->
-    json_encode_array(Array, State);
+json_encode([{K, _}|_] = Props, State) when (K =/= struct andalso
+                                             K =/= array andalso
+                                             K =/= json) ->
+    json_encode_proplist(Props, State);
 json_encode({struct, Props}, State) when is_list(Props) ->
     json_encode_proplist(Props, State);
+json_encode(Array, State) when is_list(Array) ->
+    json_encode_array(Array, State);
+json_encode({array, Array}, State) when is_list(Array) ->
+    json_encode_array(Array, State);
 json_encode({json, IoList}, _State) ->
     IoList;
 json_encode(Bad, #encoder{handler=null}) ->
@@ -405,8 +408,22 @@ tokenize_string(B, S=#decoder{offset=O}, Acc) ->
                 Acc1 = lists:reverse(xmerl_ucs:to_utf8(C), Acc),
                 tokenize_string(B, ?ADV_COL(S, 6), Acc1)
             end;
-        <<_:O/binary, C, _/binary>> ->
-            tokenize_string(B, ?INC_CHAR(S, C), [C | Acc])
+        <<_:O/binary, C1, _/binary>> when C1 < 128 ->
+            tokenize_string(B, ?INC_CHAR(S, C1), [C1 | Acc]);
+        <<_:O/binary, C1, C2, _/binary>> when C1 >= 194, C1 =< 223,
+                C2 >= 128, C2 =< 191 ->
+            tokenize_string(B, ?ADV_COL(S, 2), [C2, C1 | Acc]);
+        <<_:O/binary, C1, C2, C3, _/binary>> when C1 >= 224, C1 =< 239,
+                C2 >= 128, C2 =< 191,
+                C3 >= 128, C3 =< 191 ->
+            tokenize_string(B, ?ADV_COL(S, 3), [C3, C2, C1 | Acc]);
+        <<_:O/binary, C1, C2, C3, C4, _/binary>> when C1 >= 240, C1 =< 244,
+                C2 >= 128, C2 =< 191,
+                C3 >= 128, C3 =< 191,
+                C4 >= 128, C4 =< 191 ->
+            tokenize_string(B, ?ADV_COL(S, 4), [C4, C3, C2, C1 | Acc]);
+        _ ->
+            throw(invalid_utf8)
     end.
 
 tokenize_number(B, S) ->
@@ -651,7 +668,9 @@ input_validation_test() ->
         <<?Q, 16#E0, 16#80,16#7F, ?Q>>,
         <<?Q, 16#F0, 16#80, 16#80, 16#7F, ?Q>>,
         %% we don't support code points > 10FFFF per RFC 3629
-        <<?Q, 16#F5, 16#80, 16#80, 16#80, ?Q>>
+        <<?Q, 16#F5, 16#80, 16#80, 16#80, ?Q>>,
+        %% escape characters trigger a different code path
+        <<?Q, $\\, $\n, 16#80, ?Q>>
     ],
     lists:foreach(
       fun(X) ->
@@ -719,6 +738,15 @@ key_encode_test() ->
     ?assertEqual(
        <<"{\"foo\":1}">>,
        iolist_to_binary(encode({struct, [{"foo", 1}]}))),
+	?assertEqual(
+       <<"{\"foo\":1}">>,
+       iolist_to_binary(encode([{foo, 1}]))),
+    ?assertEqual(
+       <<"{\"foo\":1}">>,
+       iolist_to_binary(encode([{<<"foo">>, 1}]))),
+    ?assertEqual(
+       <<"{\"foo\":1}">>,
+       iolist_to_binary(encode([{"foo", 1}]))),
     ?assertEqual(
        <<"{\"\\ud834\\udd20\":1}">>,
        iolist_to_binary(
@@ -764,9 +792,16 @@ int_test() ->
     ?assertEqual(11, decode("11")),
     ok.
 
-float_fallback_test() ->
-    ?assertEqual(<<"-2147483649.0">>, iolist_to_binary(encode(-2147483649))),
-    ?assertEqual(<<"2147483648.0">>, iolist_to_binary(encode(2147483648))),
+large_int_test() ->
+    ?assertEqual(<<"-2147483649214748364921474836492147483649">>,
+        iolist_to_binary(encode(-2147483649214748364921474836492147483649))),
+    ?assertEqual(<<"2147483649214748364921474836492147483649">>,
+        iolist_to_binary(encode(2147483649214748364921474836492147483649))),
+    ok.
+
+float_test() ->
+    ?assertEqual(<<"-2147483649.0">>, iolist_to_binary(encode(-2147483649.0))),
+    ?assertEqual(<<"2147483648.0">>, iolist_to_binary(encode(2147483648.0))),
     ok.
 
 handler_test() ->

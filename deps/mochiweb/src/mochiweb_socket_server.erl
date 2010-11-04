@@ -108,6 +108,7 @@ start_server(State=#mochiweb_socket_server{ssl=Ssl, name=Name}) ->
     case Ssl of
         true ->
             application:start(crypto),
+            application:start(public_key),
             application:start(ssl);
         false ->
             void
@@ -122,7 +123,7 @@ start_server(State=#mochiweb_socket_server{ssl=Ssl, name=Name}) ->
 ensure_int(N) when is_integer(N) ->
     N;
 ensure_int(S) when is_list(S) ->
-    integer_to_list(S).
+    list_to_integer(S).
 
 ipv6_supported() ->
     case (catch inet:getaddr("localhost", inet6)) of
@@ -156,7 +157,7 @@ init(State=#mochiweb_socket_server{ip=Ip, port=Port, backlog=Backlog, nodelay=No
         {stop, eacces} ->
             case Port < 1024 of
                 true ->
-                    case fdsrv:start() of
+                    case catch fdsrv:start() of
                         {ok, _} ->
                             case fdsrv:bind_socket(tcp, Port) of
                                 {ok, Fd} ->
@@ -257,6 +258,20 @@ handle_info({'EXIT', Pid, Reason},
             ok
     end,
     {noreply, recycle_acceptor(Pid, State)};
+
+% this is what release_handler needs to get a list of modules,
+% since our supervisor modules list is set to 'dynamic'
+% see sasl-2.1.9.2/src/release_handler_1.erl get_dynamic_mods
+handle_info({From, Tag, get_modules}, State = #mochiweb_socket_server{name={local,Mod}}) ->
+    From ! {element(2,Tag), [Mod]},
+    {noreply, State};
+
+% If for some reason we can't get the module name, send empty list to avoid release_handler timeout:
+handle_info({From, Tag, get_modules}, State) ->
+    error_logger:info_msg("mochiweb_socket_server replying to dynamic modules request as '[]'~n",[]),
+    From ! {element(2,Tag), []},
+    {noreply, State};
+
 handle_info(Info, State) ->
     error_logger:info_report([{'INFO', Info}, {'State', State}]),
     {noreply, State}.
