@@ -45,7 +45,7 @@ init([]) ->
                  {ssl, true},
                  {ssl_opts, [
                     {certfile, crest_deps:local_path(["ca", "certs", "01.pem"])},
-                    {keyfile, crest_deps:local_path(["ca", "private", "crest.eky"])},
+                    {keyfile, crest_deps:local_path(["ca", "private", "crest.key"])},
                     {verify, verify_peer},
                     {cacertfile, crest_deps:local_path(["ca", "cacert.pem"])},
                     {fail_if_no_peer_cert, false},
