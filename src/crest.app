@@ -1,12 +1,13 @@
 {application, crest,
  [{description, "crest"},
-  {vsn, "0.5"},
+  {vsn, "0.6"},
   {modules, [
     crest,
     crest_app,
     crest_cosine,
     crest_demo,
     crest_deps,
+    crest_json,
     crest_manager,
     crest_peer,
     crest_router,
@@ -15,7 +16,8 @@
     crest_utils,
     crest_web,
     crest_web_ssl,
-    crest_wordlist
+    crest_wordlist,
+    destructure_json
   ]},
   {registered, []},
   {mod, {crest_app, []}},
