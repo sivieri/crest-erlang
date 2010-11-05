@@ -27,7 +27,7 @@ stop() ->
 loop(Req, DocRoot) ->
     "/" ++ Path = Req:get(path),
     ContentType = Req:get_header_value("content-type"),
-    log4erl:info("Request: ~p~n", [Path]),
+    log4erl:info("Request (SSL): ~p~n", [Path]),
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of

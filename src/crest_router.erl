@@ -11,6 +11,7 @@
 %% to the correct peer server method.
 %% @spec route('GET' | 'POST', [string()], {atom(), any()}, string()) -> {integer(), [{string(), any()}], [any()]}
 route(Method, Params, ReqParams, ContentType) ->
+	log4erl:info("Router: routing a ~p request for ~p~n", [Method, Params]),
     case Method of
         'GET' ->
             case Params of

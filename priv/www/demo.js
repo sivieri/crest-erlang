@@ -9,7 +9,7 @@ $(document).ready(function()
     		type:"GET",
     		data:"type=" + $("input[name='demo']:checked").val(),
     		dataType:"text",
-    		timeout:6000,
+    		timeout:15000,
     		success: function(data) {
     			$("#form2div form").attr("action", "crest/" + data);
     			$("#form2div form input[name='Submit']").removeAttr("disabled");
@@ -25,7 +25,7 @@ $(document).ready(function()
 			type:"POST",
 			data:$("#form2").serialize(),
 			dataType:"json",
-			timeout:6000,
+			timeout:15000,
 			success: function(data) {
 				$("#results").children().remove();
 				plotResults(data, $("input[name='demo']:checked").val());
