@@ -24,20 +24,20 @@ stop() ->
 
 %% @doc Install a new operation on this peer, using the given
 %% parameters.
-%% @spec spawn_install([{string(), any()}]) -> {reply, string(), dictionary()}
+%% @spec spawn_install([{string(), any()}]) -> {string(), dictionary()}
 spawn_install(Params) ->
     gen_server:call(?MODULE, {spawn, Params}).
 
 %% @doc Execute an already installed operation, specified by the given
 %% unique key.
-%% @spec spawn_exec([Key], [{atom(), any()}]) -> {reply, {ok, any()}, dictionary()} | {reply, {error}, dictionary()}
+%% @spec spawn_exec([Key], [{atom(), any()}]) -> {{ok, any()}, dictionary()} | {reply, {error}, dictionary()}
 spawn_exec([Key], Params) ->
     gen_server:call(?MODULE, {exec, Key, Params});
 spawn_exec(Key, Params) ->
     gen_server:call(?MODULE, {exec, Key, Params}).
 
 %% @doc Install and execute a new operation on this peer, and then delete it.
-%% @spec remote([{string(), any()}]) -> {reply, {ok, any()}, dictionary()} | {reply, {error}, dictionary()}
+%% @spec remote([{string(), any()}]) -> {{ok, any()}, dictionary()} | {{error}, dictionary()}
 remote(Params) ->
     Key = gen_server:call(?MODULE, {spawn, lists:sublist(Params, 4)}),
     Answer = gen_server:call(?MODULE, {exec, Key, lists:sublist(Params, 5, length(Params))}),
@@ -45,19 +45,19 @@ remote(Params) ->
     Answer.
 
 %% @doc Add a new process to the internal server list, with the associated key.
-%% @spec add_child(string(), pid()) -> {noreply, dictionary()}
+%% @spec add_child(string(), pid()) -> dictionary()
 add_child(Key, Pid) ->
     gen_server:cast(?MODULE, {add_child, Key, Pid}).
 
 %% @doc Remove a child process from the internal server list, and terminate
 %% it.
-%% @spec remove_child(string()) -> {noreply, dictionary()}
+%% @spec remove_child(string()) -> dictionary()
 remove_child(Key) ->
 	gen_server:cast(?MODULE, {delete, Key}).
 
 %% @doc Get a dictionary of responses from all childs, passing to all the given parameter;
 %% the key is the child process UUID.
-%% @spec get_list({string(), string()}) -> dict()
+%% @spec get_list({string(), string()}) -> dictionary()
 get_list(Param) ->
     gen_server:call(?MODULE, {list, Param}).
 
@@ -65,26 +65,15 @@ init(_Args) ->
     Spawned = dict:new(),
     {ok, Spawned}.
 
-handle_call({spawn, Params}, _From, Spawned) ->
-    F = crest_utils:get_lambda(Params),
-    Key = crest_spawn:install(F),
-    {reply, Key, Spawned};
-handle_call({exec, Key, Params}, _From, Spawned) ->
-    case dict:find(Key, Spawned) of
-        {ok, ChildPid} ->
-            Res = crest_utils:rpc(ChildPid, Params),
-            log4erl:info("Executed the existing key ~p~n", [Key]),
-            {reply, {ok, Res}, Spawned};
-        error ->
-            {reply, {error}, Spawned}
-    end;
-handle_call({list, Param}, _From, Spawned) ->
-    Result = dict:fold(fun(Key, Pid, AccIn) ->
-                               Val = {Key, crest_utils:rpc(Pid, Param)},
-                               [Val|AccIn]
-                               end, [], Spawned),
-    log4erl:info("Collected all responses for parameter ~p~n", [Param]),
-    {reply, dict:from_list(Result), Spawned};
+handle_call({spawn, Params}, From, Spawned) ->
+	spawn(fun() -> handle_spawn(Params, From) end),
+    {noreply, Spawned};
+handle_call({exec, Key, Params}, From, Spawned) ->
+	spawn(fun() -> handle_exec({Key, Params}, From, Spawned) end),
+    {noreply, Spawned};
+handle_call({list, Param}, From, Spawned) ->
+	spawn(fun() -> handle_list(Param, From, Spawned) end),
+    {noreply, Spawned};
 handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 
@@ -115,3 +104,26 @@ terminate(_Reason, _Spawned) ->
     ok.
 
 %% Internal API
+
+handle_spawn(Params, From) ->
+	F = crest_utils:get_lambda(Params),
+    Key = crest_spawn:install(F),
+	gen_server:reply(From, Key).
+
+handle_exec({Key, Params}, From, Spawned) ->
+	case dict:find(Key, Spawned) of
+        {ok, ChildPid} ->
+            Res = crest_utils:rpc(ChildPid, Params),
+            log4erl:info("Executed the existing key ~p~n", [Key]),
+			gen_server:reply(From, {ok, Res});
+        error ->
+			gen_server:reply(From, {error})
+    end.
+
+handle_list(Param, From, Spawned) ->
+	Result = dict:fold(fun(Key, Pid, AccIn) ->
+                               Val = {Key, crest_utils:rpc(Pid, Param)},
+                               [Val|AccIn]
+                               end, [], Spawned),
+    log4erl:info("Collected all responses for parameter ~p~n", [Param]),
+	gen_server:reply(From, dict:from_list(Result)).
