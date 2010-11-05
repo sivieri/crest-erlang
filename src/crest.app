@@ -4,8 +4,6 @@
   {modules, [
     crest,
     crest_app,
-    crest_cosine,
-    crest_demo,
     crest_deps,
     crest_json,
     crest_manager,
@@ -16,7 +14,6 @@
     crest_utils,
     crest_web,
     crest_web_ssl,
-    crest_wordlist,
     destructure_json
   ]},
   {registered, []},
