@@ -24,6 +24,6 @@ get_function() ->
 main() ->
     inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function(), [{"param", 4}])}, [], []),
+    Res = httpc:request(post, {"https://localhost:8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function(), [{"param", 4}])}, [crest_utils:ssl_options()], []),
     io:format("Answer: ~p~n", [Res]),
     halt(0).

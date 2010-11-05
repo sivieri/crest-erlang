@@ -3,9 +3,17 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([format/2, rpc/2, first/1, pmap/2, get_lambda_params/2, get_lambda_params/3, get_lambda/1]).
+-export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/2, get_lambda_params/3, get_lambda/1]).
 
 %% External API
+
+ssl_options() ->
+	{ssl,
+	 [{verify, 0},
+	  {certfile, crest_deps:local_path(["ca", "users", "peer", "peer.crt"])},
+	  {keyfile, crest_deps:local_path(["ca", "users", "peer", "peer.key"])},
+	  {password, "peer"}]
+	}.
 
 %% @doc Returns the head of a list if the parameter is a list, or
 %% the parameter itself if it is not a list.

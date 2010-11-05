@@ -24,7 +24,7 @@ spawn_demo(_) ->
 spawn_demo_1() ->
     inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [], []),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [crest_utils:ssl_options()], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -35,7 +35,7 @@ spawn_demo_1() ->
 spawn_demo_2() ->
     inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [], []),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [crest_utils:ssl_options()], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -46,7 +46,7 @@ spawn_demo_2() ->
 spawn_demo_3() ->
     inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [], []),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [crest_utils:ssl_options()], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -72,7 +72,7 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Limit}, AccIn) ->
-            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}, {"address", Address}])}, [], []),
+            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", "/home/alex/demo.txt"}, {"limit", Limit}, {"address", Address}])}, [crest_utils:ssl_options()], []),
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [mochijson2:decode(Body)|AccIn];

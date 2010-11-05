@@ -39,7 +39,7 @@ invocation(Max, Body) ->
 main() ->
     inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [], []),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [crest_utils:ssl_options()], []),
     case Res of
         {ok, {_, _, Body}} ->
             invocation(1000, Body);

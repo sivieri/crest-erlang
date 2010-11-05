@@ -48,7 +48,7 @@ init([]) ->
                     {keyfile, crest_deps:local_path(["ca", "private", "crest.key"])},
                     {verify, verify_peer},
                     {cacertfile, crest_deps:local_path(["ca", "cacert.pem"])},
-                    {fail_if_no_peer_cert, false},
+                    {fail_if_no_peer_cert, true},
                     {verify_fun, fun(_) -> false end}
                  ]}],
     WebSSL = {crest_web_ssl,
