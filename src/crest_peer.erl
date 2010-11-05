@@ -3,6 +3,9 @@
 %% It offers all the standard server start, stop and response
 %% methods, plus the two specific CREST operations: spawn (split
 %% into the installation and the execution parts) and remote.
+%% All gen_server:call() operations are relegated to subprocesses,
+%% so that the main server process is never blocked waiting for
+%% an answer, and this allows this peer to call itself.
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_peer).
