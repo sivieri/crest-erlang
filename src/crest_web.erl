@@ -40,6 +40,10 @@ loop(Req, DocRoot) ->
                     end;
                 ["manager"] ->
                     Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_data())]});
+				["crest", "spawn"] ->
+					Req:respond({404, [], []});
+				["crest", "remote"] ->
+					Req:respond({404, [], []});
                 ["crest"|T] ->
                     Answer = crest_router:route(Method, T, Req:parse_qs(), ContentType),
                     Req:respond(Answer);

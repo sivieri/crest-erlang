@@ -28,7 +28,7 @@ loop(Req, _DocRoot) ->
     "/" ++ Path = Req:get(path),
     ContentType = Req:get_header_value("content-type"),
     log4erl:info("Request (SSL): ~p~n", [Path]),
-    case Req:get(method) of
+	case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
                 _ ->
@@ -36,10 +36,10 @@ loop(Req, _DocRoot) ->
             end;
         'POST' ->
             case string:tokens(Path, "/") of
-                ["crest"|"spawn"] ->
+                ["crest", "spawn"] ->
                     Answer = crest_router:route('POST', ["spawn"], Req:parse_post(), ContentType),
                     Req:respond(Answer);
-				["crest"|"remote"] ->
+				["crest", "remote"] ->
                     Answer = crest_router:route('POST', ["remote"], Req:parse_post(), ContentType),
                     Req:respond(Answer);
                 _ ->

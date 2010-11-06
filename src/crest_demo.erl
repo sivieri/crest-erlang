@@ -28,6 +28,8 @@ spawn_demo_1() ->
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
         {error, _Reason} ->
             {error}
     end.
@@ -39,6 +41,8 @@ spawn_demo_2() ->
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
         {error, _Reason} ->
             {error}
     end.
@@ -50,6 +54,8 @@ spawn_demo_3() ->
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
         {error, _Reason} ->
             {error}
     end.
@@ -76,6 +82,8 @@ get_word_frequency() ->
             case Res of
                 {ok, {{_,200,_}, _, Body}} ->
                     [mochijson2:decode(Body)|AccIn];
+				{ok, {{_,N,Msg}, _, _}} ->
+					[crest_utils:format("~p: ~p", [N, Msg])|AccIn];
                 {error, Reason} ->
                     [Reason|AccIn]
             end
@@ -142,6 +150,8 @@ get_inverse_document_frequency() ->
         	{ok, {{_,200,_}, _, Body2}} ->
             	Obj = mochijson2:decode(Body2),
 				IDF(Obj, N);
+			{ok, {{_,N,Msg}, _, _}} ->
+				crest_utils:format("~p: ~p", [N, Msg]);
         	{error, Reason2} ->
             	Reason2
     		end
@@ -167,6 +177,8 @@ get_inverse_document_frequency() ->
     			case Res of
         			{ok, {{_,200,_}, _, Body}} ->
             			Pid ! InvokeService(Body, Addresses, Limit, DocumentNumber);
+					{ok, {{_,N,Msg}, _, _}} ->
+						Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}};
         			{error, Reason} ->
             			Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}}
     			end,
@@ -208,6 +220,8 @@ get_cosine_similarity() ->
         	{ok, {{_,200,_}, _, Body2}} ->
             	Obj = mochijson2:decode(Body2),
 				Cosine(Obj, N);
+			{ok, {{_,N,Msg}, _, _}} ->
+				crest_utils:format("~p: ~p", [N, Msg]);
         	{error, Reason2} ->
             	Reason2
     		end
@@ -233,6 +247,8 @@ get_cosine_similarity() ->
     			case Res of
         			{ok, {{_,200,_}, _, Body}} ->
             			Pid ! InvokeService(Body, Addresses, Limit, DocumentNumber);
+					{ok, {{_,N,Msg}, _, _}} ->
+						Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}};
         			{error, Reason} ->
             			Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}}
     			end,
