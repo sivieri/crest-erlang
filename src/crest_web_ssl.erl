@@ -24,26 +24,26 @@ stop() ->
 
 %% @doc Main server loop, serving requests.
 %% @spec loop(request(), string()) -> any()
-loop(Req, DocRoot) ->
+loop(Req, _DocRoot) ->
     "/" ++ Path = Req:get(path),
     ContentType = Req:get_header_value("content-type"),
     log4erl:info("Request (SSL): ~p~n", [Path]),
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
-                ["crest"|T] ->
-                    Answer = crest_router:route(Method, T, Req:parse_qs(), ContentType),
-                    Req:respond(Answer);
                 _ ->
-                    Req:serve_file(Path, DocRoot)
+                    Req:respond({404, [], []})
             end;
         'POST' ->
             case string:tokens(Path, "/") of
-                ["crest"|T] ->
-                    Answer = crest_router:route('POST', T, Req:parse_post(), ContentType),
+                ["crest"|"spawn"] ->
+                    Answer = crest_router:route('POST', ["spawn"], Req:parse_post(), ContentType),
+                    Req:respond(Answer);
+				["crest"|"remote"] ->
+                    Answer = crest_router:route('POST', ["remote"], Req:parse_post(), ContentType),
                     Req:respond(Answer);
                 _ ->
-                    Req:serve_file(Path, DocRoot)
+                    Req:respond({404, [], []})
             end;
         _ ->
             Req:respond({501, [], []})

@@ -46,10 +46,10 @@ rpc(Pid, Message) ->
 pmap(F, L) -> 
     S = self(),
     Ref = erlang:make_ref(), 
-    Pids = lists:map(fun(I) -> 
+    lists:foreach(fun(I) -> 
                spawn(fun() -> do_f(S, Ref, F, I) end)
            end, L),
-    gather(Pids, Ref).
+    gather(length(L), Ref,  []).
 
 %% @doc Combine a set of parameters to an urlencoded list, to be transmitted over
 %% HTTP.
@@ -78,11 +78,12 @@ get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filen
 %% Internal API
 
 do_f(Parent, Ref, F, I) ->                      
-    Parent ! {self(), Ref, (catch F(I))}.
+    Parent ! {Ref, (catch F(I))}.
 
-gather([Pid|T], Ref) ->
+gather(0, _, L) ->
+	L;
+gather(N, Ref, L) ->
     receive
-    {Pid, Ref, Ret} -> [Ret|gather(T, Ref)]
-    end;
-gather([], _) ->
-    [].
+    	{Ref, Ret} ->
+			gather(N-1, Ref, [Ret|L])
+    end.
