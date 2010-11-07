@@ -20,7 +20,7 @@ $(document).ready(function()
     	});
 	});
 	$("#form2").submit(function(){
-		$("#results").append('<p><img src="ajax-loader.gif" alt="Loading..." class="centered" /></p>');
+		$("#results").append('<p><img src="images/ajax-loader.gif" alt="Loading..." class="centered" /></p>');
 		$.ajax({
 			url:$("#form2div form").attr("action"),
 			type:"POST",
