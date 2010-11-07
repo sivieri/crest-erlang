@@ -11,7 +11,7 @@ function createTable()
 	$.ajax({
 		url:"manager",
 		type:"GET",
-		timeout:6000,
+		timeout:10000,
 		success: function(data) {
 			$("#processestable").dataTable({
 				aaData:data.aaData,
