@@ -32,7 +32,7 @@ loop(Req, DocRoot) ->
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
                 ["demo"] ->
-                    case crest_demo:spawn_demo(Req:parse_qs()) of
+                    case thesis_demo:spawn_demo(Req:parse_qs()) of
                         {ok, Message} ->
                             Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
                         {error} ->
