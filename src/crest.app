@@ -1,6 +1,6 @@
 {application, crest,
  [{description, "crest"},
-  {vsn, "0.6"},
+  {vsn, "0.6.1"},
   {modules, [
     crest,
     crest_app,
