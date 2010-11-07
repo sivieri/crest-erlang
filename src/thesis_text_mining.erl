@@ -104,7 +104,8 @@ idf(DictList) ->
 															   false ->
 																   AccIn
 														   end
-														   end, 0, DictList),
+												   		   % Plus 1 correction, for avoiding divisions by zero
+														   end, 1, DictList),
 								 {Word, Val}
 								 end, Wordlist)),
 	dict:from_list(lists:map(fun(Word) ->
