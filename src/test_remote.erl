@@ -2,7 +2,7 @@
 %% @doc Remote test code
 %% @copyright 2010 Alessandro Sivieri
 
--module(remote_test).
+-module(test_remote).
 -export([main/0]).
 
 get_function() ->

@@ -2,14 +2,14 @@
 %% @doc Spawn test code
 %% @copyright 2010 Alessandro Sivieri
 
--module(spawn_test_3).
+-module(test_spawn_single).
 -export([main/0]).
 
 get_function() ->
     F = fun(F) ->
         receive
             {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Spawn test 3"},
+                Pid ! {self(), "Spawn test 1"},
                 F(F);
 			{Pid, {"param", "operation"}} ->
                 Pid ! {self(), "GET"},
@@ -18,7 +18,7 @@ get_function() ->
                 Pid ! {self(), []},
                 F(F);
             {Pid, _} ->
-                Pid ! {self(), {"text/plain", "Function 3 called"}},
+                Pid ! {self(), {"text/plain", "Function 1 called"}},
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
