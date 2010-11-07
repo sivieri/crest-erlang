@@ -91,7 +91,7 @@ tf(DictList) ->
 
 idf(DictList) ->
 	N = length(DictList),
-	Wordlist = lists:foldl(fun(Dict, AccIn) ->
+	Wordlist = lists:foldl(fun({_Address, Dict}, AccIn) ->
 								   Keys = dict:fetch_keys(Dict),
 								   OrderedKeys = lists:sort(Keys),
 								   lists:umerge(OrderedKeys, AccIn)
