@@ -15,6 +15,7 @@ body {
 #form2div {
 	float: left;
 	width: auto;
+	margin-left: 30px;
 	display: none;
 }
 

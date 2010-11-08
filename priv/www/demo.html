@@ -31,6 +31,7 @@
 	<p>Select demo details:
 	   <form id="form2" action="" onsubmit="return false;" method="POST" enctype="application/x-www-form-urlencoded">
 	       <label for="addresses">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name="addresses" rows="5" cols="60"></textarea><br/>
+		   <label for="filename">Document filename: </label><input type="text" size="50" name="filename" value="/home/alex/demo.txt" maxlength="255" />
 		   <div id="limitfield"><label for="limit">Lower limit for word frequency: </label><input id="limit" type="text" size="5" maxlength="5" name="limit" value="10" onKeyPress="return numbersonly(this, event)" /><br/></div>
            <input type="submit" name="Submit" value="Launch" />
 	   </form>
