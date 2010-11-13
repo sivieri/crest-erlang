@@ -1,0 +1,9 @@
+%% This is generated from src/crest.app.src
+{application, crest,
+ [{description, "Computational REST framework"},
+  {vsn, "0.7"},
+  {modules, []},
+  {registered, []},
+  {mod, {crest_app, []}},
+  {env, []},
+  {applications, [kernel, stdlib, crypto]}]}.
