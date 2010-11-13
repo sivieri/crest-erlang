@@ -2,7 +2,13 @@
 $(document).ready(function()
 {
 	$("input[name='demo']").change(function(){
-		$("#form2div form input[name='Submit']").attr("disabled", "true");
+		if($("input[name='demo']:checked").val() == "wordstatus") {
+			$("#submit").attr("name", "Add new addresses");
+		}
+		else {
+			$("#submit").attr("name", "Submit");
+		}
+		$("#submit").attr("disabled", "true");
         $("#form2div").show("slow");
 	    $.ajax({
     		url:"demo",
@@ -12,7 +18,7 @@ $(document).ready(function()
     		timeout:10000,
     		success: function(data) {
     			$("#form2div form").attr("action", "crest/" + data);
-    			$("#form2div form input[name='Submit']").removeAttr("disabled");
+    			$("#submit").removeAttr("disabled");
     		},
     		error: function(data, error) {
     			alert("Error: " + error);

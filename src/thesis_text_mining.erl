@@ -8,7 +8,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(thesis_text_mining).
--export([cosine_documents/1, get_word_counts/1, print_dict/1, tf_idf/1]).
+-export([cosine_documents/1, get_word_counts/1, get_word_counts/2, print_dict/1, tf_idf/1]).
 
 %% External API
 
@@ -19,6 +19,16 @@ get_word_counts(Filename) ->
         {ok, IoDevice} ->
             Dict = process_each_line(IoDevice, dict:new()),
             Dict
+    end.
+
+%% @doc Get the word count as a dictionary from the specified file,
+%% using the specified dictionary to add words to.
+%% @spec get_word_counts(string(), dictionary()) -> dictionary()
+get_word_counts(Filename, Dict) ->
+    case file:open(Filename, read) of
+        {ok, IoDevice} ->
+            NewDict = process_each_line(IoDevice, Dict),
+            NewDict
     end.
 
 %% @doc Print the dictionary.

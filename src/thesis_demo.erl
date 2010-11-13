@@ -10,17 +10,19 @@
 
 %% @doc Spawn the correct demo based on the parameter.
 spawn_demo([{"type", "word"}]) ->
-	spawn_demo_1();
+	spawn_demo_word();
 spawn_demo([{"type", "tfidf"}]) ->
-	spawn_demo_2();
+	spawn_demo_tfidf();
 spawn_demo([{"type", "cosine"}]) ->
-	spawn_demo_3();
+	spawn_demo_cosine();
+spawn_demo([{"type", "wordstatus"}]) ->
+    spawn_demo_wordstatus();
 spawn_demo(_) ->
 	{error}.
 
 %% Internal API
 
-spawn_demo_1() ->
+spawn_demo_word() ->
     inets:start(),
 	ssl:start(),
     Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [crest_utils:ssl_options()], []),
@@ -33,7 +35,7 @@ spawn_demo_1() ->
             {error}
     end.
 
-spawn_demo_2() ->
+spawn_demo_tfidf() ->
     inets:start(),
 	ssl:start(),
     Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [crest_utils:ssl_options()], []),
@@ -46,7 +48,7 @@ spawn_demo_2() ->
             {error}
     end.
 
-spawn_demo_3() ->
+spawn_demo_cosine() ->
     inets:start(),
 	ssl:start(),
     Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [crest_utils:ssl_options()], []),
@@ -55,6 +57,19 @@ spawn_demo_3() ->
             {ok, Body};
 		{ok, {{_,_,_}, _, _}} ->
 			{error};
+        {error, _Reason} ->
+            {error}
+    end.
+
+spawn_demo_wordstatus() ->
+    inets:start(),
+    ssl:start(),
+    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_status_frequency())}, [crest_utils:ssl_options()], []),
+    case Res of
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
+        {ok, {{_,_,_}, _, _}} ->
+            {error};
         {error, _Reason} ->
             {error}
     end.
@@ -255,4 +270,80 @@ get_cosine_similarity() ->
     end,
     fun() ->
         F(F)
+    end.
+
+get_word_status_frequency() ->
+        WordStatus = fun(Obj, N, OldDict) ->
+        % Recovering lists from JSON
+        DictList = lists:map(fun(I) ->
+                                     Address = binary_to_list(crest_json:destructure(crest_utils:format("Obj[~p].ip", [I]), Obj)),
+                                     M = crest_json:destructure(crest_utils:format("Obj[~p].total", [I]), Obj),
+                                     Res = lists:map(fun(J) ->
+                                                       Word = binary_to_list(crest_json:destructure(crest_utils:format("Obj[~p].words[~p].word", [I, J]), Obj)),
+                                                       Frequency = crest_json:destructure(crest_utils:format("Obj[~p].words[~p].frequency", [I, J]), Obj),
+                                                       {Word, Frequency}
+                                                       end, lists:seq(0, M-1)),
+                                     {Address, dict:from_list(Res)}
+                                     end, lists:seq(0, N-1)),
+        % Elaborate new status: DictList contains only one element
+        {_, NewDict} = hd(DictList),
+        dict:merge(fun(_Word, Value1, Value2) -> Value1 + Value2 end, OldDict, NewDict)
+        end,
+    InvokeService = fun(Key, Addresses, Filename, Limit, N, Status) ->
+        AddressList = string:tokens(Addresses, "\r\n"),
+        FinalDict = lists:foldl(fun(Address, AccIn) ->
+                              Res2 = httpc:request(post, {"http://localhost:8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"addresses", Address}, {"filename", Filename}, {"limit", Limit}])}, [], []),
+                              case Res2 of
+                                  {ok, {{_,200,_}, _, Body2}} ->
+                                      Obj = mochijson2:decode(Body2),
+                                      WordStatus(Obj, N, AccIn);
+                                  {ok, {{_,_,_}, _, _}} ->
+                                      AccIn;
+                                  {error, _} ->
+                                      AccIn
+                              end
+                              end, Status, AddressList),
+        StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, dict:to_list(FinalDict)),
+        Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary("Merged values")},
+                           {erlang:iolist_to_binary("total"), length(StructList)},
+                           {erlang:iolist_to_binary("words"), StructList}]},
+        {{self(), {"application/json", mochijson2:encode(Result)}}, FinalDict}
+        end,
+    F = fun(F, Status) ->
+        inets:start(),
+        ssl:start(),
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Word frequency demo, with status"},
+                F(F, Status);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                F(F, Status);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
+                F(F, Status);
+            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                DocumentNumber = length(AddressList),
+                % Execution of the word frequency part
+                Res = httpc:request("http://localhost:8080/demo?type=word"),
+                case Res of
+                    {ok, {{_,200,_}, _, Body}} ->
+                        {ResMsg, NewStatus} = InvokeService(Body, Addresses, Filename, Limit, DocumentNumber, Status),
+                        Pid ! ResMsg,
+                        F(F, NewStatus);
+                    {ok, {{_,N,Msg}, _, _}} ->
+                        Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}},
+                        F(F, Status);
+                    {error, Reason} ->
+                        Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}},
+                        F(F, Status)
+                end;
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
+                F(F, Status)
+        end
+    end,
+    fun() ->
+        F(F, dict:new())
     end.
