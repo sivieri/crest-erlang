@@ -6,9 +6,6 @@
 -module(error_logger_log4erl_h).
 -behaviour(gen_event).
 
-%% @author Jakub Odias
-%% @copyright Proximetry
-%% @version 1.0.0
 %% @doc Handles events reported by error_logger and forwards it to log4erl
 %% @end
 
