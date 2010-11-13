@@ -1,6 +1,6 @@
 {application, crest,
  [{description, "crest"},
-  {vsn, "0.6.2"},
+  {vsn, "0.7"},
   {modules, [
     crest,
     crest_app,
@@ -14,7 +14,8 @@
     crest_utils,
     crest_web,
     crest_web_ssl,
-    destructure_json
+    destructure_json,
+    uuid
   ]},
   {registered, []},
   {mod, {crest_app, []}},
