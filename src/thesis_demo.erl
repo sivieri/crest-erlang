@@ -312,7 +312,7 @@ get_word_status_frequency() ->
         Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary("Merged values")},
                            {erlang:iolist_to_binary("total"), length(StructList)},
                            {erlang:iolist_to_binary("words"), StructList}]},
-        {{self(), {"application/json", mochijson2:encode(Result)}}, FinalDict}
+        {{self(), {"application/json", mochijson2:encode([Result])}}, FinalDict}
         end,
     F = fun(F, Status) ->
         inets:start(),

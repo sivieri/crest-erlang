@@ -23,7 +23,7 @@
 		<form id="form1">
 			<input id="radio1" type="radio" name="demo" value="word"/><label for="radio1">Word frequency</label><br/>
 			<input id="radio2" type="radio" name="demo" value="tfidf"/><label for="radio2">Term frequency - inverse document frequency</label><br/>
-			<input id="radio3" type="radio" name="demo" value="cosine"/><label for="radio3">Cosine similarity</label>
+			<input id="radio3" type="radio" name="demo" value="cosine"/><label for="radio3">Cosine similarity</label><br/>
 			<input id="radio4" type="radio" name="demo" value="wordstatus"/><label for="radio3">Word frequency, with status</label>
 		</form>
 	</p>
@@ -34,7 +34,7 @@
 	       <label for="addresses">IP addresses of the local network computers (separated by newlines): </label><br/><textarea name="addresses" rows="5" cols="60"></textarea><br/>
 		   <label for="filename">Document filename: </label><input type="text" size="50" name="filename" value="/home/alex/demo.txt" maxlength="255" />
 		   <div id="limitfield"><label for="limit">Lower limit for word frequency: </label><input id="limit" type="text" size="5" maxlength="5" name="limit" value="10" onKeyPress="return numbersonly(this, event)" /><br/></div>
-           <input id="submit" type="submit" name="Submit" value="Launch" />
+           <input type="submit" name="Submit" value="Launch" />
 	   </form>
 	</p>
 </div>

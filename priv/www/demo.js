@@ -3,10 +3,10 @@ $(document).ready(function()
 {
 	$("input[name='demo']").change(function(){
 		if($("input[name='demo']:checked").val() == "wordstatus") {
-			$("#submit").attr("name", "Add new addresses");
+			$("#form2div form input[name='Submit']").attr("value", "Add new addresses");
 		}
 		else {
-			$("#submit").attr("name", "Submit");
+			$("#form2div form input[name='Submit']").attr("value", "Launch");
 		}
 		$("#submit").attr("disabled", "true");
         $("#form2div").show("slow");
@@ -18,7 +18,7 @@ $(document).ready(function()
     		timeout:10000,
     		success: function(data) {
     			$("#form2div form").attr("action", "crest/" + data);
-    			$("#submit").removeAttr("disabled");
+    			$("#form2div form input[name='Submit']").removeAttr("disabled");
     		},
     		error: function(data, error) {
     			alert("Error: " + error);
