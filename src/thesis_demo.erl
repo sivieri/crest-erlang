@@ -291,7 +291,11 @@ get_word_status_frequency() ->
         end,
     InvokeService = fun(Key, Addresses, Filename, Limit, N, Status) ->
         AddressList = string:tokens(Addresses, "\r\n"),
-        FinalDict = lists:foldl(fun(Address, AccIn) ->
+        case N of
+            0 ->
+                FinalDict = Status;
+            _ ->
+                FinalDict = lists:foldl(fun(Address, AccIn) ->
                               Res2 = httpc:request(post, {"http://localhost:8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"addresses", Address}, {"filename", Filename}, {"limit", Limit}])}, [], []),
                               case Res2 of
                                   {ok, {{_,200,_}, _, Body2}} ->
@@ -302,7 +306,8 @@ get_word_status_frequency() ->
                                   {error, _} ->
                                       AccIn
                               end
-                              end, Status, AddressList),
+                              end, Status, AddressList)
+        end,
         StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, dict:to_list(FinalDict)),
         Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary("Merged values")},
                            {erlang:iolist_to_binary("total"), length(StructList)},
