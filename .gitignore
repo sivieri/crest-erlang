@@ -2,7 +2,7 @@
 ebin/*.beam
 ebin/*.app
 doc/*.html
-logs
+logs/*.txt
 erl_crash.dump
 .project
 .settings
