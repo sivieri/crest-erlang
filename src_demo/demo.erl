@@ -3,16 +3,16 @@
 %% This file is part of CREST-Erlang.
 %% 
 %% CREST-Erlang is free software: you can redistribute it and/or modify
-%% it under the terms of the GNU Lesser General Public License as published by
+%% it under the terms of the GNU General Public License as published by
 %% the Free Software Foundation, either version 3 of the License, or
 %% (at your option) any later version.
 %% 
 %% CREST-Erlang is distributed in the hope that it will be useful,
 %% but WITHOUT ANY WARRANTY; without even the implied warranty of
 %% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-%% GNU Lesser General Public License for more details.
+%% GNU General Public License for more details.
 %% 
-%% You should have received a copy of the GNU Lesser General Public License
+%% You should have received a copy of the GNU General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
@@ -20,7 +20,7 @@
 %% CREST peer through HTTP.
 %% @copyright 2010 Alessandro Sivieri
 
--module(thesis_demo).
+-module(demo).
 -export([spawn_demo/1]).
 
 %% External API
@@ -96,7 +96,7 @@ get_word_frequency() ->
             receive
                 {Pid, [{"filename", Filename}, {"limit", Num}, {"address", Address}]} ->
                     {Limit, _} = string:to_integer(Num),
-                    Dict = thesis_text_mining:get_word_counts(Filename),
+                    Dict = demo_text_mining:get_word_counts(Filename),
                     Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; true -> false end end, Dict),
                     OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
                     StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, OrderedList),
@@ -161,7 +161,7 @@ get_inverse_document_frequency() ->
 									 {Address, dict:from_list(Res)}
 									 end, lists:seq(0, N-1)),
 		% TF-IDF
-        ValueDict = thesis_text_mining:tf_idf(DictList),
+        ValueDict = demo_text_mining:tf_idf(DictList),
 		Result = lists:map(fun({Address, Dict}) ->
 								   Values = dict:fold(fun(Word, TfIdf, AccIn) ->
 															  [{struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), TfIdf}]}|AccIn]
@@ -233,7 +233,7 @@ get_cosine_similarity() ->
 									 {Address, dict:from_list(Res)}
 									 end, lists:seq(0, N-1)),
 		% Cosine
-        Cosines = thesis_text_mining:cosine_documents(DictList),
+        Cosines = demo_text_mining:cosine_documents(DictList),
         Result = lists:map(fun({Address1, Address2, Value}) ->
                                    {struct, [{erlang:iolist_to_binary("ip1"), erlang:iolist_to_binary(Address1)},
                                              {erlang:iolist_to_binary("ip2"), erlang:iolist_to_binary(Address2)},

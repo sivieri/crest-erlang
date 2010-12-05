@@ -3,16 +3,16 @@
 %% This file is part of CREST-Erlang.
 %% 
 %% CREST-Erlang is free software: you can redistribute it and/or modify
-%% it under the terms of the GNU Lesser General Public License as published by
+%% it under the terms of the GNU General Public License as published by
 %% the Free Software Foundation, either version 3 of the License, or
 %% (at your option) any later version.
 %% 
 %% CREST-Erlang is distributed in the hope that it will be useful,
 %% but WITHOUT ANY WARRANTY; without even the implied warranty of
 %% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-%% GNU Lesser General Public License for more details.
+%% GNU General Public License for more details.
 %% 
-%% You should have received a copy of the GNU Lesser General Public License
+%% You should have received a copy of the GNU General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
 %% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
@@ -24,7 +24,7 @@
 %% @reference Tf-Idf: http://en.wikipedia.org/wiki/Tf%E2%80%93idf
 %% @copyright 2010 Alessandro Sivieri
 
--module(thesis_text_mining).
+-module(demo_text_mining).
 -export([cosine_documents/1, get_word_counts/1, get_word_counts/2, print_dict/1, tf_idf/1]).
 
 %% External API

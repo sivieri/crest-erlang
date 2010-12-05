@@ -7,7 +7,22 @@ about the style at http://www.erenkrantz.com/CREST/ and about the
 Master Thesis work that generated this application at
 http://www.chimera-bellerofonte.eu/pubblicazioni/ (in Italian).
 
-2. Certificates and Certification Authority
+2. Installation
+First, you need to download the dependency libraries with
+
+./rebar get-deps
+
+(you will need git and svn and Internet access); then you can
+compile everything with
+
+./rebar compile
+
+and launch the server using one of the three start* scripts:
+start.sh will launch the server without console output, start-dev.sh
+will output some logs directly to the console, and start-detached.sh
+will launch the server and detach it from the current shell.
+
+3. Certificates and Certification Authority
 This framework requires SSL mutual authentication between peers; for
 obtaining this, I have included an example certification authority with
 a client and server certificate; beware that they have not been
@@ -18,13 +33,17 @@ application.
 The CA password is "crest", the server and client certificates passwords
 are "peer".
 
-3. Authors
+4. Authors
 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
 
-4. License
+5. License
 This framework is licensed under the "GNU Lesser General Public License";
 you can find this license in the files "COPYING" and "COPYING.LESSER" under
 the project directory, or at http://www.gnu.org/licenses/lgpl.html.
+
+The demo code is licensed under the "GNU General Public License"; you can
+find this license in the file "COPYING" under the project directory, or
+at http://www.gnu.org/licenses/gpl.html.
 
 The UUID generator source file is Copyright (C) 2008 Andrew Kreiling
 <akreiling@pobox.com> and licensed under the "MIT license"; you can
