@@ -49,3 +49,9 @@ The UUID generator source file is Copyright (C) 2008 Andrew Kreiling
 <akreiling@pobox.com> and licensed under the "MIT license"; you can
 find this license in the file "MIT-LICENSE" or at
 http://opensource.org/licenses/mit-license.php.
+
+The jQuery library is licensed under the "MIT License", more details at
+http://jquery.org/license; jQuery DataTables is licensed under the "BSD
+License", more details at http://www.datatables.net/; jqPlot is
+licensed under the "MIT License", more details at
+http://www.jqplot.com/docs/files/MIT-LICENSE-txt.html.
