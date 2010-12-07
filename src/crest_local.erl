@@ -25,24 +25,40 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
+
+%% @doc Start this peer
+%% @spec start() -> ok
 start() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
+%% @doc Stop this peer
+%% @spec stop() -> ok
 stop() ->
     gen_server:call(?MODULE, stop).
 
+%% @doc Get a list of local computations available to installation.
+%% @spec list_local() -> [{string(), [{string(), string()}]}]
 list_local() ->
 	gen_server:call(?MODULE, list).
 
+%% @doc Add a new local computation.
+%% @spec add_local(string(), string(), string()) -> ok
 add_local(Name, Module, Function) ->
 	gen_server:cast(?MODULE, {add, Name, Module, Function}).
 
+%% @doc Remove a computation from  the local ones; it replaces the current one.
+%% @spec remove_local(string()) -> ok
 remove_local(Name) ->
 	gen_server:cast(?MODULE, {remove, Name}).
 
+%% @doc Install a computation locally, if present in the list.
+%% @spec start_local(string()) -> {ok, Key} | error
 start_local(Name) ->
 	gen_server:call(?MODULE, {start, Name}).
 
+%% @doc Reload the configuration file; do not replace any function already
+%% in the list.
+%% @spec reload() -> ok
 reload() ->
 	gen_server:cast(?MODULE, reload).
 
@@ -60,7 +76,7 @@ handle_call(_Request, _From, Locals) ->
 
 handle_cast({add, Name, Module, Function}, Locals) ->
 	log4erl:info("Registering a new local computation: ~p~n", [Name]),
-	NewLocals = dict:append(Name, {Module, Function}, Locals),
+	NewLocals = dict:store(Name, {Module, Function}, Locals),
 	{noreply, NewLocals};
 handle_cast({remove, Name}, Locals) ->
 	log4erl:info("De-registering a local computation: ~p~n", [Name]),
@@ -81,6 +97,7 @@ terminate(_Reason, _Locals) ->
     ok.
 
 %% Internal API
+
 do_reload() ->
 	do_reload(dict:new()).
 do_reload(Locals) ->
@@ -88,7 +105,7 @@ do_reload(Locals) ->
 	case file:consult(Filename) of
 		{ok, NewLocalsList} ->
 			NewLocals = lists:foldl(fun({Name, Module, Function}, AccIn) ->
-											dict:append(Name, {Module, Function}, AccIn)
+											dict:store(Name, {Module, Function}, AccIn)
 											end, dict:new(), NewLocalsList),
 			dict:merge(fun(_Key, Value1, _Value2) -> Value1 end, Locals, NewLocals);
 		{error, Reason} ->
@@ -98,8 +115,8 @@ do_reload(Locals) ->
 
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
-		{ok, [{Module, Function}]} ->
-			erlang:apply(list_to_atom(Module), list_to_atom(Function), []);
+		{ok, {Module, Function}} ->
+			crest_utils:invoke_spawn("localhost", Module, Function);
 		error ->
 			{error}
 	end.

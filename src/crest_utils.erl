@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/2, get_lambda_params/3, get_lambda/1]).
+-export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/3]).
 
 %% External API
 
@@ -68,17 +68,6 @@ pmap(F, L) ->
            end, L),
     gather(length(L), Ref,  []).
 
-%% @doc Combine a set of parameters to an urlencoded list, to be transmitted over
-%% HTTP.
-%% @spec get_lambda_params(atom(), fun()) -> string()
-get_lambda_params(ModuleName, Fun) ->
-    get_lambda_params(ModuleName, Fun, []).
-%% @spec get_lambda_params(atom(), fun(), [any()]) -> string()
-get_lambda_params(ModuleName, Fun, OtherList) ->
-    {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
-    FunBinary = term_to_binary(Fun),
-    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
-
 %% @doc Take a list of parameters from an HTTP request and recreate the binary fun that
 %% is encoded there.
 %% Attention: because of code load, if the same module is sent to the server
@@ -92,6 +81,53 @@ get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filen
     code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
     binary_to_term(list_to_binary(FunBinary)).
 
+%% @doc Spawn a function on a certain host; the function module needs to be
+%% in the Erlang path.
+%% @spec invoke_spawn(string(), atom(), atom()) -> {ok, Key} | {error}
+invoke_spawn(Host, Module, Function) ->
+	inets:start(),
+	ssl:start(),
+    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Function())}, [crest_utils:ssl_options()], []),
+    case Res of
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
+        {error, _Reason} ->
+            {error}
+    end.
+
+%% @doc Spawn a function on a certain host and invoke it with parameters;
+%% the function module needs to be in the Erlang path.
+%% @spec invoke_remote(string(), atom(), atom(), [string(), string()]) -> {ok, Body} | {error}
+invoke_remote(Host, Module, Function, Params) ->
+	inets:start(),
+	ssl:start(),
+    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Function, Params)}, [crest_utils:ssl_options()], []),
+    case Res of
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
+        {error, _Reason} ->
+            {error}
+    end.
+
+%% @doc Invoke an already installed computation with parameters.
+%% @spec invoke_lambda(string(), string(), [string(), string()]) -> {ok, Body} | {error}
+invoke_lambda(Host, Key, Params) ->
+	inets:start(),
+	ssl:start(),
+    Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []),
+    case Res of
+        {ok, {{_,200,_}, _, Body}} ->
+            {ok, Body};
+		{ok, {{_,_,_}, _, _}} ->
+			{error};
+        {error, _Reason} ->
+            {error}
+    end.
+
 %% Internal API
 
 do_f(Parent, Ref, F, I) ->                      
@@ -104,3 +140,10 @@ gather(N, Ref, L) ->
     	{Ref, Ret} ->
 			gather(N-1, Ref, [Ret|L])
     end.
+
+get_lambda_params(ModuleName, Fun) ->
+    get_lambda_params(ModuleName, Fun, []).
+get_lambda_params(ModuleName, Fun, OtherList) ->
+    {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
+    FunBinary = term_to_binary(Fun),
+    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
