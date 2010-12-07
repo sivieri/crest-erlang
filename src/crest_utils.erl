@@ -99,7 +99,7 @@ invoke_spawn(Host, Module, Function) ->
 
 %% @doc Spawn a function on a certain host and invoke it with parameters;
 %% the function module needs to be in the Erlang path.
-%% @spec invoke_remote(string(), atom(), atom(), [string(), string()]) -> {ok, Body} | {error}
+%% @spec invoke_remote(string(), atom(), atom(), [{string(), string()}]) -> {ok, Body} | {error}
 invoke_remote(Host, Module, Function, Params) ->
 	inets:start(),
 	ssl:start(),
@@ -115,7 +115,7 @@ invoke_remote(Host, Module, Function, Params) ->
     end.
 
 %% @doc Invoke an already installed computation with parameters.
-%% @spec invoke_lambda(string(), string(), [string(), string()]) -> {ok, Body} | {error}
+%% @spec invoke_lambda(string(), string(), [{string(), string()}]) -> {ok, Body} | {error}
 invoke_lambda(Host, Key, Params) ->
 	inets:start(),
 	ssl:start(),
