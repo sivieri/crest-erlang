@@ -32,10 +32,6 @@ route(Method, Params, ReqParams, ContentType) ->
     case Method of
         'GET' ->
             case Params of
-                ["spawn"] ->
-                    {405, [], []};
-                ["remote"] ->
-                    {405, [], []};
                 T ->
                     case crest_peer:spawn_exec(T, ReqParams) of
                         {ok, {CT, Message}} ->
@@ -64,9 +60,7 @@ route(Method, Params, ReqParams, ContentType) ->
                         {error} ->
                             {404, [], []}
                     end
-            end;
-        _ ->
-            {405, [], []}
+            end
     end.
 
 %% Internal API
