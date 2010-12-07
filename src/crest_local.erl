@@ -98,7 +98,7 @@ do_reload(Locals) ->
 
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
-		{ok, {Module, Function}} ->
+		{ok, [{Module, Function}]} ->
 			erlang:apply(list_to_atom(Module), list_to_atom(Function), []);
 		error ->
 			{error}
