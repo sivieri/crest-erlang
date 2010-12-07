@@ -43,18 +43,10 @@ stop() ->
 %% @spec loop(request(), string()) -> any()
 loop(Req, DocRoot) ->
     "/" ++ Path = Req:get(path),
-    ContentType = Req:get_header_value("content-type"),
     log4erl:info("Request: ~p~n", [Path]),
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
-                ["demo"] ->
-                    case demo:spawn_demo(Req:parse_qs()) of
-                        {ok, Message} ->
-                            Req:respond({200, [{"Content-Type", "text/html"}], [Message]});
-                        {error} ->
-                            Req:respond({500, [], []})
-                    end;
                 ["crest", "manager"] ->
                     Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_data())]});
 				["crest", "spawn"] ->
@@ -70,8 +62,8 @@ loop(Req, DocRoot) ->
                     end;
 				["crest", "local", T] ->
 					case crest_local:start_local(T) of
-                        {ok, {CT, Message}} ->
-                            Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {ok, Key} ->
+                            Req:respond({200, [{"Content-Type", "text/html"}], Key});
                         {error} ->
                             Req:respond({404, [], []})
                     end;

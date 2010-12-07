@@ -21,23 +21,9 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(demo).
--export([spawn_demo/1]).
+-export([spawn_demo_word/0, spawn_demo_tfidf/0, spawn_demo_cosine/0, spawn_demo_wordstatus/0]).
 
 %% External API
-
-%% @doc Spawn the correct demo based on the parameter.
-spawn_demo([{"type", "word"}]) ->
-	spawn_demo_word();
-spawn_demo([{"type", "tfidf"}]) ->
-	spawn_demo_tfidf();
-spawn_demo([{"type", "cosine"}]) ->
-	spawn_demo_cosine();
-spawn_demo([{"type", "wordstatus"}]) ->
-    spawn_demo_wordstatus();
-spawn_demo(_) ->
-	{error}.
-
-%% Internal API
 
 spawn_demo_word() ->
     inets:start(),
@@ -90,6 +76,8 @@ spawn_demo_wordstatus() ->
         {error, _Reason} ->
             {error}
     end.
+
+%% Internal API
 
 get_word_frequency() ->
     ClientFunction = fun() ->

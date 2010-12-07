@@ -21,7 +21,7 @@
 
 -module(crest_local).
 -behaviour(gen_server).
--export([start/0, stop/0, list_local/0, add_local/3, remove_local/1, start_local/1]).
+-export([start/0, stop/0, list_local/0, add_local/3, remove_local/1, start_local/1, reload/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -43,21 +43,31 @@ remove_local(Name) ->
 start_local(Name) ->
 	gen_server:call(?MODULE, {start, Name}).
 
+reload() ->
+	gen_server:cast(?MODULE, reload).
+
 init(_Args) ->
     Locals = dict:new(),
     {ok, Locals}.
 
 handle_call(list, _From, Locals) ->
-	{reply, ok, Locals};
+	{reply, dict:to_list(Locals), Locals};
 handle_call({start, Name}, _From, Locals) ->
-	{reply, ok, Locals};
+	Result = do_start_local(Locals, Name),
+	{reply, Result, Locals};
 handle_call(_Request, _From, Locals) ->
     {noreply, Locals}.
 
 handle_cast({add, Name, Module, Function}, Locals) ->
-	{noreply, Locals};
+	log4erl:info("Registering a new local computation: ~p~n", [Name]),
+	NewLocals = dict:append(Name, {Module, Function}, Locals),
+	{noreply, NewLocals};
 handle_cast({remove, Name}, Locals) ->
-	{noreply, locals};
+	log4erl:info("De-registering a local computation: ~p~n", [Name]),
+	NewLocals = dict:erase(Name, Locals),
+	{noreply, NewLocals};
+handle_cast(reload, Locals) ->
+	{noreply, do_reload(Locals)};
 handle_cast(_Request, Locals) ->
     {noreply, Locals}.
 
@@ -71,3 +81,18 @@ terminate(_Reason, _Locals) ->
     ok.
 
 %% Internal API
+do_reload(Locals) ->
+	Filename = crest_deps:local_path(["config", "locals.config"]),
+	case file:consult(Filename) of
+		{ok, NewLocalsList} ->
+			NewLocals = lists:foldl(fun({Name, Module, Function}, AccIn) ->
+											dict:append(Name, {Module, Function}, AccIn)
+											end, dict:new(), NewLocalsList),
+			dict:merge(fun(_Key, Value1, _Value2) -> Value1 end, Locals, NewLocals);
+		{error, Reason} ->
+			log4erl:info("Unable to load locals configuration: ~p~n", [Reason]),
+			Locals
+	end.
+
+do_start_local(Locals, Name) ->
+	ok.
