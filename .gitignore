@@ -1,9 +1,8 @@
 # Ignore binaries and docs (as usual)
-ebin/*.beam
-ebin/*.app
-doc/*.html
+ebin
+doc
 logs/*.txt
 erl_crash.dump
 .project
 .settings
-deps/*
+deps
