@@ -47,7 +47,7 @@ reload() ->
 	gen_server:cast(?MODULE, reload).
 
 init(_Args) ->
-    Locals = dict:new(),
+    Locals = do_reload(),
     {ok, Locals}.
 
 handle_call(list, _From, Locals) ->
@@ -81,6 +81,8 @@ terminate(_Reason, _Locals) ->
     ok.
 
 %% Internal API
+do_reload() ->
+	do_reload(dict:new()).
 do_reload(Locals) ->
 	Filename = crest_deps:local_path(["config", "locals.config"]),
 	case file:consult(Filename) of
@@ -95,5 +97,9 @@ do_reload(Locals) ->
 	end.
 
 do_start_local(Locals, Name) ->
-	{Module, Function} = dict:fetch(Name, Locals),
-	erlang:apply(list_to_atom(Module), list_to_atom(Function), []).
+	case dict:find(Name, Locals) of
+		{ok, {Module, Function}} ->
+			erlang:apply(list_to_atom(Module), list_to_atom(Function), []);
+		error ->
+			{error}
+	end.
