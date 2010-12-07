@@ -55,15 +55,26 @@ loop(Req, DocRoot) ->
                         {error} ->
                             Req:respond({500, [], []})
                     end;
-                ["manager"] ->
+                ["crest", "manager"] ->
                     Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_data())]});
 				["crest", "spawn"] ->
 					Req:respond({404, [], []});
 				["crest", "remote"] ->
 					Req:respond({404, [], []});
-                ["crest"|T] ->
-                    Answer = crest_router:route(Method, T, Req:parse_qs(), ContentType),
-                    Req:respond(Answer);
+                ["crest", "url", T] ->
+                    case crest_peer:spawn_exec(T, Req:parse_qs()) of
+                        {ok, {CT, Message}} ->
+                            Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {error} ->
+                            Req:respond({404, [], []})
+                    end;
+				["crest", "local", T] ->
+					case crest_local:start_local(T) of
+                        {ok, {CT, Message}} ->
+                            Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {error} ->
+                            Req:respond({404, [], []})
+                    end;
                 _ ->
                     Req:serve_file(Path, DocRoot)
             end;
@@ -73,9 +84,13 @@ loop(Req, DocRoot) ->
 					Req:respond({404, [], []});
 				["crest", "remote"] ->
 					Req:respond({404, [], []});
-                ["crest"|T] ->
-                    Answer = crest_router:route('POST', T, Req:parse_post(), ContentType),
-                    Req:respond(Answer);
+                ["crest", "url", T] ->
+					case crest_peer:spawn_exec(T, Req:parse_post()) of
+                        {ok, {CT, Message}} ->
+                            Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {error} ->
+                            Req:respond({404, [], []})
+                    end;
                 _ ->
                     Req:serve_file(Path, DocRoot)
             end;

@@ -43,7 +43,6 @@ stop() ->
 %% @spec loop(request(), string()) -> any()
 loop(Req, _DocRoot) ->
     "/" ++ Path = Req:get(path),
-    ContentType = Req:get_header_value("content-type"),
     log4erl:info("Request (SSL): ~p~n", [Path]),
 	case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
@@ -54,11 +53,15 @@ loop(Req, _DocRoot) ->
         'POST' ->
             case string:tokens(Path, "/") of
                 ["crest", "spawn"] ->
-                    Answer = crest_router:route('POST', ["spawn"], Req:parse_post(), ContentType),
-                    Req:respond(Answer);
+					Key = crest_peer:spawn_install(Req:parse_post()),
+                    Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
 				["crest", "remote"] ->
-                    Answer = crest_router:route('POST', ["remote"], Req:parse_post(), ContentType),
-                    Req:respond(Answer);
+					case crest_peer:remote(Req:parse_post()) of
+                        {ok, {CT, Message}} ->
+                            {200, [{"Content-Type", CT}], [Message]};
+                        {error} ->
+                            {404, [], []}
+                    end;
                 _ ->
                     Req:respond({404, [], []})
             end;

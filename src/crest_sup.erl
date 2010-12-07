@@ -74,6 +74,9 @@ init([]) ->
     Peer = {crest_peer,
             {crest_peer, start, []},
             permanent, 5000, worker, [crest_peer]},
+	Router = {crest_local,
+			  {crest_local, start, []},
+			  permanent, 5000, worker, [crest_local]},
 
-    Processes = [Web, WebSSL, Peer],
+    Processes = [Web, WebSSL, Peer, Router],
     {ok, {{one_for_one, 10, 10}, Processes}}.
