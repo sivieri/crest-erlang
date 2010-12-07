@@ -29,10 +29,8 @@ $(document).ready(function()
 		$("#submit").attr("disabled", "true");
         $("#form2div").show("slow");
 	    $.ajax({
-    		url:"demo",
+    		url:"crest/local/" + $("input[name='demo']:checked").val(),
     		type:"GET",
-    		data:"type=" + $("input[name='demo']:checked").val(),
-    		dataType:"text",
     		timeout:10000,
     		success: function(data) {
     			$("#form2div form").attr("action", "crest/" + data);

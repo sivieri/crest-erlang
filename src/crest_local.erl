@@ -95,4 +95,5 @@ do_reload(Locals) ->
 	end.
 
 do_start_local(Locals, Name) ->
-	ok.
+	{Module, Function} = dict:fetch(Name, Locals),
+	erlang:apply(list_to_atom(Module), list_to_atom(Function), []).

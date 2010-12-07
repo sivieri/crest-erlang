@@ -27,7 +27,7 @@ $(document).ready(function(){
 function createTable()
 {
 	$.ajax({
-		url:"manager",
+		url:"crest/manager",
 		type:"GET",
 		timeout:10000,
 		success: function(data) {
