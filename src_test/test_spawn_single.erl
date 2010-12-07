@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(test_spawn_single).
--export([main/0]).
+-export([main/0, get_function/0]).
 
 get_function() ->
     F = fun(F) ->
@@ -47,17 +47,12 @@ get_function() ->
     end.
 
 main() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [crest_utils:ssl_options()], []),
+    Res = crest_utils:invoke_spawn("localhost", ?MODULE, get_function),
     case Res of
-        {ok, {_, _, Body}} ->
-            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]),
-            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]);
-        {ok, {_, Body}} ->
-            io:format("Invocazione 1: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]),
-            io:format("Invocazione 2: ~p~n", [httpc:request("http://localhost:8080/crest/" ++ Body)]);
-        {error, Reason} ->
-            io:format("Error: ~p~n", [Reason])
+        {ok, Body} ->
+            io:format("Invocazione 1: ~p~n", [crest_utils:invoke_lambda("localhost", Body, [])]),
+            io:format("Invocazione 2: ~p~n", [crest_utils:invoke_lambda("localhost", Body, [])]);
+        {error} ->
+            io:format("Error~n")
     end,
     halt(0).

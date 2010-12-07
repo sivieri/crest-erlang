@@ -68,9 +68,9 @@ init(_Args) ->
 
 handle_call(list, _From, Locals) ->
 	{reply, dict:to_list(Locals), Locals};
-handle_call({start, Name}, _From, Locals) ->
-	Result = do_start_local(Locals, Name),
-	{reply, Result, Locals};
+handle_call({start, Name}, From, Locals) ->
+	spawn(fun() -> handle_start(Name, From, Locals) end),
+	{noreply, Locals};
 handle_call(_Request, _From, Locals) ->
     {noreply, Locals}.
 
@@ -116,7 +116,11 @@ do_reload(Locals) ->
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
 		{ok, {Module, Function}} ->
-			crest_utils:invoke_spawn("localhost", Module, Function);
+			crest_utils:invoke_spawn("localhost", list_to_atom(Module), list_to_atom(Function));
 		error ->
 			{error}
 	end.
+
+handle_start(Name, From, Locals) ->
+	Result = do_start_local(Locals, Name),
+	gen_server:reply(From, Result).

@@ -21,63 +21,9 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(demo).
--export([spawn_demo_word/0, spawn_demo_tfidf/0, spawn_demo_cosine/0, spawn_demo_wordstatus/0]).
+-export([get_word_frequency/0, get_inverse_document_frequency/0, get_cosine_similarity/0, get_word_status_frequency/0]).
 
 %% External API
-
-spawn_demo_word() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_frequency())}, [crest_utils:ssl_options()], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-spawn_demo_tfidf() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_inverse_document_frequency())}, [crest_utils:ssl_options()], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-spawn_demo_cosine() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_cosine_similarity())}, [crest_utils:ssl_options()], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-spawn_demo_wordstatus() ->
-    inets:start(),
-    ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_word_status_frequency())}, [crest_utils:ssl_options()], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-        {ok, {{_,_,_}, _, _}} ->
-            {error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-%% Internal API
 
 get_word_frequency() ->
     ClientFunction = fun() ->
@@ -357,3 +303,6 @@ get_word_status_frequency() ->
     fun() ->
         F(F, dict:new())
     end.
+
+%% Internal API
+

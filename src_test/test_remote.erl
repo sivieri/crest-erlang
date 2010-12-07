@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(test_remote).
--export([main/0]).
+-export([main/0, get_function/0]).
 
 get_function() ->
     F = fun(F) ->
@@ -39,8 +39,6 @@ get_function() ->
     end.
 
 main() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function(), [{"param", 4}])}, [crest_utils:ssl_options()], []),
+    Res = crest_utils:invoke_remote("localhost", ?MODULE, get_function, [{"param", 10}]),
     io:format("Answer: ~p~n", [Res]),
     halt(0).

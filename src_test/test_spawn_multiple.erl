@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(test_spawn_multiple).
--export([main/0]).
+-export([main/0, get_function/0]).
 
 get_function() ->
     F = fun(F) ->
@@ -50,19 +50,15 @@ invocation(Max, Body) ->
 	List = lists:seq(1, Max),
 	crest_utils:pmap(fun(Index) ->
 							 io:format("Spawning ~p~n", [Index]),
-							 httpc:request("http://localhost:8080/crest/" ++ Body)
+							 crest_utils:invoke_lambda("localhost", Body, [])
 					 end, List).
 
 main() ->
-    inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://localhost:8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, get_function())}, [crest_utils:ssl_options()], []),
+    Res = crest_utils:invoke_spawn("localhost", ?MODULE, get_function),
     case Res of
-        {ok, {_, _, Body}} ->
+        {ok, Body} ->
             invocation(1000, Body);
-        {ok, {_, Body}} ->
-            invocation(1000, Body);
-        {error, Reason} ->
-            io:format("Error: ~p~n", [Reason])
+        error ->
+            io:format("Error~n")
     end,
     halt(0).

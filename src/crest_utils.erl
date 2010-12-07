@@ -87,7 +87,7 @@ get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filen
 invoke_spawn(Host, Module, Function) ->
 	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Function())}, [crest_utils:ssl_options()], []),
+    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), [])}, [crest_utils:ssl_options()], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -103,7 +103,8 @@ invoke_spawn(Host, Module, Function) ->
 invoke_remote(Host, Module, Function, Params) ->
 	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Function, Params)}, [crest_utils:ssl_options()], []),
+    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), Params)}, [crest_utils:ssl_options()], []),
+	io:format("~p~n", [Res]),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -118,7 +119,7 @@ invoke_remote(Host, Module, Function, Params) ->
 invoke_lambda(Host, Key, Params) ->
 	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []),
+    Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/url/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []),
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};
@@ -141,8 +142,6 @@ gather(N, Ref, L) ->
 			gather(N-1, Ref, [Ret|L])
     end.
 
-get_lambda_params(ModuleName, Fun) ->
-    get_lambda_params(ModuleName, Fun, []).
 get_lambda_params(ModuleName, Fun, OtherList) ->
     {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
     FunBinary = term_to_binary(Fun),

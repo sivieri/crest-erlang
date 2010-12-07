@@ -58,9 +58,9 @@ loop(Req, _DocRoot) ->
 				["crest", "remote"] ->
 					case crest_peer:remote(Req:parse_post()) of
                         {ok, {CT, Message}} ->
-                            {200, [{"Content-Type", CT}], [Message]};
+                            Req:respond({200, [{"Content-Type", CT}], [Message]});
                         {error} ->
-                            {404, [], []}
+                            Req:respond({404, [], []})
                     end;
                 _ ->
                     Req:respond({404, [], []})
