@@ -69,7 +69,8 @@ pmap(F, L) ->
     gather(length(L), Ref,  []).
 
 %% @doc Take a list of parameters from an HTTP request and recreate the binary fun that
-%% is encoded there. This function does not load the same module twice.
+%% is encoded there. This function does not load the same module twice, unless the hash
+%% value of the binary code is changed.
 %% @spec get_lambda([{string(), any()}]) -> term()
 get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
 	ModuleAtom = list_to_atom(ModuleName),
