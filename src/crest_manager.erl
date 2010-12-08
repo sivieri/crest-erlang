@@ -22,21 +22,21 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_manager).
--export([get_data/0]).
+-export([get_installed_data/0, get_local_data/0]).
 
 %% External API
 
 %% @doc Function to get names, operations and parameters for all the
 %% installed computations in this CREST peer.
-%% @spec get_data() -> json()
-get_data() ->
-    NameDict = crest_peer:get_list({"param", "name"}),
-	OperationDict = crest_peer:get_list({"param", "operation"}),
-	ParamsDict = crest_peer:get_list({"param", "parameters"}),
+%% @spec get_installed_data() -> json()
+get_installed_data() ->
+    NameDict = crest_peer:get_list("name"),
+	OperationDict = crest_peer:get_list("operation"),
+	ParamsDict = crest_peer:get_list("parameters"),
 	Temp1 = dict:merge(fun(_Key, Value1, Value2) -> {Value1, Value2} end, NameDict, OperationDict),
     Temp2 = dict:merge(fun(_Key, Value1, Value2) -> {Value1, compat(Value2)} end, Temp1, ParamsDict),
 	ResultList = dict:fold(fun(Key, {{Name, Operation}, Params}, AccIn) ->
-								   ElemList = [erlang:iolist_to_binary(make_link(Key)),
+								   ElemList = [erlang:iolist_to_binary(make_url_link(Key)),
 											   erlang:iolist_to_binary(Name),
 											   erlang:iolist_to_binary(Operation),
 											   erlang:iolist_to_binary(Params)],
@@ -44,10 +44,25 @@ get_data() ->
 								   end, [], Temp2),
 	{struct, [{erlang:iolist_to_binary("aaData"), ResultList}]}.
 
+%% @doc Function to get names, operations and parameters for all the
+%% local computations in this CREST peer.
+%% @spec get_local_data() -> json()
+get_local_data() ->
+    LocalList = crest_local:list_local(),
+	ResultList = lists:foldl(fun({Name, {Module, Function}}, AccIn) ->
+								   ElemList = [erlang:iolist_to_binary(make_local_link(Name)),
+											   erlang:iolist_to_binary(Module ++ ":" ++ Function ++ "()")],
+								   [ElemList|AccIn]
+								   end, [], LocalList),
+	{struct, [{erlang:iolist_to_binary("aaData"), ResultList}]}.
+
 %% Internal API
 
-make_link(Value) ->
-	"<a href=\"crest/" ++ Value ++ "\" title=\"" ++ Value ++ "\">" ++ Value ++ "</a>".
+make_url_link(Value) ->
+	"<a href=\"crest/url/" ++ Value ++ "\" title=\"" ++ Value ++ "\">" ++ Value ++ "</a>".
+
+make_local_link(Value) ->
+	"<a href=\"crest/local/" ++ Value ++ "\" title=\"" ++ Value ++ "\">" ++ Value ++ "</a>".
 
 compat([]) ->
 	"<em>None</em>";

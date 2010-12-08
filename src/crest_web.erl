@@ -47,8 +47,10 @@ loop(Req, DocRoot) ->
     case Req:get(method) of
         Method when Method =:= 'GET'; Method =:= 'HEAD' ->
             case string:tokens(Path, "/") of
-                ["crest", "manager"] ->
-                    Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_data())]});
+                ["crest", "manager", "installed"] ->
+                    Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_installed_data())]});
+				["crest", "manager", "local"] ->
+                    Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_manager:get_local_data())]});
 				["crest", "spawn"] ->
 					Req:respond({404, [], []});
 				["crest", "remote"] ->

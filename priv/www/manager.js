@@ -20,18 +20,38 @@
 $(document).ready(function(){
 	createTable();
 	$("#refreshform").submit(function(){
-		createTable();
+		createTableInstalled();
+		createTableLocal();
 	});
 });
 
-function createTable()
+function createTableInstalled()
 {
 	$.ajax({
-		url:"crest/manager",
+		url:"crest/manager/installed",
 		type:"GET",
 		timeout:10000,
 		success: function(data) {
 			$("#processestable").dataTable({
+				aaData:data.aaData,
+				bProcessing:true,
+				bDestroy:true
+			});
+		},
+		error: function(data, error) {
+			alert("Error: " + error);
+		}
+	});
+}
+
+function createTableLocal()
+{
+	$.ajax({
+		url:"crest/manager/local",
+		type:"GET",
+		timeout:10000,
+		success: function(data) {
+			$("#localtable").dataTable({
 				aaData:data.aaData,
 				bProcessing:true,
 				bDestroy:true

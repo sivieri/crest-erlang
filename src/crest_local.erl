@@ -37,7 +37,7 @@ stop() ->
     gen_server:call(?MODULE, stop).
 
 %% @doc Get a list of local computations available to installation.
-%% @spec list_local() -> [{string(), [{string(), string()}]}]
+%% @spec list_local() -> [{string(), {string(), string()}}]
 list_local() ->
 	gen_server:call(?MODULE, list).
 
