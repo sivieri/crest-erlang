@@ -18,7 +18,8 @@
 
 // jQuery things
 $(document).ready(function(){
-	createTable();
+	createTableInstalled();
+	createTableLocal();
 	$("#refreshform").submit(function(){
 		createTableInstalled();
 		createTableLocal();
