@@ -71,12 +71,23 @@ pmap(F, L) ->
 %% @doc Take a list of parameters from an HTTP request and recreate the binary fun that
 %% is encoded there. This function does not load the same module twice.
 %% @spec get_lambda([{string(), any()}]) -> term()
-get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", _ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
-	case code:is_loaded(list_to_atom(ModuleName)) of
+get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
+	ModuleAtom = list_to_atom(ModuleName),
+	ModuleRealBinary = list_to_binary(ModuleBinary),
+	case code:is_loaded(ModuleAtom) of
 		{file, _} ->
-			binary_to_term(list_to_binary(FunBinary));
+			{_, OldModuleBinary, _} = code:get_object_code(ModuleAtom),
+			OldHash = code_hash(OldModuleBinary),
+			case string:equal(OldHash, ModuleHash) of
+				true ->
+					binary_to_term(list_to_binary(FunBinary));
+				false ->
+					log4erl:info("Updating module bytecode: ~p~n", [ModuleName]),
+					code:load_binary(ModuleAtom, Filename, ModuleRealBinary),
+    				binary_to_term(list_to_binary(FunBinary))
+			end;
 		false ->
-    		code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
+    		code:load_binary(ModuleAtom, Filename, ModuleRealBinary),
     		binary_to_term(list_to_binary(FunBinary))
 	end.
 
