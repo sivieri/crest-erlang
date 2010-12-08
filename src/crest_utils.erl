@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/3]).
+-export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/3, code_hash/1]).
 
 %% External API
 
@@ -77,7 +77,7 @@ pmap(F, L) ->
 %% don't think this solves the problem, but anyway...).
 %% Remember: this is not a bug, it's a feature!
 %% @spec get_lambda([{string(), any()}]) -> term()
-get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}]) ->
+get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
     code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
     binary_to_term(list_to_binary(FunBinary)).
 
@@ -129,6 +129,14 @@ invoke_lambda(Host, Key, Params) ->
             {error}
     end.
 
+%% @doc Calculate the hash of a binary blob; it hides the hash
+%% function used, which may change over time, while at the same
+%% time it returns the string representation instead of a binary
+%% list (as the crypto module does).
+%% @spec code_hash(binary()) -> string()
+code_hash(Binary) ->
+	lists:flatten([io_lib:format("~2.16.0b",[N])||N<-binary_to_list(erlang:md5(Binary))]).
+
 %% Internal API
 
 do_f(Parent, Ref, F, I) ->                      
@@ -145,4 +153,4 @@ gather(N, Ref, L) ->
 get_lambda_params(ModuleName, Fun, OtherList) ->
     {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
     FunBinary = term_to_binary(Fun),
-    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
+    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", code_hash(ModuleBinary)}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
