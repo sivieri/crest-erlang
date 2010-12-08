@@ -69,17 +69,16 @@ pmap(F, L) ->
     gather(length(L), Ref,  []).
 
 %% @doc Take a list of parameters from an HTTP request and recreate the binary fun that
-%% is encoded there.
-%% Attention: because of code load, if the same module is sent to the server
-%% more than two times, then the older processes are killed (cfr. the standard
-%% Erlang policy); thus, maybe some version control has to be inserted (if possible),
-%% or remote closures have to be spawned inside some update-savvy module (well, I
-%% don't think this solves the problem, but anyway...).
-%% Remember: this is not a bug, it's a feature!
+%% is encoded there. This function does not load the same module twice.
 %% @spec get_lambda([{string(), any()}]) -> term()
-get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
-    code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
-    binary_to_term(list_to_binary(FunBinary)).
+get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", _ModuleHash}, {"filename", Filename}, {"code", FunBinary}]) ->
+	case code:is_loaded(list_to_atom(ModuleName)) of
+		{file, _} ->
+			binary_to_term(list_to_binary(FunBinary));
+		false ->
+    		code:load_binary(list_to_atom(ModuleName), Filename, list_to_binary(ModuleBinary)),
+    		binary_to_term(list_to_binary(FunBinary))
+	end.
 
 %% @doc Spawn a function on a certain host; the function module needs to be
 %% in the Erlang path.
