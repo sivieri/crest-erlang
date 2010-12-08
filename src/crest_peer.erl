@@ -77,13 +77,18 @@ remove_child(Key) ->
 
 %% @doc Get a dictionary of responses from all childs, passing to all the given parameter;
 %% the key is the child process UUID.
-%% @spec get_list({string(), string()}) -> dictionary()
+%% @spec get_list(string()) -> dictionary()
 get_list(Param) ->
-    gen_server:call(?MODULE, {list, Param}).
+    gen_server:call(?MODULE, {list, {"param", Param}}).
 
 init(_Args) ->
     Spawned = dict:new(),
-    {ok, Spawned}.
+	Children = supervisor:which_children(crest_spawn_sup),
+	NewSpawned = lists:foldl(fun({Key, Pid, _, _}, AccIn) ->
+									 log4erl:info("Recovered a running computation: ~p~n", [Key]),
+									 dict:store(Key, Pid, AccIn) end,
+							 Spawned, Children),
+    {ok, NewSpawned}.
 
 handle_call({spawn, Params}, From, Spawned) ->
 	spawn(fun() -> handle_spawn(Params, From) end),

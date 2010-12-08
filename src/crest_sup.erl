@@ -26,6 +26,7 @@
 -export([init/1]).
 
 %% External API
+
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
@@ -77,6 +78,12 @@ init([]) ->
 	Router = {crest_local,
 			  {crest_local, start, []},
 			  permanent, 5000, worker, [crest_local]},
+	SpawnSup = {crest_spawn_sup,
+				{crest_spawn_sup, start_link, []},
+				permanent, 5000, supervisor, [crest_spawn_sup]},
 
-    Processes = [Web, WebSSL, Peer, Router],
+    Processes = [SpawnSup, Web, WebSSL, Peer, Router],
     {ok, {{one_for_one, 10, 10}, Processes}}.
+
+%% Internal API
+

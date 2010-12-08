@@ -33,7 +33,7 @@
 install(F) ->
     Key = uuid:to_string(uuid:srandom()),
     Params = {Key, {?MODULE, start, [Key, F]}, temporary, infinity, supervisor, [?MODULE]},
-    supervisor:start_child(crest_sup, Params),
+    supervisor:start_child(crest_spawn_sup, Params),
     Key.
 
 %% @doc Start the link of this bridge to the newly spawned function.
