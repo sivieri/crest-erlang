@@ -85,8 +85,9 @@ init(_Args) ->
     Spawned = dict:new(),
 	Children = supervisor:which_children(crest_spawn_sup),
 	NewSpawned = lists:foldl(fun({Key, Pid, _, _}, AccIn) ->
+									 {links, [_Pid1, Pid2]} = process_info(Pid, links),
 									 log4erl:info("Recovered a running computation: ~p~n", [Key]),
-									 dict:store(Key, Pid, AccIn) end,
+									 dict:store(Key, Pid2, AccIn) end,
 							 Spawned, Children),
     {ok, NewSpawned}.
 
