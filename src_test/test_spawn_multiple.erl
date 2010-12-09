@@ -34,9 +34,35 @@ get_function_pow() ->
 			{Pid, {"param", "parameters"}} ->
                 Pid ! {self(), [{"input", "integer()"}]},
                 F(F);
-            {Pid, {"input", InputString}} ->
+            {Pid, [{"input", InputString}]} ->
 				{InputInt, _} = string:to_integer(InputString),
 				Res = math:pow(InputInt, 2),
+                Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}},
+                F(F);
+            Any ->
+                io:format("Spawned: ~p~n", [Any]),
+                F(F)
+        end
+    end,
+    fun() ->
+        F(F)
+    end.
+
+get_function_sqrt() ->
+    F = fun(F) ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Square root of integers"},
+                F(F);
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET"},
+                F(F);
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"input", "integer()"}]},
+                F(F);
+            {Pid, [{"input", InputString}]} ->
+				{InputInt, _} = string:to_integer(InputString),
+				Res = math:sqrt(InputInt),
                 Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}},
                 F(F);
             Any ->
@@ -60,34 +86,8 @@ get_function_reverser() ->
 			{Pid, {"param", "parameters"}} ->
                 Pid ! {self(), [{"input", "string()"}]},
                 F(F);
-            {Pid, {"input", Input}} ->
+            {Pid, [{"input", Input}]} ->
                 Pid ! {self(), {"text/plain", lists:reverse(Input)}},
-                F(F);
-            Any ->
-                io:format("Spawned: ~p~n", [Any]),
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
-    end.
-
-get_function_sqrt() ->
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Square root of integers"},
-                F(F);
-			{Pid, {"param", "operation"}} ->
-                Pid ! {self(), "GET"},
-                F(F);
-			{Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"input", "integer()"}]},
-                F(F);
-            {Pid, {"input", InputString}} ->
-				{InputInt, _} = string:to_integer(InputString),
-				Res = math:sqrt(InputInt),
-                Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}},
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -101,7 +101,7 @@ get_function_sqrt() ->
 request_pow({Host, Key, _Index}) ->
 	N = random:uniform(1000),
 	N2 = crest_utils:format("~f", math:pow(N, 2)),
-	case crest_operations:invoke_lambda(Host, Key, [{"input", crest_utils:format("~p", N)}]) of
+	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", N)}]) of
 		{ok, Result} when N2 =:= Result->
 			ok;
 		{ok, Result} ->
@@ -113,7 +113,7 @@ request_pow({Host, Key, _Index}) ->
 request_sqrt({Host, Key, _Index}) ->
 	N = random:uniform(1000),
 	N2 = crest_utils:format("~f", math:sqrt(N)),
-	case crest_operations:invoke_lambda(Host, Key, [{"input", crest_utils:format("~p", N)}]) of
+	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", N)}]) of
 		{ok, Result} when N2 =:= Result->
 			ok;
 		{ok, Result} ->
@@ -125,7 +125,7 @@ request_sqrt({Host, Key, _Index}) ->
 request_reverse({Host, Key, _Index}) ->
 	In = "Reversing strings...",
 	Out = lists:reverse(In),
-	case crest_operations:invoke_lambda(Host, Key, [{"input", In}]) of
+	case crest_operations:invoke_lambda(get, Host, Key, [{"input", In}]) of
 		{ok, Result} when Out =:= Result->
 			ok;
 		{ok, Result} ->
@@ -145,7 +145,7 @@ main([Host, SpawnsString, RequestsString]) ->
                                      List2 = lists:map(fun(Index) ->
 															   {Host, Body, Index}
 							  						   end, lists:seq(1, Requests)),
-									 crest_utils:pmap(request_pow, List2);
+									 crest_utils:pmap(fun(Elem) -> test_spawn_multiple:request_pow(Elem) end, List2);
                                  {error} ->
                                      io:format("Spawn error~n")
                              end
@@ -157,7 +157,7 @@ main([Host, SpawnsString, RequestsString]) ->
                                      List2 = lists:map(fun(Index) ->
 															   {Host, Body, Index}
 							  						   end, lists:seq(1, Requests)),
-									 crest_utils:pmap(request_sqrt, List2);
+									 crest_utils:pmap(fun(Elem) -> test_spawn_multiple:request_sqrt(Elem) end, List2);
                                  {error} ->
                                      io:format("Spawn error~n")
                              end
@@ -169,7 +169,7 @@ main([Host, SpawnsString, RequestsString]) ->
                                      List2 = lists:map(fun(Index) ->
 															   {Host, Body, Index}
 							  						   end, lists:seq(1, Requests)),
-									 crest_utils:pmap(request_reverse, List2);
+									 crest_utils:pmap(fun(Elem) -> test_spawn_multiple:request_reverse(Elem) end, List2);
                                  {error} ->
                                      io:format("Spawn error~n")
                              end

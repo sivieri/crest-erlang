@@ -107,7 +107,7 @@ get_lambda_params(ModuleName, Fun, OtherList) ->
 
 %% Internal API
 
-do_f(Parent, Ref, F, I) ->                      
+do_f(Parent, Ref, F, I) -> 
     Parent ! {Ref, (catch F(I))}.
 
 gather(0, _, L) ->

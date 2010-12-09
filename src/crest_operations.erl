@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_operations).
--export([invoke_spawn/3, invoke_remote/4, invoke_lambda/3]).
+-export([invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
 
 %% External API
 
@@ -58,11 +58,18 @@ invoke_remote(Host, Module, Function, Params) ->
     end.
 
 %% @doc Invoke an already installed computation with parameters.
-%% @spec invoke_lambda(string(), string(), [{string(), string()}]) -> {ok, Body} | {error}
-invoke_lambda(Host, Key, Params) ->
+%% @spec invoke_lambda(get | post, string(), string(), [{string(), string()}]) -> {ok, Body} | {error}
+invoke_lambda(Method, Host, Key, Params) ->
 	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/url/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []),
+	case Method of
+		get ->
+			Res = httpc:request(get, {"http://"++ Host ++ ":8080/crest/url/" ++ Key ++ "?" ++ mochiweb_util:urlencode(Params), []}, [], []);
+		post ->
+			Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/url/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []);
+		_ ->
+			Res = {error, "Wrong method"}
+	end,
     case Res of
         {ok, {{_,200,_}, _, Body}} ->
             {ok, Body};

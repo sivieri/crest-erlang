@@ -50,8 +50,8 @@ main() ->
     Res = crest_operations:invoke_spawn("localhost", ?MODULE, get_function),
     case Res of
         {ok, Body} ->
-            io:format("Invocazione 1: ~p~n", [crest_operations:invoke_lambda("localhost", Body, [])]),
-            io:format("Invocazione 2: ~p~n", [crest_operations:invoke_lambda("localhost", Body, [])]);
+            io:format("Invocazione 1: ~p~n", [crest_operations:invoke_lambda(get, "localhost", Body, [])]),
+            io:format("Invocazione 2: ~p~n", [crest_operations:invoke_lambda(get, "localhost", Body, [])]);
         {error} ->
             io:format("Error~n")
     end,
