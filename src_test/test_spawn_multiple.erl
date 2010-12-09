@@ -100,8 +100,8 @@ get_function_reverser() ->
 
 request_pow({Host, Key, _Index}) ->
 	N = random:uniform(1000),
-	N2 = crest_utils:format("~f", math:pow(N, 2)),
-	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", N)}]) of
+	N2 = crest_utils:format("~f", [math:pow(N, 2)]),
+	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", [N])}]) of
 		{ok, Result} when N2 =:= Result->
 			ok;
 		{ok, Result} ->
@@ -112,8 +112,8 @@ request_pow({Host, Key, _Index}) ->
 
 request_sqrt({Host, Key, _Index}) ->
 	N = random:uniform(1000),
-	N2 = crest_utils:format("~f", math:sqrt(N)),
-	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", N)}]) of
+	N2 = crest_utils:format("~f", [math:sqrt(N)]),
+	case crest_operations:invoke_lambda(get, Host, Key, [{"input", crest_utils:format("~p", [N])}]) of
 		{ok, Result} when N2 =:= Result->
 			ok;
 		{ok, Result} ->
