@@ -20,9 +20,14 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_operations).
--export([invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
+-export([install_local/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
 
 %% External API
+
+%% @doc Wrapper around crest_local:start_local/1.
+%% @spec install_local(string()) -> {ok, string()} | {error}
+install_local(Name) ->
+	crest_local:start_local(Name).
 
 %% @doc Spawn a function on a certain host; the function module needs to be
 %% in the Erlang path.

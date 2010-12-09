@@ -43,19 +43,15 @@ get_word_frequency() ->
             end
         end,
     CalledFunction = fun({Address, Filename, Limit}, AccIn) ->
-            Res = httpc:request(post, {"https://" ++ Address ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(?MODULE, ClientFunction, [{"filename", Filename}, {"limit", Limit}, {"address", Address}])}, [crest_utils:ssl_options()], []),
+			Res = crest_operations:invoke_remote(Address, ?MODULE, ClientFunction, [{"filename", Filename}, {"limit", Limit}, {"address", Address}]),
             case Res of
-                {ok, {{_,200,_}, _, Body}} ->
+                {ok, Body} ->
                     [mochijson2:decode(Body)|AccIn];
-				{ok, {{_,N,Msg}, _, _}} ->
-					[crest_utils:format("~p: ~p", [N, Msg])|AccIn];
-                {error, Reason} ->
-                    [Reason|AccIn]
+                {error} ->
+                    AccIn
             end
         end,
     F = fun(F) ->
-        inets:start(),
-		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Word frequency demo"},
@@ -106,20 +102,16 @@ get_inverse_document_frequency() ->
         {self(), {"application/json", mochijson2:encode(Result)}}
 		end,
 	InvokeService = fun(Key, Addresses, Filename, Limit, N) ->
-		Res2 = httpc:request(post, {"http://localhost:8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}])}, [], []),
+		Res2 = crest_operations:invoke_lambda(post, "localhost", Key, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]),
 		case Res2 of
-        	{ok, {{_,200,_}, _, Body2}} ->
+        	{ok, Body2} ->
             	Obj = mochijson2:decode(Body2),
 				IDF(Obj, N);
-			{ok, {{_,N,Msg}, _, _}} ->
-				crest_utils:format("~p: ~p", [N, Msg]);
-        	{error, Reason2} ->
-            	Reason2
+			{error} ->
+            	"error"
     		end
 		end,
     F = fun(F) ->
-        inets:start(),
-		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Inverse document frequency demo"},
@@ -134,14 +126,12 @@ get_inverse_document_frequency() ->
 				AddressList = string:tokens(Addresses, "\r\n"),
         		DocumentNumber = length(AddressList),
 				% Execution of the word frequency part
-				Res = httpc:request("http://localhost:8080/demo?type=word"),
+				Res = crest_operations:install_local("word"),
     			case Res of
-        			{ok, {{_,200,_}, _, Body}} ->
+        			{ok, Body} ->
             			Pid ! InvokeService(Body, Addresses, Filename, Limit, DocumentNumber);
-					{ok, {{_,N,Msg}, _, _}} ->
-						Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}};
-        			{error, Reason} ->
-            			Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}}
+					{error} ->
+            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
     			end,
                 F(F);
             {Pid, Other} ->
@@ -176,20 +166,16 @@ get_cosine_similarity() ->
         {self(), {"application/json", mochijson2:encode(Result)}}
 		end,
 	InvokeService = fun(Key, Addresses, Filename, Limit, N) ->
-		Res2 = httpc:request(post, {"http://localhost:8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}])}, [], []),
+		Res2 = crest_operations:invoke_lambda(post, "localhost", Key, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]),
 		case Res2 of
-        	{ok, {{_,200,_}, _, Body2}} ->
+        	{ok, Body2} ->
             	Obj = mochijson2:decode(Body2),
 				Cosine(Obj, N);
-			{ok, {{_,N,Msg}, _, _}} ->
-				crest_utils:format("~p: ~p", [N, Msg]);
-        	{error, Reason2} ->
-            	Reason2
+			{error} ->
+            	"Error"
     		end
 		end,
     F = fun(F) ->
-        inets:start(),
-		ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Cosine similarity demo"},
@@ -204,14 +190,12 @@ get_cosine_similarity() ->
 				AddressList = string:tokens(Addresses, "\r\n"),
         		DocumentNumber = length(AddressList),
 				% Execution of the word frequency part
-				Res = httpc:request("http://localhost:8080/demo?type=word"),
+				Res = crest_operations:install_local("word"),
     			case Res of
-        			{ok, {{_,200,_}, _, Body}} ->
+        			{ok, Body} ->
             			Pid ! InvokeService(Body, Addresses, Filename, Limit, DocumentNumber);
-					{ok, {{_,N,Msg}, _, _}} ->
-						Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}};
-        			{error, Reason} ->
-            			Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}}
+					{error} ->
+            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
     			end,
                 F(F);
             {Pid, Other} ->
@@ -247,7 +231,7 @@ get_word_status_frequency() ->
                 FinalDict = Status;
             _ ->
                 FinalDict = lists:foldl(fun(Address, AccIn) ->
-                              Res2 = httpc:request(post, {"http://localhost:8080/crest/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode([{"addresses", Address}, {"filename", Filename}, {"limit", Limit}])}, [], []),
+							  Res2 = crest_operations:invoke_lambda(post, "localhost", Key, [{"addresses", Address}, {"filename", Filename}, {"limit", Limit}]),
                               case Res2 of
                                   {ok, {{_,200,_}, _, Body2}} ->
                                       Obj = mochijson2:decode(Body2),
@@ -266,8 +250,6 @@ get_word_status_frequency() ->
         {{self(), {"application/json", mochijson2:encode([Result])}}, FinalDict}
         end,
     F = fun(F, Status) ->
-        inets:start(),
-        ssl:start(),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Word frequency demo, with status"},
@@ -282,17 +264,14 @@ get_word_status_frequency() ->
                 AddressList = string:tokens(Addresses, "\r\n"),
                 DocumentNumber = length(AddressList),
                 % Execution of the word frequency part
-                Res = httpc:request("http://localhost:8080/demo?type=word"),
+				Res = crest_operations:install_local("word"),
                 case Res of
-                    {ok, {{_,200,_}, _, Body}} ->
+                    {ok, Body} ->
                         {ResMsg, NewStatus} = InvokeService(Body, Addresses, Filename, Limit, DocumentNumber, Status),
                         Pid ! ResMsg,
                         F(F, NewStatus);
-                    {ok, {{_,N,Msg}, _, _}} ->
-                        Pid ! {self(), {"text/plain", crest_utils:format("Error ~p: ~p", [N, Msg])}},
-                        F(F, Status);
-                    {error, Reason} ->
-                        Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Reason])}},
+                    {error} ->
+                        Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
                         F(F, Status)
                 end;
             {Pid, Other} ->
