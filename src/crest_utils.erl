@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/3, code_hash/1]).
+-export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1]).
 
 %% External API
 
@@ -92,54 +92,6 @@ get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHas
     		binary_to_term(list_to_binary(FunBinary))
 	end.
 
-%% @doc Spawn a function on a certain host; the function module needs to be
-%% in the Erlang path.
-%% @spec invoke_spawn(string(), atom(), atom()) -> {ok, Key} | {error}
-invoke_spawn(Host, Module, Function) ->
-	inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), [])}, [crest_utils:ssl_options()], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-%% @doc Spawn a function on a certain host and invoke it with parameters;
-%% the function module needs to be in the Erlang path.
-%% @spec invoke_remote(string(), atom(), atom(), [{string(), string()}]) -> {ok, Body} | {error}
-invoke_remote(Host, Module, Function, Params) ->
-	inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), Params)}, [crest_utils:ssl_options()], []),
-	io:format("~p~n", [Res]),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
-%% @doc Invoke an already installed computation with parameters.
-%% @spec invoke_lambda(string(), string(), [{string(), string()}]) -> {ok, Body} | {error}
-invoke_lambda(Host, Key, Params) ->
-	inets:start(),
-	ssl:start(),
-    Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/url/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []),
-    case Res of
-        {ok, {{_,200,_}, _, Body}} ->
-            {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
-            {error}
-    end.
-
 %% @doc Calculate the hash of a binary blob; it hides the hash
 %% function used, which may change over time, while at the same
 %% time it returns the string representation instead of a binary
@@ -147,6 +99,11 @@ invoke_lambda(Host, Key, Params) ->
 %% @spec code_hash(binary()) -> string()
 code_hash(Binary) ->
 	lists:flatten([io_lib:format("~2.16.0b",[N])||N<-binary_to_list(erlang:md5(Binary))]).
+
+get_lambda_params(ModuleName, Fun, OtherList) ->
+    {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
+    FunBinary = term_to_binary(Fun),
+    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", code_hash(ModuleBinary)}, {"filename", Filename}, {"code", FunBinary}], OtherList)).
 
 %% Internal API
 
@@ -160,8 +117,3 @@ gather(N, Ref, L) ->
     	{Ref, Ret} ->
 			gather(N-1, Ref, [Ret|L])
     end.
-
-get_lambda_params(ModuleName, Fun, OtherList) ->
-    {_Name, ModuleBinary, Filename} = code:get_object_code(ModuleName),
-    FunBinary = term_to_binary(Fun),
-    mochiweb_util:urlencode(lists:append([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", code_hash(ModuleBinary)}, {"filename", Filename}, {"code", FunBinary}], OtherList)).

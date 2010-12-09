@@ -39,6 +39,6 @@ get_function() ->
     end.
 
 main() ->
-    Res = crest_utils:invoke_remote("localhost", ?MODULE, get_function, [{"param", 10}]),
+    Res = crest_operations:invoke_remote("localhost", ?MODULE, get_function, [{"param", 10}]),
     io:format("Answer: ~p~n", [Res]),
     halt(0).
