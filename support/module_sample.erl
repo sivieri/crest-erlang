@@ -30,8 +30,8 @@ get_function() ->
                 Pid ! {self(), [{"param1", "string()"}, {"param2", "integer()"}]},
                 F(F);
             {Pid, [{Parameter1, Value1}, {Parameter2, Value2}]} ->
-                computation(Value1, Value2),
-                Pid ! {self(), {"text/plain", ComputationResults}},
+                %% Compute your values here
+                Pid ! {self(), {"text/plain", "Return some relevant result here."}},
                 F(F);
             {Pid, Other} ->
                 Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},

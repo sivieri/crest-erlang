@@ -1,6 +1,15 @@
 CREST-Erlang
 
 1. Introduction
+2. Installation
+3. Certificates and Certification Authority
+4. Add a new computation
+5. Authors
+6. License
+
+====================================================================
+
+1. Introduction
 This is a Web framework written in Erlang and supporting the
 architectural style "Computational REST"; you can find informations
 about the style at http://www.erenkrantz.com/CREST/ and about the
@@ -33,10 +42,37 @@ application.
 The CA password is "crest", the server and client certificates passwords
 are "peer".
 
-4. Authors
+4. Add a new computation
+Installing a new computation on your local server is quite easy: create a
+closure following the template located at
+
+<crest-erlang root>/support/module_sample.erl
+
+You can develop additional libraries or additional modules supporting the
+one that you see there; then compile it using erlc and add any produced
+.beam file to the current bytecode path:
+
+<crest-erlang root>/ebin
+
+Add a line in
+
+<crest-erlang root>/config/locals.config
+
+With the following format:
+
+{"Keywork", "module_name", "computation_main_function"}.
+
+Beware that the keyword needs to be unique inside your configuration file.
+Then you can install it using crest_operations:install_local/1, passing to
+it the keyword itself; if the server was running when you modified the
+configuration file, it will be reloaded and then your computation will be
+installed. The returned UUID can be used to invoke the computation, through
+the url <http://hostname:8080/url/uuid> or using crest_operations:invoke_lambda/4. 
+
+5. Authors
 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
 
-5. License
+6. License
 This framework is licensed under the "GNU Lesser General Public License";
 you can find this license in the files "COPYING" and "COPYING.LESSER" under
 the project directory, or at http://www.gnu.org/licenses/lgpl.html.

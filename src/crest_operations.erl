@@ -27,6 +27,7 @@
 %% @doc Wrapper around crest_local:start_local/1.
 %% @spec install_local(string()) -> {ok, string()} | {error}
 install_local(Name) ->
+	crest_local:reload(),
 	crest_local:start_local(Name).
 
 %% @doc Spawn a function on a certain host; the function module needs to be
