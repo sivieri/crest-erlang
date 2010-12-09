@@ -50,6 +50,7 @@ upgrade() ->
 init([]) ->
     Ip = case os:getenv("MOCHIWEB_IP") of false -> "0.0.0.0"; Any -> Any end,   
     WebConfig = [
+				 {max, 1000000},
          		 {ip, Ip},
                  {port, 8080},
                  {docroot, crest_deps:local_path(["priv", "www"])}],
@@ -57,6 +58,7 @@ init([]) ->
            {crest_web, start, [WebConfig]},
            permanent, 5000, worker, dynamic},
 	WebConfigSSL = [
+			     {max, 1000000},
                  {ip, Ip},
                  {port, 8443},
                  {docroot, crest_deps:local_path(["priv", "www"])},
