@@ -8,7 +8,7 @@
         <server host="192.168.0.5" port="8080" type="tcp"></server>
     </servers>
     <monitoring>
-        <monitor host="192.168.0.5" type="erlang"/>
+        <monitor host="192.168.0.5" type="munin"/>
     </monitoring>
     <load>
         <arrivalphase phase="1" duration="60" unit="second">
@@ -25,40 +25,40 @@
     <sessions>
         <session name="http_test_1" probability="34" type="ts_http">
             <request>
-            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<dyn_variable name="key" xpath="/key/text()"></dyn_variable>
             	<http url="/crest/local/pow" version="1.1" method="GET"></http>
 			</request>
 			<thinktime value="0.1" random="true"></thinktime>
 			<for from="1" to="10" incr="1" var="counter">
 				<request subst="true">
-					<match do="continue" when="match">100.000000</match>
-					<http url="crest/url/%%_key%%?input=10" version="1.1" method="GET"></http>
+					<match do="continue" skip_headers="http" when="match">100.000000</match>
+					<http url="/crest/url/%%_key%%?input=10" version="1.1" method="GET"></http>
 				</request>
 			</for>
         </session>
 		<session name="http_test_2" probability="33" type="ts_http">
             <request>
-            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<dyn_variable name="key" xpath="/key/text()"></dyn_variable>
             	<http url="/crest/local/sqrt" version="1.1" method="GET"></http>
 			</request>
 			<thinktime value="0.1" random="true"></thinktime>
 			<for from="1" to="10" incr="1" var="counter">
 				<request subst="true">
-					<match do="continue" when="match">10.000000</match>
-					<http url="crest/url/%%_key%%?input=100" version="1.1" method="GET"></http>
+					<match do="continue" skip_headers="http" when="match">10.000000</match>
+					<http url="/crest/url/%%_key%%?input=100" version="1.1" method="GET"></http>
 				</request>
 			</for>
         </session>
 		<session name="http_test_3" probability="33" type="ts_http">
             <request>
-            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<dyn_variable name="key" xpath="/key/text()"></dyn_variable>
             	<http url="/crest/local/reverse" version="1.1" method="GET"></http>
 			</request>
 			<thinktime value="0.1" random="true"></thinktime>
 			<for from="1" to="10" incr="1" var="counter">
 				<request subst="true">
-					<match do="continue" when="match">olleH</match>
-					<http url="crest/url/%%_key%%?input=Hello" version="1.1" method="GET"></http>
+					<match do="continue" skip_headers="http" when="match">olleH</match>
+					<http url="/crest/url/%%_key%%?input=Hello" version="1.1" method="GET"></http>
 				</request>
 			</for>
         </session>
