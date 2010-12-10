@@ -1,7 +1,7 @@
 %% This is generated from src/crest.app.src
 {application, crest,
  [{description, "Computational REST framework"},
-  {vsn, "0.7.1"},
+  {vsn, "0.7.3"},
   {modules, []},
   {registered, []},
   {mod, {crest_app, []}},
