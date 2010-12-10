@@ -80,7 +80,7 @@ invoke_lambda(Method, Host, Key, Params) ->
             {ok, Body};
 		{ok, _, _, _} ->
             {error};
-		{error, _Reason} ->
+		{error, Reason} ->
             {error}
     end.
 
