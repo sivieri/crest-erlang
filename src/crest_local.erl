@@ -116,7 +116,7 @@ do_reload(Locals) ->
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
 		{ok, {Module, Function}} ->
-			crest_utils:invoke_spawn("localhost", list_to_atom(Module), list_to_atom(Function));
+			crest_operations:invoke_spawn("localhost", list_to_atom(Module), list_to_atom(Function));
 		error ->
 			{error}
 	end.

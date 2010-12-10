@@ -8,7 +8,7 @@
         <server host="192.168.0.5" port="8080" type="tcp"></server>
     </servers>
     <monitoring>
-        <monitor host="192.168.0.5" type="snmp"/>
+        <monitor host="192.168.0.5" type="erlang"/>
     </monitoring>
     <load>
         <arrivalphase phase="1" duration="60" unit="second">
