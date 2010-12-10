@@ -24,13 +24,17 @@
 
 %% External API
 
+%% @doc Returns the list of SSL options for making HTTPS requests with
+%% mutual authentication.
+%% @spec ssl_options() -> [any()]
 ssl_options() ->
-	{ssl,
+	[{is_ssl, true},
+	{ssl_options,
 	 [{verify, 0},
 	  {certfile, crest_deps:local_path(["ca", "users", "peer", "peer.crt"])},
 	  {keyfile, crest_deps:local_path(["ca", "users", "peer", "peer.key"])},
 	  {password, "peer"}]
-	}.
+	}].
 
 %% @doc Returns the head of a list if the parameter is a list, or
 %% the parameter itself if it is not a list.

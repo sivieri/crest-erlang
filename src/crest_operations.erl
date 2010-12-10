@@ -34,15 +34,15 @@ install_local(Name) ->
 %% in the Erlang path.
 %% @spec invoke_spawn(string(), atom(), atom()) -> {ok, Key} | {error}
 invoke_spawn(Host, Module, Function) ->
-	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/spawn", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), [])}, [crest_utils:ssl_options()], []),
+	ibrowse:start(),
+	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), []), crest_utils:ssl_options()),
     case Res of
-        {ok, {{_,200,_}, _, Body}} ->
+        {ok, "200", _, Body} ->
             {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
+		{ok, _, _, _} ->
+            {error};
+		{error, _Reason} ->
             {error}
     end.
 
@@ -50,38 +50,37 @@ invoke_spawn(Host, Module, Function) ->
 %% the function module needs to be in the Erlang path.
 %% @spec invoke_remote(string(), atom(), atom(), [{string(), string()}]) -> {ok, Body} | {error}
 invoke_remote(Host, Module, Function, Params) ->
-	inets:start(),
 	ssl:start(),
-    Res = httpc:request(post, {"https://" ++ Host ++ ":8443/crest/remote", [], "application/x-www-form-urlencoded", crest_utils:get_lambda_params(Module, Module:Function(), Params)}, [crest_utils:ssl_options()], []),
+	ibrowse:start(),
+	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/remote", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), Params), crest_utils:ssl_options()),
 	io:format("~p~n", [Res]),
     case Res of
-        {ok, {{_,200,_}, _, Body}} ->
+        {ok, "200", _, Body} ->
             {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
+		{ok, _, _, _} ->
+            {error};
+		{error, _Reason} ->
             {error}
     end.
 
 %% @doc Invoke an already installed computation with parameters.
 %% @spec invoke_lambda(get | post, string(), string(), [{string(), string()}]) -> {ok, Body} | {error}
 invoke_lambda(Method, Host, Key, Params) ->
-	inets:start(),
-	ssl:start(),
+	ibrowse:start(),
 	case Method of
 		get ->
-			Res = httpc:request(get, {"http://"++ Host ++ ":8080/crest/url/" ++ Key ++ "?" ++ mochiweb_util:urlencode(Params), []}, [], []);
+			Res = ibrowse:send_req("http://"++ Host ++ ":8080/crest/url/" ++ Key ++ "?" ++ mochiweb_util:urlencode(Params), [], get);
 		post ->
-			Res = httpc:request(post, {"http://"++ Host ++ ":8080/crest/url/" ++ Key, [], "application/x-www-form-urlencoded", mochiweb_util:urlencode(Params)}, [], []);
+			Res = ibrowse:send_req("http://"++ Host ++ ":8080/crest/url/" ++ Key, [{"Content-Type", "application/x-www-form-urlencoded"}], post, mochiweb_util:urlencode(Params));
 		_ ->
 			Res = {error, "Wrong method"}
 	end,
     case Res of
-        {ok, {{_,200,_}, _, Body}} ->
+        {ok, "200", _, Body} ->
             {ok, Body};
-		{ok, {{_,_,_}, _, _}} ->
-			{error};
-        {error, _Reason} ->
+		{ok, _, _, _} ->
+            {error};
+		{error, _Reason} ->
             {error}
     end.
 
