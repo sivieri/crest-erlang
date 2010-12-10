@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!DOCTYPE tsung SYSTEM "/usr/share/tsung/tsung-1.0.dtd">
+<tsung loglevel="debug" dumptraffic="true" version="1.0">
+    <clients>
+        <client host="localhost" weight="1" maxusers="1000" use_controller_vm="true"/>
+    </clients>
+    <servers>
+        <server host="192.168.0.5" port="8080" type="tcp"></server>
+    </servers>
+    <monitoring>
+        <monitor host="192.168.0.5" type="snmp"/>
+    </monitoring>
+    <load>
+        <arrivalphase phase="1" duration="60" unit="second">
+            <users interarrival="1" unit="second"/>
+        </arrivalphase>
+    </load>
+    <options>
+        <option type="ts_http" name="user_agent">
+            <user_agent probability="100">
+                Mozilla/5.0 (X11; U; Linux i686; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.15 Safari/534.13
+            </user_agent>
+        </option>
+    </options>
+    <sessions>
+        <session name="http_test_1" probability="34" type="ts_http">
+            <request>
+            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<http url="/crest/local/pow" version="1.1" method="GET"></http>
+			</request>
+			<thinktime value="0.1" random="true"></thinktime>
+			<for from="1" to="10" incr="1" var="counter">
+				<request subst="true">
+					<match do="continue" when="match">100.000000</match>
+					<http url="crest/url/%%_key%%?input=10" version="1.1" method="GET"></http>
+				</request>
+			</for>
+        </session>
+		<session name="http_test_2" probability="33" type="ts_http">
+            <request>
+            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<http url="/crest/local/sqrt" version="1.1" method="GET"></http>
+			</request>
+			<thinktime value="0.1" random="true"></thinktime>
+			<for from="1" to="10" incr="1" var="counter">
+				<request subst="true">
+					<match do="continue" when="match">10.000000</match>
+					<http url="crest/url/%%_key%%?input=100" version="1.1" method="GET"></http>
+				</request>
+			</for>
+        </session>
+		<session name="http_test_3" probability="33" type="ts_http">
+            <request>
+            	<dyn_variable name="key" regexp=".*"></dyn_variable>
+            	<http url="/crest/local/reverse" version="1.1" method="GET"></http>
+			</request>
+			<thinktime value="0.1" random="true"></thinktime>
+			<for from="1" to="10" incr="1" var="counter">
+				<request subst="true">
+					<match do="continue" when="match">olleH</match>
+					<http url="crest/url/%%_key%%?input=Hello" version="1.1" method="GET"></http>
+				</request>
+			</for>
+        </session>
+    </sessions>
+</tsung>
