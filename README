@@ -86,6 +86,10 @@ The UUID generator source file is Copyright (C) 2008 Andrew Kreiling
 find this license in the file "MIT-LICENSE" or at
 http://opensource.org/licenses/mit-license.php.
 
+The gen_server2 source file is Copyright (C) 2009 LShift Ltd. and licensed
+under the "Erlang Public License"; you can find this license in the file
+"EPL-LICENSE" or at http://www.erlang.org/EPLICENSE.
+
 The jQuery library is licensed under the "MIT License", more details at
 http://jquery.org/license; jQuery DataTables is licensed under the "BSD
 License", more details at http://www.datatables.net/; jqPlot is

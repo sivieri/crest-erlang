@@ -39,7 +39,7 @@ install(F) ->
 %% @doc Start the link of this bridge to the newly spawned function.
 %% @spec start(string(), fun()) -> {ok, pid()}
 start(Key, F) ->
-    {ok, BridgePid} = supervisor_bridge:start_link({local, list_to_atom(Key)}, ?MODULE, {Key, F}),
+    {ok, BridgePid} = supervisor_bridge:start_link(?MODULE, {Key, F}),
     {ok, BridgePid}.
 
 %% @doc Add child pid and key to the crest_peer server here, for avoiding

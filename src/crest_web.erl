@@ -65,7 +65,7 @@ loop(Req, DocRoot) ->
 				["crest", "local", T] ->
 					case crest_local:start_local(T) of
                         {ok, Key} ->
-                            Req:respond({200, [{"Content-Type", "text/html"}], Key});
+                            Req:respond({200, [{"Content-Type", "text/xml"}], "<key>" ++ Key ++ "</key>"});
                         {error} ->
                             Req:respond({404, [], []})
                     end;

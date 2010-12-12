@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_local).
--behaviour(gen_server).
+-behaviour(gen_server2).
 -export([start/0, stop/0, list_local/0, add_local/3, remove_local/1, start_local/1, reload/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
@@ -29,38 +29,38 @@
 %% @doc Start this peer
 %% @spec start() -> ok
 start() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server2:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %% @doc Stop this peer
 %% @spec stop() -> ok
 stop() ->
-    gen_server:call(?MODULE, stop).
+    gen_server2:call(?MODULE, stop).
 
 %% @doc Get a list of local computations available to installation.
 %% @spec list_local() -> [{string(), {string(), string()}}]
 list_local() ->
-	gen_server:call(?MODULE, list).
+	gen_server2:call(?MODULE, list).
 
 %% @doc Add a new local computation.
 %% @spec add_local(string(), string(), string()) -> ok
 add_local(Name, Module, Function) ->
-	gen_server:cast(?MODULE, {add, Name, Module, Function}).
+	gen_server2:cast(?MODULE, {add, Name, Module, Function}).
 
 %% @doc Remove a computation from  the local ones; it replaces the current one.
 %% @spec remove_local(string()) -> ok
 remove_local(Name) ->
-	gen_server:cast(?MODULE, {remove, Name}).
+	gen_server2:cast(?MODULE, {remove, Name}).
 
 %% @doc Install a computation locally, if present in the list.
 %% @spec start_local(string()) -> {ok, Key} | error
 start_local(Name) ->
-	gen_server:call(?MODULE, {start, Name}).
+	gen_server2:call(?MODULE, {start, Name}).
 
 %% @doc Reload the configuration file; do not replace any function already
 %% in the list.
 %% @spec reload() -> ok
 reload() ->
-	gen_server:cast(?MODULE, reload).
+	gen_server2:cast(?MODULE, reload).
 
 init(_Args) ->
     Locals = do_reload(),
@@ -123,4 +123,4 @@ do_start_local(Locals, Name) ->
 
 handle_start(Name, From, Locals) ->
 	Result = do_start_local(Locals, Name),
-	gen_server:reply(From, Result).
+	gen_server2:reply(From, Result).

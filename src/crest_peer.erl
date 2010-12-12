@@ -26,7 +26,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_peer).
--behaviour(gen_server).
+-behaviour(gen_server2).
 -export([start/0, stop/0, spawn_install/1, remote/1, spawn_exec/2, add_child/2, remove_child/1, get_list/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
@@ -35,51 +35,51 @@
 %% @doc Start this peer
 %% @spec start() -> ok
 start() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server2:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %% @doc Stop this peer
 %% @spec stop() -> ok
 stop() ->
-    gen_server:call(?MODULE, stop).
+    gen_server2:call(?MODULE, stop).
 
 %% @doc Install a new operation on this peer, using the given
 %% parameters.
 %% @spec spawn_install([{string(), any()}]) -> {string(), dictionary()}
 spawn_install(Params) ->
-    gen_server:call(?MODULE, {spawn, Params}).
+    gen_server2:call(?MODULE, {spawn, Params}).
 
 %% @doc Execute an already installed operation, specified by the given
 %% unique key.
 %% @spec spawn_exec([Key], [{atom(), any()}]) -> {{ok, any()}, dictionary()} | {reply, {error}, dictionary()}
 spawn_exec([Key], Params) ->
-    gen_server:call(?MODULE, {exec, Key, Params});
+    gen_server2:call(?MODULE, {exec, Key, Params});
 spawn_exec(Key, Params) ->
-    gen_server:call(?MODULE, {exec, Key, Params}).
+    gen_server2:call(?MODULE, {exec, Key, Params}).
 
 %% @doc Install and execute a new operation on this peer, and then delete it.
 %% @spec remote([{string(), any()}]) -> {{ok, any()}, dictionary()} | {{error}, dictionary()}
 remote(Params) ->
-    Key = gen_server:call(?MODULE, {spawn, lists:sublist(Params, 4)}),
-    Answer = gen_server:call(?MODULE, {exec, Key, lists:sublist(Params, 5, length(Params))}),
-    gen_server:cast(?MODULE, {delete, Key}),
+    Key = gen_server2:call(?MODULE, {spawn, lists:sublist(Params, 4)}),
+    Answer = gen_server2:call(?MODULE, {exec, Key, lists:sublist(Params, 5, length(Params))}),
+    gen_server2:cast(?MODULE, {delete, Key}),
     Answer.
 
 %% @doc Add a new process to the internal server list, with the associated key.
 %% @spec add_child(string(), pid()) -> dictionary()
 add_child(Key, Pid) ->
-    gen_server:cast(?MODULE, {add_child, Key, Pid}).
+    gen_server2:cast(?MODULE, {add_child, Key, Pid}).
 
 %% @doc Remove a child process from the internal server list, and terminate
 %% it.
 %% @spec remove_child(string()) -> dictionary()
 remove_child(Key) ->
-	gen_server:cast(?MODULE, {delete, Key}).
+	gen_server2:cast(?MODULE, {delete, Key}).
 
 %% @doc Get a dictionary of responses from all childs, passing to all the given parameter;
 %% the key is the child process UUID.
 %% @spec get_list(string()) -> dictionary()
 get_list(Param) ->
-    gen_server:call(?MODULE, {list, {"param", Param}}).
+    gen_server2:call(?MODULE, {list, {"param", Param}}).
 
 init(_Args) ->
     Spawned = dict:new(),
@@ -134,16 +134,16 @@ terminate(_Reason, _Spawned) ->
 handle_spawn(Params, From) ->
 	F = crest_utils:get_lambda(Params),
     Key = crest_spawn:install(F),
-	gen_server:reply(From, Key).
+	gen_server2:reply(From, Key).
 
 handle_exec({Key, Params}, From, Spawned) ->
 	case dict:find(Key, Spawned) of
         {ok, ChildPid} ->
             Res = crest_utils:rpc(ChildPid, Params),
             log4erl:info("Executed the existing key ~p~n", [Key]),
-			gen_server:reply(From, {ok, Res});
+			gen_server2:reply(From, {ok, Res});
         error ->
-			gen_server:reply(From, {error})
+			gen_server2:reply(From, {error})
     end.
 
 handle_list(Param, From, Spawned) ->
@@ -152,4 +152,4 @@ handle_list(Param, From, Spawned) ->
                                [Val|AccIn]
                                end, [], Spawned),
     log4erl:info("Collected all responses for parameter ~p~n", [Param]),
-	gen_server:reply(From, dict:from_list(Result)).
+	gen_server2:reply(From, dict:from_list(Result)).
