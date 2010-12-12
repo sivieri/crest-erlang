@@ -24,6 +24,14 @@ $(document).ready(function(){
 		createTableInstalled();
 		createTableLocal();
 	});
+	$("#localtable a").bind("click", function(event){
+		event.preventDefault();
+		event.stopPropagation();
+		$.get(this.href, {}, function(response){
+			$("#newlocal").html(response);
+		});
+		return false;
+	});
 });
 
 function createTableInstalled()

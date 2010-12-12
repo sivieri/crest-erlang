@@ -35,9 +35,10 @@ get_function_pow() ->
                 Pid ! {self(), [{"input", "integer()"}]},
                 F(F);
             {Pid, [{"input", InputString}]} ->
-				{InputInt, _} = string:to_integer(InputString),
-				Res = math:pow(InputInt, 2),
-                Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}},
+				spawn(fun() -> 
+					{InputInt, _} = string:to_integer(InputString),
+					Res = math:pow(InputInt, 2),
+                	Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}} end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -61,9 +62,10 @@ get_function_sqrt() ->
                 Pid ! {self(), [{"input", "integer()"}]},
                 F(F);
             {Pid, [{"input", InputString}]} ->
-				{InputInt, _} = string:to_integer(InputString),
-				Res = math:sqrt(InputInt),
-                Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}},
+				spawn(fun() ->
+					{InputInt, _} = string:to_integer(InputString),
+					Res = math:sqrt(InputInt),
+                	Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}} end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -87,7 +89,8 @@ get_function_reverser() ->
                 Pid ! {self(), [{"input", "string()"}]},
                 F(F);
             {Pid, [{"input", Input}]} ->
-                Pid ! {self(), {"text/plain", lists:reverse(Input)}},
+				spawn(fun() ->
+                	Pid ! {self(), {"text/plain", lists:reverse(Input)}} end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
