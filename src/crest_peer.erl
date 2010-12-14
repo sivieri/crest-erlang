@@ -88,14 +88,14 @@ get_list(Param) ->
     gen_server2:call(?MODULE, {list, {"param", Param}}).
 
 init(_Args) ->
-    Spawned = dict:new(),
+    Spawned = ets:new(proctable, [set]),
 	Children = supervisor:which_children(crest_spawn_sup),
-	NewSpawned = lists:foldl(fun({Key, Pid, _, _}, AccIn) ->
+	lists:foreach(fun({Key, Pid, _, _}) ->
 									 {links, [_Pid1, Pid2]} = process_info(Pid, links),
 									 log4erl:info("Recovered a running computation: ~p~n", [Key]),
-									 dict:store(Key, Pid2, AccIn) end,
-							 Spawned, Children),
-    {ok, NewSpawned}.
+									 ets:insert(Spawned, {Key, Pid2}) end,
+							 Children),
+    {ok, Spawned}.
 
 handle_call({spawn, Params}, From, Spawned) ->
 	spawn(fun() -> handle_spawn(Params, From) end),
@@ -113,16 +113,16 @@ handle_call(_Request, _From, Spawned) ->
     {noreply, Spawned}.
 
 handle_cast({add_child, Key, Pid}, Spawned) ->
-    NewSpawned = dict:store(Key, Pid, Spawned),
+    ets:insert(Spawned, {Key, Pid}),
     log4erl:info("Registered a new key ~p~n", [Key]),
-    {noreply, NewSpawned};
+    {noreply, Spawned};
 handle_cast({delete, Key}, Spawned) ->
     case supervisor:terminate_child(crest_sup, Key) of
         ok ->
             supervisor:delete_child(crest_sup, Key),
-            NewSpawned = dict:erase(Key, Spawned),
+            ets:delete(Spawned, Key),
             log4erl:info("Deleted the key ~p~n", [Key]),
-            {noreply, NewSpawned};
+            {noreply, Spawned};
         {error, not_found} ->
             {noreply, Spawned}
     end;
@@ -135,7 +135,8 @@ handle_info(_Info, Spawned) ->
 code_change(_OldVsn, Spawned, _Extra) ->
     {ok, Spawned}.
 
-terminate(_Reason, _Spawned) ->
+terminate(_Reason, Spawned) ->
+    ets:delete(Spawned),
     ok.
 
 %% Internal API
@@ -150,18 +151,18 @@ handle_spawn_local({M, F}, From) ->
     gen_server2:reply(From, Key).
 
 handle_exec({Key, Params}, From, Spawned) ->
-	case dict:find(Key, Spawned) of
-        {ok, ChildPid} ->
-            Res = crest_utils:rpc(ChildPid, Params),
+    case ets:lookup(Spawned, list_to_binary(Key)) of
+        [{_, Pid}|_T] ->
+            Res = crest_utils:rpc(Pid, Params),
             log4erl:info("Executed the existing key ~p~n", [Key]),
 			gen_server2:reply(From, {ok, Res});
-        error ->
+        [] ->
 			gen_server2:reply(From, {error})
     end.
 
 handle_list(Param, From, Spawned) ->
-	Result = dict:fold(fun(Key, Pid, AccIn) ->
-                               Val = {Key, crest_utils:rpc(Pid, Param)},
+	Result = ets:foldl(fun({Key, Pid}, AccIn) ->
+                               Val = {binary_to_list(Key), crest_utils:rpc(Pid, Param)},
                                [Val|AccIn]
                                end, [], Spawned),
     log4erl:info("Collected all responses for parameter ~p~n", [Param]),

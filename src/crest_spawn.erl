@@ -47,7 +47,7 @@ start(Key, F) ->
 %% @spec init({string(), fun()}) -> {ok, pid(), pid()}
 init({Key, F}) ->
     ChildPid = proc_lib:spawn_link(fun() -> F() end),
-    crest_peer:add_child(Key, ChildPid),
+    crest_peer:add_child(list_to_binary(Key), ChildPid),
     {ok, ChildPid, ChildPid}.
 
 %% @doc Terminate a child pid.

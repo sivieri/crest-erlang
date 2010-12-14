@@ -832,7 +832,10 @@ format_status(Opt, StatusData) ->
     NameTag = if is_pid(Name) ->
 		      pid_to_list(Name);
 		 is_atom(Name) ->
-		      Name
+		      Name;
+         true ->
+             {_, Name2} = Name,
+             Name2
 	      end,
     Header = lists:concat(["Status for generic server ", NameTag]),
     Log = sys:get_debug(log, Debug, []),
