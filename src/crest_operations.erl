@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_operations).
--export([install_local/1, invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
+-export([install_local/1, invoke_local_spawn/2, invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
 
 %% External API
 
@@ -29,6 +29,13 @@
 install_local(Name) ->
 	crest_local:reload(),
 	crest_local:start_local(Name).
+
+%% @doc Spawn a function on this host; it can be done also through invoke_spawn,
+%% but this call bypasses a Web request to localhost.
+%% @spec invoke_local_spawn(atom(), atom()) -> {ok, string()}
+invoke_local_spawn(Module, Function) ->
+    Key = crest_peer:spawn_local_install({Module, Function}),
+    {ok, Key}.
 
 %% @doc Spawn a function on a certain host; the function module needs to be
 %% in the Erlang path.
