@@ -20,11 +20,80 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(original).
--export([]).
+-export([get_function/0, get_manager/0]).
 
 %% External API
 
+get_function() ->
+    F = fun(F, Instances) ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Original demo instances list"},
+                F(F, Instances);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET/POST"},
+                F(F, Instances);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"instance", "string()"}]},
+                F(F, Instances);
+            {Pid, [{"instance", "new"}]} ->
+                Res = crest_operations:install_local("manager"),
+                case Res of
+                    {ok, Body} ->
+                        NewInstances = [Body|Instances],
+                        Pid ! {self(), {"text/plain", Body}},
+                        F(F, NewInstances);
+                    {error} ->
+                        Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
+                        F(F, Instances)
+                end;
+            {Pid, []} ->
+                case Instances of
+                    [H|_] ->
+                        Pid ! {self(), {"text/plain", H}};
+                    [] ->
+                        Res = crest_operations:install_local("manager"),
+                        case Res of
+                            {ok, Body} ->
+                                NewInstances = [Body|Instances],
+                                Pid ! {self(), {"text/plain", Body}},
+                                F(F, NewInstances);
+                            {error} ->
+                                Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
+                        end
+                end,
+                F(F, Instances);
+            Any ->
+                io:format("Spawned: ~p~n", [Any]),
+                F(F, Instances)
+        end
+    end,
+    fun() ->
+        F(F, [])
+    end.
 
+get_manager() ->
+    F = fun(F, Instances) ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Original demo main manager"},
+                F(F, Instances);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET/POST"},
+                F(F, Instances);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), []},
+                F(F, Instances);
+            {Pid, []} ->
+                F(F, Instances);
+            Any ->
+                io:format("Spawned: ~p~n", [Any]),
+                F(F, Instances)
+        end
+    end,
+    fun() ->
+        F(F, [])
+    end.
 
 %% Internal API
 
