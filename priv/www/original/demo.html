@@ -1,0 +1,1068 @@
+<html>
+<head>
+<title>CREST Widgets</title>
+<style type="text/css">
+@import "dijit/themes/soria/soria.css";
+@import "dojox/layout/resources/FloatingPane.css";
+@import "dojox/layout/resources/ResizeHandle.css";
+@import "dojox/grid/resources/Grid.css";
+@import "dojox/grid/resources/soriaGrid.css";
+@import "dojox/widget/Calendar/Calendar.css";
+@import "dijit/tests/css/dijitTests.css";
+	.search {
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		padding-left: 10px;
+		margin-left: 10px;
+	}
+	.label { 
+		text-align: right;
+		line-height: 1.5em;
+	}
+	.TagCloud {
+		font-family:Arial, sans-serif;
+		font-size:0.8em;
+		width:350px;
+	}
+	.TagCloud ul { 
+		padding: 0pt;
+		margin: 0pt;
+	}
+	.TagCloud li { 
+		display:inline;
+	}
+	.TagCloud a:link, .TagCloud a:visited { 
+		color:#0000FF;
+		text-decoration:none;
+	}
+	.TagCloud a:hover { 
+		color:#666666;
+		text-decoration:underline;
+	}
+</style>
+<script type="text/javascript" src="dojo/dojo.js" djConfig="parseOnLoad:true, isDebug: false"></script>
+<script type="text/javascript">
+dojo.require("dojox.layout.FloatingPane");
+dojo.require("dijit.layout.TabContainer");
+dojo.require("dijit.layout.ContentPane");
+dojo.require("dijit.form.FilteringSelect");
+dojo.require("dojo.data.ItemFileWriteStore");
+dojo.require("dojox.grid.DataGrid");
+dojo.require("dojox.widget.Calendar");
+dojo.require("dijit.Menu");
+dojo.require("dojox.data.GoogleSearchStore");
+dojo.require("dijit.form.Button");
+dojo.require("dijit.form.ComboBox");
+dojo.require("mydojo.TagCloud");
+dojo.require("dojox.gfx");
+dojo.require("dojox.gfx.move");
+dojo.require("dojox.charting.widget.Sparkline");
+dojo.require("dojox.data.CsvStore");
+dojo.require("dojo.date.stamp");
+var mirror_surface;
+var surfaces = new Object();
+var shapes = new Object();
+var mirror_created = false;
+var w_tl;
+var url_update;
+var t_all;
+var JSONs = new Object();
+var colors = new Object();
+colors['W_0'] = "blue";
+<!--Functions of Manager-->
+var widget_count = 0;
+var link_count = 0;
+var widgetItems = {
+   identifier: 'id',
+   label: 'type',
+   items: [
+      {id:"W_0", type:"widget", title: "Manager", host:"Peer 1", linkto:""}
+   ] 
+};
+var layout = [ 
+	{name: 'ID', field:'id',width:"19%"},
+	{name: 'Type', field:'title',width:"48%"},
+	{name: 'Host', field:'host',width:"33%"}
+];
+function getRand(from, to){
+	return Math.random() * (to - from) + from;
+}
+function showMenu(evt){
+	var _isDisabled = true;
+	var pMenu = new dijit.Menu({targetNodeIds:["widgets_added"]});
+	pMenu.addChild(new dijit.MenuItem({
+            label:"Get Info"
+  }));
+	var pSubMenu = new dijit.Menu();
+	var selectedId = widgets.getValue(widgetsGrid.getItem(evt.rowIndex),"id");
+	var linkto = widgets.getValue(widgetsGrid.getItem(evt.rowIndex),"linkto");
+	if (!linkto){
+		linkto = "";
+	}
+	//alert(selectedId);
+	function gotWidget(items, request) {
+  	if (items ) {
+  		if (items.length>1){
+  			_isDisabled = false;
+  			dojo.forEach(items, function(item){
+  				var id = widgets.getValue(item,"id");
+  				if (id !=selectedId){
+  					var title = widgets.getValue(item,"title");
+  					pSubMenu.addChild(new dijit.MenuItem({
+  						label:id+": "+title,
+  						onClick: function() {
+            		//alert(selectedId+" to "+id);
+            		linkto = linkto+id+" ";
+            		widgets.setValue(widgetsGrid.getItem(evt.rowIndex),"linkto",linkto);
+            		widgets.newItem({id:"L_"+link_count++, type:"link", source: selectedId, target: id});
+            		widgets.save();
+            		widgetsGrid.filter({ type: 'widget' });
+            		if (mirror_created){
+            			mirrorLink(selectedId,id);
+            		}
+    						var d = {
+    							"type": "link",
+    							"from": selectedId,
+									"to": id
+	    					};
+								dojo.rawXhrPost({ 
+    							url: "/widget/manager/link", 
+    							handleAs: "json", 
+    							postData: dojo.toJson(d), 
+    							headers: {"Content-Type": "application/json"} 
+    						});     
+          		}
+  					}));
+  				}
+  			});
+  		}
+		}
+  }
+	widgets.fetch({query:{type: 'widget'}, onComplete: gotWidget});
+  pMenu.addChild(new dijit.PopupMenuItem({
+  	label:"Connect To",
+    popup:pSubMenu,
+    disabled:_isDisabled
+  }));
+	<!--Running Host Menu Item-->
+	var pSubMenuTwo = new dijit.Menu();
+	var cur_host= widgets.getValue(widgetsGrid.getItem(evt.rowIndex),"host");
+	function gotHost(items, request) {
+  	if (items ) {
+  		if (items.length>1){
+  			_isDisabled = false;
+  			dojo.forEach(items, function(item){
+  				var host = widgetStore.getValue(item,"name");
+  				var l = host;  				
+  				if (host == cur_host){
+  					l = l+"  <";
+  				} 
+  				pSubMenuTwo.addChild(new dijit.MenuItem({
+  					label:l,
+  					onClick: function() {
+  						if (host != cur_host){
+  							widgets.setValue(widgetsGrid.getItem(evt.rowIndex),"host",host);
+  							<!--update mirror image-->
+  							if (mirror_created){
+  								for (var j in shapes){
+  									if (host=="Peer 1"){
+  										shapes[j][selectedId].setStroke({color: 'blue', width: 2});
+  									} else if (host=="Peer 2"){
+  										shapes[j][selectedId].setStroke({color: 'green', width: 2});
+  									}
+  								}
+								}
+								<!--update title bar color-->
+  							dojo.query(".dojoxFloatingPaneTitle").forEach(function(node, index, arr){
+  								var w= dijit.getEnclosingWidget(node);
+  								if (w.attr("id")==selectedId){
+  									if (host == "Peer 1"){
+  										dojo.style(node,"background","#fff url('img/titleBar.png') repeat-x top left");
+  										colors[selectedId] = "blue";
+  									} else if (host == "Peer 2"){
+      								dojo.style(node,"background","#fff url('img/green.png') repeat-x top left");
+      								colors[selectedId] = "green";
+  									}
+  								}
+  							});
+  						}	
+          	}
+  				}));
+  			});
+  		}
+		}
+  }
+	widgetStore.fetch({query:{type: 'host'}, onComplete: gotHost});
+  pMenu.addChild(new dijit.PopupMenuItem({
+  	label:"Running Host",
+    popup:pSubMenuTwo
+  }));
+	pMenu.startup();
+  dojo.connect(pMenu, 'onClose', function() {
+    pMenu.uninitialize();
+  });	
+}
+function _create(wId,sub,_x,_y){
+	var x, y;
+	if (_x){
+		x = _x;
+	} else {
+		x = getRand(20, 1000);
+	}
+	if (_y){
+		y = _y;
+	} else {
+		y = getRand(20, 400);
+	}
+	switch(sub){
+		case "Sparkline":
+  		var sparklinepane = new dojox.layout.FloatingPane({
+     		'title': "Sparkline",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:250px;height:180px;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(sparklinepane.domNode,dojo.body());
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/sparkline.csv";
+  		}
+  		drawSP(wId);
+  		sparklinepane.startup();
+			break;
+		case "Mirror":
+  		var mirrorpane = new dojox.layout.FloatingPane({
+     		'title': "Mirror",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:305px;height:185px;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(mirrorpane.domNode,dojo.body());
+  		mirrorpane.startup();  			
+  		var container = document.createElement("div");
+  		mirror_created = true;
+  		surfaces[wId] = dojox.gfx.createSurface(container, 288, 160);
+  		shapes[wId] = new Object();
+  		draw_mirror(wId);
+  		mirrorpane.attr("content",container);
+  		dojo.subscribe("/dnd/move/stop", function(e){
+  			var w = dijit.byNode(e.node);
+    		_onmoved(w.id);
+			});
+			break;
+		case "RSS Reader":
+  		var rsspane = new dojox.layout.FloatingPane({
+     		'title': "RSS Reader",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:250px;height:300px;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(rsspane.domNode,dojo.body());
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/rss.json";
+  		}  		
+			drawRSS(wId);
+  		rsspane.startup();  			
+			break;
+		case "QR Code":
+  		var qrpane = new dojox.layout.FloatingPane({
+     		'title': "QR Code",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:250px;height:275px;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(qrpane.domNode,dojo.body());
+  		var _div = document.createElement("div");
+  		_div.innerHTML = 
+				"<img name='"+
+				wId+"_qr_image'></img>";
+  		qrpane.attr("content",_div);
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/qr.json";
+  		}  		
+  		drawQR(wId);
+  		qrpane.startup();  			
+			break;
+		case "Tag Cloud":
+  		var tagcloudpane = new dojox.layout.FloatingPane({
+     		'title': "Tag Cloud",
+     		'resizable': false, 
+     		'dockable': false,
+     		'onFocus':function(){w_tl = wId;},
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:250;height:230;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(tagcloudpane.domNode,dojo.body());
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/tagcloud.json";
+  		}  		
+  		drawTL(wId);
+  		tagcloudpane.startup();
+  		//var t=setTimeout(function() {drawTL(wId)},5000);  			
+			break;
+		case "URL Selector":
+  		var urlpane = new dojox.layout.FloatingPane({
+     		'title': "URL Selector",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:350px;height:61px;",
+     		'onKeyDown': function(k){url_update = false;},
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(urlpane.domNode,dojo.body());
+  		var _div = document.createElement("div");
+  		_div.innerHTML = 
+				"<table width='100%'><tr><td width='85%'>" +
+				"<select id='" +
+				wId+"_url_field' dojoType='dijit.form.ComboBox' style='width: 100%;'>" +
+				"</select></td><td width='15%'>"+
+				"<button dojoType='dijit.form.Button' type='submit' style='font-size:15px' onclick='_submitURL(" +
+				"\""+
+				wId+ "\""+
+				");'>OK</button>"+
+				"</td></tr></table>";
+  		urlpane.attr("content",_div);
+  		urlpane.startup();
+  		url_update = true;
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/url.json";
+  		}  		
+  		getURL(wId);  			
+			break;
+		case "Google News":
+  		var googlepane = new dojox.layout.FloatingPane({
+     		'title': "Google News Search",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:250;height:300;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(googlepane.domNode,dojo.body());
+  		var _div = document.createElement("div");
+  		_div.innerHTML =
+                       "<table width='100%'><tr><td width='60%'>" +
+                               "<input type='text' readonly='readonly' style='width:100%' id='"+
+                               wId+"_searchText'/></td><td width='40%'>" +
+                               "<input type='text' readonly='readonly' style='width:100%' id='"+
+                               wId+"_searchDate'/></td></tr></table>"  +
+                               "<ul class='search' style='width:100%' id='"+
+				wId+"_searchOutput'></ul>";
+  		googlepane.attr("content",_div);
+  		googlepane.startup();
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/google.json";
+  		}  		
+  		getSearchKey(wId);  			
+			break;
+		default:
+  		var calendarpane = new dojox.layout.FloatingPane({
+     		'title': "Calendar",
+     		'resizable': false, 
+     		'dockable': false,
+     		'style': "position:absolute;top:"+y+";left:"+x+";width:185px;height:215px;",
+     		'id': wId
+  		},document.createElement("div"));
+  		dojo.place(calendarpane.domNode,dojo.body());
+  		var _calendar = new dojox.widget.Calendar({id:wId+"_calendar"},document.createElement("div"));
+  		if (!JSONs[wId]){
+  			JSONs[wId] = "data/calendar.json";
+  		}  		
+  		getSelected(wId);
+  		dojo.connect(_calendar, "onValueSelected", function(date){
+          //alert(date);
+    			var d = {
+    				"id": wId,
+						"date": dojo.date.stamp.toISOString(date)
+	    		};
+					dojo.rawXhrPost({ 
+    				url: JSONs[wId],
+    				handleAs: "json", 
+    				postData: dojo.toJson(d), 
+    				headers: {"Content-Type": "application/json"} 
+    			});     
+        });
+  		calendarpane.attr("content",_calendar);
+  		calendarpane.startup();  
+	}
+	dijit.byId(wId).bringToTop();
+}
+function add_widget(){
+	if (!dijit.byId("widgetlist").attr('value')){
+		alert("Please select a widget to add");
+		return false;
+	}
+	var loc = dijit.byId("hostlist").attr('displayedValue');
+	var type = dijit.byId("widgetlist").attr('displayedValue');
+	while (dojo.byId("W_"+widget_count)){
+		widget_count++;
+	}
+	var w_id = "W_"+widget_count;	
+	_create(w_id,type,null,null);
+	widgets.newItem({id:w_id, type:"widget", title: type, 
+		host: loc, linkto:""});
+	widgets.save();
+	var x, y, width, height, c;
+  dojo.query(".dojoxFloatingPaneTitle").forEach(function(node, index, arr){
+  	var w= dijit.getEnclosingWidget(node);
+  	if (w.attr("id")==w_id){
+  		if (loc == "Peer 1"){
+  			dojo.style(node,"background","#fff url('img/titleBar.png') repeat-x top left");
+  			colors[w_id] = "blue";
+  			c = "blue";
+  		} else if (loc == "Peer 2"){
+      	dojo.style(node,"background","#fff url('img/green.png') repeat-x top left");
+      	colors[w_id] = "green";
+      	c = "green";
+  		}
+      x = dojo.coords(node).x;
+      y = dojo.coords(node).y;
+      width = dojo.style(node,"width");
+      height = dojo.style(node,"height");
+  	}
+  });
+	if (mirror_created){
+		mirrorWidget(w_id);
+	}	
+  var d = {
+  	type: "widget",
+  	id: w_id,
+		title: type,
+		x: x,
+		y: y,
+		width: width,
+		height: height,
+		color: c,
+		host: loc
+	};
+	dojo.rawXhrPost({ 
+  	url: "/widget/manager/create", 
+    handleAs: "json", 
+    postData: dojo.toJson(d), 
+    headers: {"Content-Type": "application/json"} 
+  });     
+}
+<!--Sparkline functions-->
+function sparkClicked(sTag){
+	alert(sTag.innerHTML+" clicked.");
+}
+var tagStore;
+function drawSP(w_id){
+	tagStore = new dojox.data.CsvStore({url: JSONs[w_id]+'?'+Math.random()});
+  tagStore.fetch( {
+    onComplete: function(data,response) {
+			var content;
+			var n = 30;
+			function gotTag(items, request) {
+  			if (items ) {
+  				if (items.length>0){
+  					var attrs = tagStore.getAttributes(items[0]);
+  					content = '<table cellpadding="0" cellspacing="3" border="0">';
+  					var i;
+  					for (i = 0; i < attrs.length; i++) {
+  						content = content + '<tr><td class="label" style="text-align:left;"><a href="#'+ attrs[i] 
+  									+'" onclick="sparkClicked(this);return false;">'+ attrs[i] + '</a></td>';
+  						content = content + '<td>';
+  						content = content + '<div dojoType="dojox.charting.widget.Sparkline" style="width: 100px; height: 15px;" ';
+  						content = content + 'store="tagStore" field="'+ attrs[i] +'" count="'+n+'" valueFn="Number(x)"></div>';
+							content = content + '</td>';
+							content = content + '<td style="color:red;text-align: right;">' +tagStore.getValue(items[n-1], attrs[i])+'</td>';
+  						content = content + '</tr>';
+  					}
+  					content = content +"</table>";
+  				}
+				}
+  		}
+			tagStore.fetch({ count: n, onComplete: gotTag});
+			dijit.byId(w_id).attr("content",content);
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error:  failed to load data, with error message = " + error);
+    }
+  });
+	setTimeout(function() {drawSP(w_id)},3000);
+}
+<!--Mirror function-->
+function _onmoved(id){
+	<!--redraw moved widget-->
+	for (var j in shapes){
+		var c_x = (dojo.coords(dojo.byId(id)).x)/5;
+  	var c_y = (dojo.coords(dojo.byId(id)).y)/5;
+		dojo.attr(shapes[j][id].rawNode, "x",c_x);
+		dojo.attr(shapes[j][id].rawNode, "y",c_y);
+	}
+	<!--redraw links-->
+	dojo.query('[src='+id+']').forEach(function(node, index, arr){
+		dojo.attr(node,"x1", (dojo.coords(dojo.byId(id)).x+ Number(dojo.style(dojo.byId(id),"width"))/2)/5);
+		dojo.attr(node,"y1", (dojo.coords(dojo.byId(id)).y+ Number(dojo.style(dojo.byId(id),"height"))/2)/5);
+  });
+	dojo.query('[tgt='+id+']').forEach(function(node, index, arr){
+		dojo.attr(node,"x2", (dojo.coords(dojo.byId(id)).x+ Number(dojo.style(dojo.byId(id),"width"))/2)/5);
+		dojo.attr(node,"y2", (dojo.coords(dojo.byId(id)).y+ Number(dojo.style(dojo.byId(id),"height"))/2)/5);
+  });
+	dojo.query('[in='+id+']').forEach(function(node, index, arr){
+		dojo.attr(node,"cx", (dojo.coords(dojo.byId(id)).x+ Number(dojo.style(dojo.byId(id),"width"))/2)/5);
+		dojo.attr(node,"cy", (dojo.coords(dojo.byId(id)).y+ Number(dojo.style(dojo.byId(id),"height"))/2)/5);
+  });
+}
+function mirrorWidget(w_id){
+	for (var j in surfaces){
+		draw_widget(w_id,j);
+	}
+}
+function mirrorLink(from, to){
+	for (var j in surfaces){
+		draw_link(from,to,j);
+	}
+}
+function draw_widget(w_id, mirror_id){
+	var c_x = (dojo.coords(dojo.byId(w_id)).x)/5;
+  var c_y = (dojo.coords(dojo.byId(w_id)).y)/5;
+  var c_width = Number(dojo.style(dojo.byId(w_id),"width"))/5;
+  var c_height = Number(dojo.style(dojo.byId(w_id),"height"))/5;
+  var shape = surfaces[mirror_id].createRect({x: c_x, y: c_y, width: c_width, height: c_height});
+  if (colors[w_id]=="blue"){
+  	shape.setStroke({color: 'blue', width: 2});
+  } else if (colors[w_id]=="green"){
+  	shape.setStroke({color: 'green', width: 2});
+  }
+	shape.setFill([255,255,255,1]);
+	shapes[mirror_id][w_id]=shape;
+}
+function draw_link(from, to, mirror_id){
+	var x_1 = dojo.coords(dojo.byId(from)).x+ Number(dojo.style(dojo.byId(from),"width"))/2; 
+	var y_1 = dojo.coords(dojo.byId(from)).y+ Number(dojo.style(dojo.byId(from),"height"))/2;
+	var x_2 = dojo.coords(dojo.byId(to)).x+Number(dojo.style(dojo.byId(to),"width"))/2;
+	var y_2 = dojo.coords(dojo.byId(to)).y+Number(dojo.style(dojo.byId(to),"height"))/2;
+	var shape = surfaces[mirror_id].createLine({x1: x_1/5, y1: y_1/5, x2: x_2/5, y2: y_2/5});
+	shape.setStroke("black");
+	dojo.attr(shape.rawNode,"src",from);
+	dojo.attr(shape.rawNode,"tgt",to);
+	<!--draw end points-->
+	//var p1 = surfaces[mirror_id].createCircle({cx:x_1/5, cy:y_1/5, r:5});
+	//p1.setFill([0,0,0,1]);
+	//dojo.attr(p1.rawNode,"in",from);
+	var p2 = surfaces[mirror_id].createCircle({cx:x_2/5, cy:y_2/5, r:5});
+	p2.setFill([0,0,0,1]);
+	dojo.attr(p2.rawNode,"in",to);
+}
+function draw_mirror(mirror_id){
+	<!--draw widgets-->
+	function gotWidget(items, request) {
+  	if (items ) {
+    	var i;
+      for (i = 0; i < items.length; i++) {      	
+      	var item = items[i];
+      	var w_id = widgets.getValue(item, "id");
+      	//var host = widgets.getValue(item, "host");
+      	draw_widget(w_id,mirror_id);
+      }
+		}
+  }
+	widgets.fetch({query:{type: 'widget'}, onComplete: gotWidget});
+	<!--draw links-->	
+	function gotLink(items, request) {
+  	if (items ) {
+    	var i;
+      for (i = 0; i < items.length; i++) {      	
+      	var item = items[i];
+      	var s_id = widgets.getValue(item, "source");
+      	var t_id = widgets.getValue(item, "target");
+      	draw_link(s_id,t_id,mirror_id);
+      }
+		}
+  }
+	widgets.fetch({query:{type: 'link'}, onComplete: gotLink});	
+}
+<!--QR Generator function-->
+function drawQR(w_id){
+	var qrStore = new dojo.data.ItemFileWriteStore({url: JSONs[w_id], urlPreventCache:true});
+  qrStore.fetch( {
+    onComplete: function(data,response) {
+			var _url;
+			function gotURL(items, request) {
+  			if (items ) {
+  				_url = qrStore.getValue(items[0],"url");
+				}
+  		}
+			qrStore.fetch({onComplete: gotURL});
+			if (_url){
+				document.images[w_id+"_qr_image"].src = "http://chart.apis.google.com/chart?cht=qr&chs=250x250&chl="+escape(_url);	
+			}
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  }); 
+	setTimeout(function() {drawQR(w_id)},3000);
+}
+<!--RSS function-->
+function drawRSS(w_id){
+	var rssStore = new dojo.data.ItemFileWriteStore({url: JSONs[w_id], urlPreventCache:true});
+  rssStore.fetch( {
+    onComplete: function(data,response) {
+			var content;
+			function gotFeed(items, request) {
+  			if (items ) {
+    			content = "<div>";
+    			var i;
+      		for (i = 0; i < items.length; i++) {      	
+      			var item = items[i];
+      			content = content+'<p style="color:blue">'+ rssStore.getValue(item, "label")+'</p>';
+      			content = content+'<p style="color:#A8A8A8;font-size:70%">Published: '+ rssStore.getValue(item, "sent")+'</p>';
+      			content = content+'<p style="color:#A8A8A8">'+ rssStore.getValue(item, "text")+'</p>';      	
+      		}
+      		content=content+"</div>";
+				}
+  		}
+			rssStore.fetch({query:{type: 'message'}, onComplete: gotFeed});
+			dijit.byId(w_id).attr("content",content);	
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  });  		
+	setTimeout(function() {drawRSS(w_id)},3000);
+}
+<!--Tag Cloud functions-->
+function tagItemClicked(sTag){
+	var d = {
+    "id": w_tl,
+		"tag": sTag
+	};
+	dojo.rawXhrPost({ 
+    url: JSONs[w_tl],
+    handleAs: "json", 
+    postData: dojo.toJson(d), 
+    headers: {"Content-Type": "application/json"} 
+  });
+  //alert(dojo.toJson(d));     
+}
+function drawTL(w_id){
+	var cloudStore = new dojo.data.ItemFileWriteStore({url: JSONs[w_id], urlPreventCache:true});
+  cloudStore.fetch( {
+    onComplete: function(data,response) {
+      var _tagcloud = new mydojo.TagCloud({
+					store: cloudStore,
+					style: "width:100%;height:100%;"
+				},document.createElement("div"));
+			dijit.byId(w_id).attr("content",_tagcloud);	
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  }); 
+	setTimeout(function() {drawTL(w_id)},3000);
+}
+<!--URL Selection function-->
+function _submitURL(wid){
+	var u = dijit.byId(wid+'_url_field').attr('value');
+	if (u){
+		//alert(dijit.byId(wid+'_url_field').attr('value'));
+    var d = {
+    		"id": wid,
+				"url": u
+	    };
+		dojo.rawXhrPost({ 
+    	url: JSONs[wid],
+    	handleAs: "json", 
+    	postData: dojo.toJson(d), 
+    	headers: {"Content-Type": "application/json"} 
+    });     
+	}
+	url_update = true;	
+}
+function getURL(w_id){
+	if (url_update){
+	var urlStore = new dojo.data.ItemFileWriteStore({url: JSONs[w_id], urlPreventCache:true});
+  urlStore.fetch( {
+    onComplete: function(data,response) {
+    	var _url;
+			function gotURL(items, request) {
+  			if (items ) {
+  				if (items.length>0){
+  					_url = urlStore.getValue(items[0],"url");
+  				}
+				}
+  		}
+			urlStore.fetch({ onComplete: gotURL});
+			if (_url){
+				dijit.byId(w_id+'_url_field').attr("value",_url);
+			}	
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  });
+	} 
+	setTimeout(function() {getURL(w_id)},3000);		
+}
+<!--Functions of Google-->
+var _lastSearchedDate;
+var _lastSearchedText;
+var monthname=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+function doSearch(wid,_text,_date) {
+	if (_text){
+		dojo.byId(wid+"_searchText").value = _text;
+	}
+       if (_date){
+               var d = dojo.date.stamp.fromISOString(_date);
+               dojo.byId(wid+"_searchDate").value = monthname[d.getMonth()] +" "+ d.getDate()+", "+d.getFullYear();
+       } else {
+               dojo.byId(wid+"_searchDate").value = "";
+       }
+  var queryString = dojo.byId(wid+"_searchText").value;  
+  _lastSearchedText = queryString;
+  _lastSearchedDate = _date;
+  var store = new dojox.data.GoogleNewsSearchStore();
+  var list = dojo.byId(wid+"_searchOutput");    
+  //Clean up any previous searches
+  while(list.firstChild){
+  	list.removeChild(list.firstChild);
+  }
+  if (_date){
+  	<!--Search by date and word-->
+  	store.fetch({
+    	query:{text: queryString},
+    	count: 100,
+    	onComplete: function(items, request) {
+    		var delay = 0;
+    		dojo.forEach(items, function(item){
+    			var pub_date = new Date(store.getValue(item, "publishedDate"));
+    			if (isSameDate(_date,store.getValue(item, "publishedDate"))){
+      			var li = document.createElement("li");
+      			li.innerHTML = 
+      				"<a style='color:#000000;display:inline;' target='_blank' href=\"" +
+        			store.getValue(item, "unescapedUrl")  + 
+        			"\">" +
+        			store.getValue(item, "title") +
+        			"</a><br><span style='font-size:80%'>Published: "+
+        			pub_date.toUTCString()+
+        			"</span>";            
+      			dojo.style(li, "opacity", "0");
+      			list.appendChild(li);
+      			//Fade in the results.
+      			delay += 200;
+      			dojo.fadeIn({node:li}).play(delay);
+    			}          
+    		});
+    	},
+      onError: function(error,response) {
+        //error, log it or alert user.
+        console.log("Error: failed to load data, with error message = " + error);
+      }
+  	});
+  } else {
+  	<!--Only search by word-->
+  	store.fetch({
+    	query:{text: queryString},
+    	count: 10,
+    	onComplete: function(items, request) {
+    		var delay = 0;
+    		dojo.forEach(items, function(item){
+    			var pub_date = new Date(store.getValue(item, "publishedDate"));
+      		var li = document.createElement("li");
+      		li.innerHTML = 
+      			"<a style='color:#000000;display:inline;' target='_blank' href=\"" +
+        		store.getValue(item, "unescapedUrl")  + 
+        		"\">" +
+        		store.getValue(item, "title") +
+        		"</a><br><span style='font-size:80%'>Published: "+
+        		pub_date.toUTCString()+
+        		"</span>";            
+      		dojo.style(li, "opacity", "0");
+      		list.appendChild(li);
+      		//Fade in the results.
+      		delay += 200;
+      		dojo.fadeIn({node:li}).play(delay);          
+    		});
+    	},
+      onError: function(error,response) {
+        //error, log it or alert user.
+        console.log("Error: failed to load data, with error message = " + error);
+      }
+    });    		
+	}
+}
+function isSameDate(a,b){
+	if ((!a)&&(!b)){
+		return true;
+	}
+	if ((!a)||(!b)){
+		return false;
+	}
+	//_a = new Date(a);
+	//_b = new Date(b);
+	_a = dojo.date.stamp.fromISOString(a);
+	_b = dojo.date.stamp.fromISOString(b);
+	if (!_b) { _b = new Date(b); }
+	return ((_a.getDate()==_b.getDate())&&(_a.getMonth()==_b.getMonth())&&(_a.getFullYear()==_b.getFullYear()));
+}
+function getSearchKey(wid){
+	var googleStore = new dojo.data.ItemFileWriteStore({url: JSONs[wid], urlPreventCache:true});
+  googleStore.fetch( {
+    onComplete: function(data,response) {
+    	var _text;
+    	var _date;
+			function gotKeys(items, request) {
+  			if (items ) {
+  				if (items.length>0){
+  					_text = googleStore.getValue(items[0],"text");
+  					_date = googleStore.getValue(items[0],"date");
+  				}
+				}
+  		}
+			googleStore.fetch({ onComplete: gotKeys});
+			if (_text){
+				if ((_text!=_lastSearchedText)||(!isSameDate(_date,_lastSearchedDate))){
+					doSearch(wid,_text,_date);
+				}
+			}
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  }); 
+	setTimeout(function() {getSearchKey(wid)},3000);	
+}
+<!--Functions of Calendar-->
+function getSelected(w_id){
+	var calendarStore = new dojo.data.ItemFileWriteStore({url: JSONs[w_id], urlPreventCache:true});
+  calendarStore.fetch( {
+    onComplete: function(data,response) {
+    	var _selected;
+			function gotDate(items, request) {
+  			if (items ) {
+  				if (items.length>0){
+  					_selected = calendarStore.getValue(items[0],"date");
+  				}
+				}
+  		}
+			calendarStore.fetch({ onComplete: gotDate});
+			if (_selected){
+				dijit.byId(w_id+"_calendar").attr("value",dojo.date.stamp.fromISOString(_selected));
+			}	
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  }); 
+	setTimeout(function() {getSelected(w_id)},3000);	
+}
+<!--Initialization functions-->
+function getColor(wid){
+	var c;
+	function gotWidget(items, request) {
+  	if (items ) {
+  		if (items.length>0){
+  			var p = widgets.getValue(items[0],"host");
+  			if (p=="Peer 1"){
+  				c = "blue";
+  			}
+  			if (p=="Peer 2"){
+  				c = "green";
+  			}
+  		}
+		}
+  }
+	widgets.fetch({query:{id: wid}, onComplete: gotWidget});
+	return c;
+}
+function _changeColor(id, newColor){
+  <!--update mirror image-->
+	if (mirror_created){
+		for (var j in shapes){
+  		if (newColor=="blue"){
+  			shapes[j][id].setStroke({color: 'blue', width: 2});
+  		} else if (newColor=="green"){
+  			shapes[j][id].setStroke({color: 'green', width: 2});
+  		}
+		}
+	}
+	<!--update title bar color-->
+  dojo.query(".dojoxFloatingPaneTitle").forEach(function(node, index, arr){
+  	var w= dijit.getEnclosingWidget(node);
+  	if (w.attr("id")==id){
+  		if (newColor == "blue"){
+  			dojo.style(node,"background","#fff url('img/titleBar.png') repeat-x top left");
+  			colors[id] = "blue";
+  		} else if (newColor == "green"){
+      	dojo.style(node,"background","#fff url('img/green.png') repeat-x top left");
+      	colors[id] = "green";
+  		}
+  	}
+  });
+}
+function _updateAll(){
+	var mapStore = new dojo.data.ItemFileWriteStore({url: "/widget/manager/maps", urlPreventCache:true});
+  mapStore.fetch( {
+    onComplete: function(data,response) {
+			function gotWid(items, request) {
+  			if (items.length>0 ) {
+    			dojo.forEach(items, function(item){
+    				var id = mapStore.getValue(item, "id");
+    				var t = mapStore.getValue(item, "title");
+    				var url = mapStore.getValue(item, "url");
+    				var x = mapStore.getValue(item, "x");
+    				var y = mapStore.getValue(item, "y");
+    				var w = mapStore.getValue(item, "width");
+    				var h = mapStore.getValue(item, "height");
+    				var color = mapStore.getValue(item, "color");
+    				var loc = mapStore.getValue(item, "host");
+    				if (dijit.byId(id)){
+    					<!--widget exists, update!-->
+    					//if (JSONs[id] != url) { alert("Updating: " + id + "=" + url); }
+    					JSONs[id] = url;
+    					dojo.style(dojo.byId(id),"left",x);
+    					dojo.style(dojo.byId(id),"top",y);
+    					if (mirror_created){
+    						_onmoved(id);
+    					}
+    					if (color!=colors[id]){
+    						_changeColor(id,color);
+    					}
+    				} else {
+    					<!--widget doesn't exist, create!-->
+    					JSONs[id] = url;
+    					_create(id,t,x,y);
+    					widgets.newItem({id:id, type:"widget", title: t, host: loc});
+    					widgets.save();
+    					dojo.query(".dojoxFloatingPaneTitle").forEach(function(node, index, arr){
+  							var w= dijit.getEnclosingWidget(node);
+  							if (w.attr("id")==id){
+  								if (loc == "Peer 1"){
+  									dojo.style(node,"background","#fff url('img/titleBar.png') repeat-x top left");
+  									colors[id] = "blue";
+  								} else if (loc == "Peer 2"){
+      							dojo.style(node,"background","#fff url('img/green.png') repeat-x top left");
+      							colors[id] = "green";
+  								}
+  							}
+  						});
+							if (mirror_created){
+								mirrorWidget(id);
+							}
+    				}
+    			});
+				}
+  		}
+			mapStore.fetch({query:{type:"widget"}, onComplete: gotWid});
+			function gotLink(items, request) {
+  			if (items.length>0 ) {
+    			dojo.forEach(items, function(item){
+    				var from = mapStore.getValue(item, "from");
+    				var to = mapStore.getValue(item, "to");
+    				if (!linkExisted(from, to)){
+    					<!--if the link doesn't exist, create! otherwise ignore it-->
+    					//alert("created");
+    					widgets.newItem({id:"L_"+link_count++, type:"link", source: from, target: to});
+    					widgets.save();
+    					widgetsGrid.filter({ type: 'widget' });
+    					if (mirror_created){
+    						mirrorLink(from,to);
+    					}
+    				}
+    			});
+				}
+  		}
+			mapStore.fetch({query:{type:"link"}, onComplete: gotLink});
+    },
+    onError: function(error,response) {
+      //error, log it or alert user.
+      console.log("Error: failed to load data, with error message = " + error);
+    }
+  }); 
+	t_all = setTimeout("_updateAll()",3000);
+}
+function linkExisted(from, to){
+	var f;
+	function gotLink(items, request) {
+		if (items.length>0){
+			f = true;
+		} else {
+			f = false;
+		}
+	}
+	widgets.fetch({query:{source:from, target:to}, onComplete: gotLink});
+	return f;
+}
+function init(){
+	<!--post move-->
+	dojo.subscribe("/dnd/move/start", function(e){
+  	if (t_all){
+  		clearTimeout(t_all);
+  	}
+	});
+  dojo.subscribe("/dnd/move/stop", function(e){
+  	t_all = setTimeout("_updateAll()",6000);
+    var x = dojo.coords(e.node).x;
+    var y = dojo.coords(e.node).y;
+    var w = dojo.style(e.node,"width");
+    var h = dojo.style(e.node,"height");
+    var id = dijit.byNode(e.node).id;
+    var c = getColor(id);
+    var d = {
+    		id: id,
+				x:x,
+				y:y,
+				width: w,
+				height: h,
+				color: c
+	    };
+		dojo.rawXhrPost({ 
+    	url: "/widget/manager/move", 
+    	handleAs: "json", 
+    	postData: dojo.toJson(d), 
+    	headers: {"Content-Type": "application/json"} 
+    });     
+	});
+	<!--update widgets frequently-->
+	_updateAll();
+}
+dojo.addOnLoad(init);
+</script>
+</head>
+<body class="soria">
+<div dojoType="dojo.data.ItemFileWriteStore" jsId="widgetStore" url="data/manager.json"></div>
+<div dojoType="dojo.data.ItemFileWriteStore" jsId="widgets" data="widgetItems"></div>
+<div dojoType="dojox.layout.FloatingPane" id="W_0" 
+	title="Widget Manager" resizable="false" dockable="false" 
+	style="position:absolute;top:10;left:100;width:300px;height:420px;">
+	<!--style="position:absolute;top:10;left:1100;width:300px;height:420px;"-->
+	<p>
+		<table width="100%">	
+		<tr>
+			<td width="52%">
+				<select id="widgetlist"" dojoType="dijit.form.FilteringSelect" store="widgetStore"
+           searchAttr= "title" value="id" style="width: 100%;">
+				</select>
+			</td>
+			<td width="32%">
+				<select id="hostlist"" dojoType="dijit.form.FilteringSelect" store="widgetStore"
+           searchAttr= "name" value="peer1" style="width: 100%;">
+				</select>
+			</td>
+			<td width="16%">
+				<button dojoType="dijit.form.Button" type="submit" style="font-size:14px" onclick="add_widget">Add</button>
+			</td>
+		</tr>
+		</table>
+	</p>
+	<p>
+		<div id="widgets_added" jsId="widgetsGrid" dojoType="dojox.grid.DataGrid" store="widgets" query="{ type: 'widget' }"
+    	clientSort="true" style="width: 100%" structure="layout" autoHeight="true" 
+    	onRowContextMenu="showMenu">
+		</div>
+	</p>
+</div>
+</body>
+</html>
