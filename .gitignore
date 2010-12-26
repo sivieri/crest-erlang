@@ -5,6 +5,7 @@ logs/*.txt
 logs/index
 logs/main.log
 logs/?
+logs/??
 erl_crash.dump
 .project
 .settings
