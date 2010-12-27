@@ -20,9 +20,22 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1]).
+-export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1, http_get/1]).
 
 %% External API
+
+%% @doc Get the content of the given URL.
+%% @spec http_get(string()) -> {ok, string()} | error
+http_get(Url) ->
+    ibrowse:start(),
+    case ibrowse:send_req(Url, [], get) of
+        {ok, "200", _, Body} ->
+            {ok, Body};
+        {ok, _, _, _} ->
+            error;
+        {error, _Reason} ->
+            error
+    end.
 
 %% @doc Returns the list of SSL options for making HTTPS requests with
 %% mutual authentication.
