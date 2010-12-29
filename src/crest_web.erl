@@ -59,6 +59,8 @@ loop(Req, DocRoot) ->
                     case crest_peer:spawn_exec(T, Req:parse_qs()) of
                         {ok, {CT, Message}} ->
                             Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {ok} ->
+                            Req:respond({200, [], []});
                         {error} ->
                             Req:respond({404, [], []})
                     end;
@@ -82,6 +84,8 @@ loop(Req, DocRoot) ->
 					case crest_peer:spawn_exec(T, Req:parse_post()) of
                         {ok, {CT, Message}} ->
                             Req:respond({200, [{"Content-Type", CT}], [Message]});
+                        {ok} ->
+                            Req:respond({200, [], []});
                         {error} ->
                             Req:respond({404, [], []})
                     end;

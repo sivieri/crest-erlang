@@ -59,6 +59,8 @@ spawn_local_install(Params) ->
 %% @spec spawn_exec([Key], [{atom(), any()}]) -> {ok, any()} | {error}
 spawn_exec([Key], Params) ->
     gen_server2:call(?MODULE, {exec, Key, Params});
+spawn_exec([Key|Path], Params) ->
+    gen_server2:call(?MODULE, {exec, Key, Path, Params});
 spawn_exec(Key, Params) ->
     gen_server2:call(?MODULE, {exec, Key, Params}).
 
@@ -105,6 +107,9 @@ handle_call({spawn_local, Params}, From, Spawned) ->
     {noreply, Spawned};
 handle_call({exec, Key, Params}, From, Spawned) ->
 	spawn(fun() -> handle_exec({Key, Params}, From, Spawned) end),
+    {noreply, Spawned};
+handle_call({exec, Key, Path, Params}, From, Spawned) ->
+    spawn(fun() -> handle_exec({Key, Path, Params}, From, Spawned) end),
     {noreply, Spawned};
 handle_call({list, Param}, From, Spawned) ->
 	spawn(fun() -> handle_list(Param, From, Spawned) end),
@@ -158,6 +163,15 @@ handle_exec({Key, Params}, From, Spawned) ->
 			gen_server2:reply(From, {ok, Res});
         [] ->
 			gen_server2:reply(From, {error})
+    end;
+handle_exec({Key, Path, Params}, From, Spawned) ->
+    case ets:lookup(Spawned, list_to_binary(Key)) of
+        [{_, Pid}|_T] ->
+            Res = crest_utils:rpc(Pid, {Path, Params}),
+            log4erl:info("Executed the existing key ~p~n", [Key]),
+            gen_server2:reply(From, {ok, Res});
+        [] ->
+            gen_server2:reply(From, {error})
     end.
 
 handle_list(Param, From, Spawned) ->
