@@ -49,10 +49,15 @@ get_installed_data() ->
 %% @spec get_local_data() -> json()
 get_local_data() ->
     LocalList = crest_local:list_local(),
-	ResultList = lists:foldl(fun({Name, {Module, Function}}, AccIn) ->
-								   ElemList = [erlang:iolist_to_binary(make_local_link(Name)),
-											   erlang:iolist_to_binary(Module ++ ":" ++ Function ++ "()")],
-								   [ElemList|AccIn]
+	ResultList = lists:foldl(fun({Name, {Module, Function, Visibility}}, AccIn) ->
+                                   case Visibility of
+                                       true ->
+                                           ElemList = [erlang:iolist_to_binary(make_local_link(Name)),
+                                               erlang:iolist_to_binary(Module ++ ":" ++ Function ++ "()")],
+                                           [ElemList|AccIn];
+                                       false ->
+                                           AccIn
+                                   end
 								   end, [], LocalList),
 	{struct, [{erlang:iolist_to_binary("aaData"), ResultList}]}.
 

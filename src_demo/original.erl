@@ -21,9 +21,8 @@
 
 -module(original).
 -include_lib("xmerl/include/xmerl.hrl").
--export([get_function/0, get_manager/0]).
--record(widget, {id, pid, title = "", x = 0, y = 0, width = 0, height = 0, color = "", host = "", linkto = ""}).
--compile(export_all).
+-export([get_function/0, get_manager/0, urlsel/0, rss_feed/0]).
+-record(widget, {id, url, title = "", x = 0, y = 0, width = 0, height = 0, color = "", host = "", linkto = ""}).
 
 %% External API
 
@@ -77,7 +76,6 @@ get_function() ->
 
 get_manager() ->
     F = fun(F, Instances) ->
-        process_flag(trap_exit, true),
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Original demo main manager"},
@@ -99,15 +97,27 @@ get_manager() ->
                                                      {"host", Host}]}} ->
                 case Title of
                     "URL Selector" ->
-                        Pid = proc_lib:spawn_link(fun() -> urlsel() end),
-                        Widget = #widget{id = Id, pid = Pid, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
-                        NewInstances = dict:store(Id, Widget, Instances),
-                        Pid ! {self(), {ok}};
+                        Res = crest_operations:install_local("urlsel"),
+                        case Res of
+                            {ok, Body} ->
+                                Widget = #widget{id = Id, url = Body, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
+                                NewInstances = dict:store(Id, Widget, Instances),
+                                Pid ! {self(), {ok}};
+                            {error} ->
+                                NewInstances = Instances,
+                                Pid ! {self(), {error}}                             
+                        end;
                     "RSS Reader" ->
-                        Pid = proc_lib:spawn_link(fun() -> rss_feed() end),
-                        Widget = #widget{id = Id, pid = Pid, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
-                        NewInstances = dict:store(Id, Widget, Instances),
-                        Pid ! {self(), {ok}};
+                        Res = crest_operations:install_local("rssfeed"),
+                        case Res of
+                            {ok, Body} ->
+                                Widget = #widget{id = Id, url = Body, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
+                                NewInstances = dict:store(Id, Widget, Instances),
+                                Pid ! {self(), {ok}};
+                            {error} ->
+                                NewInstances = Instances,
+                                Pid ! {self(), {error}}                                
+                        end;
                     _Any ->
                         NewInstances = Instances,
                         Pid ! {self(), {error}}
@@ -146,31 +156,6 @@ get_manager() ->
             {Pid, {[{"widget", "manager", "maps"}], _}} ->
                 Pid ! {self(), {"application/json", serialize_widgets(Instances)}},
                 F(F, Instances);
-            {Pid, {[{"widget", Id}], Params}} ->
-                case dict:find(Id, Instances) of
-                    {ok, Widget} when Widget#widget.linkto =/= ""->
-                        ToWidget = dict:fetch(Widget#widget.linkto, Instances), 
-                        ToPid = ToWidget#widget.pid,
-                        Widget#widget.pid ! {Pid, ToPid, Params};
-                    {ok, Widget} ->
-                        Widget#widget.pid ! {Pid, Params};
-                    error ->
-                        Pid ! {self(), {error}}
-                end,
-                F(F, Instances);
-            {'EXIT', Pid, _Reason} ->
-                Keys = dict:fetch_keys(Instances),
-                Ids = lists:foldl(fun(Key, AccIn) ->
-                                    El = dict:fetch(Key, Instances),
-                                    case El of
-                                        El when El#widget.pid =:= Pid ->
-                                            [El#widget.id|AccIn];
-                                        _ ->
-                                            AccIn
-                                    end
-                                    end, [], Keys),
-                NewInstances = lists:foldl(fun(Id, In) -> dict:erase(Id, In) end, Instances, Ids),
-                F(F, NewInstances);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
                 F(F, Instances)
@@ -180,36 +165,15 @@ get_manager() ->
         F(F, dict:new())
     end.
 
-%% Internal API
-
-serialize_widgets(Widgets) ->
-    SerWidgets = dict:fold(fun(Widget, AccIn) ->
-                                   El = {struct, [{erlang:iolist_to_binary("x"), Widget#widget.x},
-                                                  {erlang:iolist_to_binary("y"), Widget#widget.y},
-                                                  {erlang:iolist_to_binary("url"), erlang:iolist_to_binary("/crest/url/zappd/widget/" ++ Widget#widget.id)},
-                                                  {erlang:iolist_to_binary("type"), erlang:iolist_to_binary("widget")},
-                                                  {erlang:iolist_to_binary("width"), Widget#widget.width},
-                                                  {erlang:iolist_to_binary("color"), erlang:iolist_to_binary(Widget#widget.color)},
-                                                  {erlang:iolist_to_binary("host"), erlang:iolist_to_binary(Widget#widget.host)},
-                                                  {erlang:iolist_to_binary("height"), Widget#widget.height},
-                                                  {erlang:iolist_to_binary("title"), erlang:iolist_to_binary(Widget#widget.title)},
-                                                  {erlang:iolist_to_binary("id"), erlang:iolist_to_binary(Widget#widget.id)}]},
-                                   [El|AccIn]
-                                   end, [], Widgets),
-    {struct, [{erlang:iolist_to_binary("items"), SerWidgets}]}.
-
 urlsel() ->
     F = fun(F, FeedUrl) ->
         receive
             {Pid, [{"id", _Id}, {"url", Url}]} ->
                 Pid ! {self(), {ok}},
                 F(F, Url);
-            {Pid, []} ->
+            {Pid, _} ->
                 Answer = {struct, [{erlang:iolist_to_binary("items"), [{struct, [{erlang:iolist_to_binary("url"), erlang:iolist_to_binary(FeedUrl)}]}]}]},
                 Pid ! {self(), {"application/json", Answer}},
-                F(F, FeedUrl);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
                 F(F, FeedUrl)
         end
     end,
@@ -220,17 +184,32 @@ urlsel() ->
 rss_feed() ->
     F = fun(F) ->
         receive
-            {Pid, ToPid, []} ->
+            {Pid, _} ->
                 
-                F(F);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
                 F(F)
         end
     end,
     fun() ->
         F(F)
     end.
+
+%% Internal API
+
+serialize_widgets(Widgets) ->
+    SerWidgets = dict:fold(fun(Widget, AccIn) ->
+                                   El = {struct, [{erlang:iolist_to_binary("x"), Widget#widget.x},
+                                                  {erlang:iolist_to_binary("y"), Widget#widget.y},
+                                                  {erlang:iolist_to_binary("url"), erlang:iolist_to_binary("/crest/url/" ++ Widget#widget.url)},
+                                                  {erlang:iolist_to_binary("type"), erlang:iolist_to_binary("widget")},
+                                                  {erlang:iolist_to_binary("width"), Widget#widget.width},
+                                                  {erlang:iolist_to_binary("color"), erlang:iolist_to_binary(Widget#widget.color)},
+                                                  {erlang:iolist_to_binary("host"), erlang:iolist_to_binary(Widget#widget.host)},
+                                                  {erlang:iolist_to_binary("height"), Widget#widget.height},
+                                                  {erlang:iolist_to_binary("title"), erlang:iolist_to_binary(Widget#widget.title)},
+                                                  {erlang:iolist_to_binary("id"), erlang:iolist_to_binary(Widget#widget.id)}]},
+                                   [El|AccIn]
+                                   end, [], Widgets),
+    {struct, [{erlang:iolist_to_binary("items"), SerWidgets}]}.
 
 feed_to_json(List) ->
     lists:map(fun({Title, Date, Desc}) ->

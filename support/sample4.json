@@ -1,0 +1,22 @@
+{"items":[
+    {"x":508,
+	 "y":15,
+	 "url":"/mailbox/ae3437b1-91f1-4b44-a69c-933d2b60d25e",
+	 "type":"widget",
+	 "width":352,
+	 "color":"blue",
+	 "host":"Peer 1",
+	 "height":63,
+	 "title":"URL Selector",
+	 "id":"W_1"},
+	{"x":598,
+	 "y":126,
+	 "url":"/mailbox/9fed8560-87e2-4014-9c85-83d851bf8e3e",
+	 "type":"widget",
+	 "width":252,
+	 "color":"blue",
+	 "host":"Peer 1",
+	 "height":302,
+	 "title":"RSS Reader",
+	 "id":"W_2"}
+]}

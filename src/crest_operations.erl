@@ -20,7 +20,7 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_operations).
--export([install_local/1, invoke_local_spawn/2, invoke_spawn/3, invoke_remote/4, invoke_lambda/4]).
+-export([install_local/1, invoke_local_spawn/2, invoke_spawn/3, invoke_remote/4, invoke_lambda/4, invoke_local_lambda/2]).
 
 %% External API
 
@@ -90,6 +90,11 @@ invoke_lambda(Method, Host, Key, Params) ->
 		{error, _Reason} ->
             {error}
     end.
+
+%% @doc Invoke an already installed computation in the same peer.
+%% @spec invoke_local_lambda(string(), [{string(), string()}]) -> {ok, Body} | {error}
+invoke_local_lambda(Key, Params) ->
+    crest_peer:spawn_exec(Key, Params).
 
 %% Internal API
 

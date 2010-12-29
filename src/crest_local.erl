@@ -74,9 +74,9 @@ handle_call({start, Name}, From, Locals) ->
 handle_call(_Request, _From, Locals) ->
     {noreply, Locals}.
 
-handle_cast({add, Name, Module, Function}, Locals) ->
+handle_cast({add, Name, Module, Function, Visibility}, Locals) ->
 	log4erl:info("Registering a new local computation: ~p~n", [Name]),
-	NewLocals = dict:store(Name, {Module, Function}, Locals),
+	NewLocals = dict:store(Name, {Module, Function, Visibility}, Locals),
 	{noreply, NewLocals};
 handle_cast({remove, Name}, Locals) ->
 	log4erl:info("De-registering a local computation: ~p~n", [Name]),
@@ -104,8 +104,8 @@ do_reload(Locals) ->
 	Filename = crest_deps:local_path(["config", "locals.config"]),
 	case file:consult(Filename) of
 		{ok, NewLocalsList} ->
-			NewLocals = lists:foldl(fun({Name, Module, Function}, AccIn) ->
-											dict:store(Name, {Module, Function}, AccIn)
+			NewLocals = lists:foldl(fun({Name, Module, Function, Visibility}, AccIn) ->
+											dict:store(Name, {Module, Function, Visibility}, AccIn)
 											end, dict:new(), NewLocalsList),
 			dict:merge(fun(_Key, Value1, _Value2) -> Value1 end, Locals, NewLocals);
 		{error, Reason} ->
@@ -115,7 +115,7 @@ do_reload(Locals) ->
 
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
-		{ok, {Module, Function}} ->
+		{ok, {Module, Function, _Visibility}} ->
             crest_operations:invoke_local_spawn(list_to_atom(Module), list_to_atom(Function));
 		error ->
 			{error}

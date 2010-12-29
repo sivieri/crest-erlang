@@ -56,7 +56,7 @@ spawn_local_install(Params) ->
 
 %% @doc Execute an already installed operation, specified by the given
 %% unique key.
-%% @spec spawn_exec([Key], [{atom(), any()}]) -> {ok, any()} | {error}
+%% @spec spawn_exec([Key], [{string(), string()}]) -> {ok, any()} | {error}
 spawn_exec([Key], Params) ->
     gen_server2:call(?MODULE, {exec, Key, Params});
 spawn_exec([Key|Path], Params) ->
