@@ -60,10 +60,10 @@ Add a line in
 
 With the following format:
 
-{"Keywork", "module_name", "computation_main_function", true/false}.
+{computation, "Keywork", "module_name", "computation_main_function", true/false}.
 
 where the boolean value indicates if the given function has to be shown
-in the manager Web page.
+in the manager Web page, and the first atom is fixed.
 Beware that the keyword needs to be unique inside your configuration file.
 Then you can install it using crest_operations:install_local/1, passing to
 it the keyword itself; if the server was running when you modified the

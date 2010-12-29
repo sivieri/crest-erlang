@@ -144,10 +144,17 @@ get_manager() ->
                                                    {"from", IdFrom},
                                                    {"to", IdTo}]}} ->
                 case dict:find(IdFrom, Instances) of
-                    {ok, Widget} ->
-                        NewWidget = Widget#widget{linkto = IdTo},
-                        NewInstances = dict:store(IdFrom, NewWidget, Instances),
-                        Pid ! {self(), {ok}};
+                    {ok, WidgetFrom} ->
+                        case dict:find(IdTo, Instances) of
+                            {ok, WidgetTo} ->
+                                NewWidget = WidgetFrom#widget{linkto = IdTo},
+                                NewInstances = dict:store(IdFrom, NewWidget, Instances),
+                                crest_operations:invoke_local_lambda(WidgetTo#widget.url, {"link", WidgetFrom#widget.url}),
+                                Pid ! {self(), {ok}};
+                            {error} ->
+                                NewInstances = Instances,
+                                Pid ! {self(), {error}}
+                        end;
                     error ->
                         NewInstances = Instances,
                         Pid ! {self(), {error}}
@@ -168,6 +175,15 @@ get_manager() ->
 urlsel() ->
     F = fun(F, FeedUrl) ->
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "URL selector"},
+                F(F, FeedUrl);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET/POST"},
+                F(F, FeedUrl);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), []},
+                F(F, FeedUrl);
             {Pid, [{"id", _Id}, {"url", Url}]} ->
                 Pid ! {self(), {ok}},
                 F(F, Url);
@@ -178,19 +194,37 @@ urlsel() ->
         end
     end,
     fun() ->
-        F(F, "")
+        F(F, "http://localhost:8080/original/feed.xml")
     end.
 
 rss_feed() ->
-    F = fun(F) ->
+    F = fun(F, UrlSel) ->
         receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "RSS feed loader"},
+                F(F, UrlSel);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "GET/POST"},
+                F(F, UrlSel);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), []},
+                F(F, UrlSel);
+            {Pid, [{"link", Key}]} ->
+                Pid ! ok,
+                F(F, Key);
             {Pid, _} ->
-                
-                F(F)
+                case crest_utils:http_get(UrlSel) of
+                    {ok, Feed} ->
+                        Res = feed_to_json(parse_feed(Feed)),
+                        Pid ! {self(), {"application/json", Res}};
+                    error ->
+                        Pid ! {self(), {error}}
+                end,
+                F(F, UrlSel)
         end
     end,
     fun() ->
-        F(F)
+        F(F, "")
     end.
 
 %% Internal API
@@ -219,12 +253,13 @@ feed_to_json(List) ->
                                          ]}
                                end, List).
 
+%% @reference http://www.trapexit.org/How_to_write_an_RSS_aggregator
 parse_feed(Content) ->
     {Doc, _Misc} = xmerl_scan:string(Content),
     Items = getElementsByTagName(Doc, item),
     lists:map(fun(Item) ->
                       {textOf(first(Item, title)),
-                       textOf(first(Item, 'dc:date')),
+                       textOf(first(Item, pubDate)),
                        textOf(first(Item, description))}
                       end, Items).
 

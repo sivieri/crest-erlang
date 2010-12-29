@@ -21,7 +21,8 @@
 
 -module(crest_local).
 -behaviour(gen_server2).
--export([start/0, stop/0, list_local/0, add_local/3, remove_local/1, start_local/1, reload/0]).
+-include("crest.hrl").
+-export([start/0, stop/0, list_local/0, add_local/4, remove_local/1, start_local/1, reload/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -42,9 +43,10 @@ list_local() ->
 	gen_server2:call(?MODULE, list).
 
 %% @doc Add a new local computation.
-%% @spec add_local(string(), string(), string()) -> ok
-add_local(Name, Module, Function) ->
-	gen_server2:cast(?MODULE, {add, Name, Module, Function}).
+%% @spec add_local(string(), string(), string(), boolean()) -> ok
+add_local(Name, Module, Function, Visibility) ->
+    Computation = #computation{name = Name, module = Module, function = Function, visibility = Visibility},
+	gen_server2:cast(?MODULE, {add, Computation}).
 
 %% @doc Remove a computation from  the local ones; it replaces the current one.
 %% @spec remove_local(string()) -> ok
@@ -67,16 +69,24 @@ init(_Args) ->
     {ok, Locals}.
 
 handle_call(list, _From, Locals) ->
-	{reply, dict:to_list(Locals), Locals};
+    List = dict:fold(fun(Name, Computation, AccIn) ->
+                             case Computation#computation.visibility of
+                                 true ->
+                                     [{Name, Computation#computation.module, Computation#computation.function}|AccIn];
+                                 false ->
+                                     AccIn
+                             end
+                             end, [], Locals),
+	{reply, List, Locals};
 handle_call({start, Name}, From, Locals) ->
 	spawn(fun() -> handle_start(Name, From, Locals) end),
 	{noreply, Locals};
 handle_call(_Request, _From, Locals) ->
     {noreply, Locals}.
 
-handle_cast({add, Name, Module, Function, Visibility}, Locals) ->
-	log4erl:info("Registering a new local computation: ~p~n", [Name]),
-	NewLocals = dict:store(Name, {Module, Function, Visibility}, Locals),
+handle_cast({add, Computation}, Locals) ->
+	log4erl:info("Registering a new local computation: ~p~n", [Computation#computation.name]),
+	NewLocals = dict:store(Computation#computation.name, Computation, Locals),
 	{noreply, NewLocals};
 handle_cast({remove, Name}, Locals) ->
 	log4erl:info("De-registering a local computation: ~p~n", [Name]),
@@ -104,8 +114,8 @@ do_reload(Locals) ->
 	Filename = crest_deps:local_path(["config", "locals.config"]),
 	case file:consult(Filename) of
 		{ok, NewLocalsList} ->
-			NewLocals = lists:foldl(fun({Name, Module, Function, Visibility}, AccIn) ->
-											dict:store(Name, {Module, Function, Visibility}, AccIn)
+			NewLocals = lists:foldl(fun(Computation, AccIn) ->
+											dict:store(Computation#computation.name, Computation, AccIn)
 											end, dict:new(), NewLocalsList),
 			dict:merge(fun(_Key, Value1, _Value2) -> Value1 end, Locals, NewLocals);
 		{error, Reason} ->
@@ -115,8 +125,8 @@ do_reload(Locals) ->
 
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
-		{ok, {Module, Function, _Visibility}} ->
-            crest_operations:invoke_local_spawn(list_to_atom(Module), list_to_atom(Function));
+		{ok, Computation} ->
+            crest_operations:invoke_local_spawn(list_to_atom(Computation#computation.module), list_to_atom(Computation#computation.function));
 		error ->
 			{error}
 	end.

@@ -1,0 +1,1 @@
+-record(computation, {name, module, function, visibility = false}).
