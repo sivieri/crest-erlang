@@ -27,7 +27,7 @@
 
 -module(crest_peer).
 -behaviour(gen_server2).
--export([start/0, stop/0, spawn_install/1, spawn_local_install/1, remote/1, spawn_exec/2, add_child/2, remove_child/1, get_list/1]).
+-export([start/0, stop/0, spawn_install/1, spawn_local_install/1, remote/1, spawn_exec/2, spawn_exec/3, add_child/2, remove_child/1, get_list/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, code_change/3, terminate/2]).
 
 %% External API
@@ -63,6 +63,16 @@ spawn_exec([Key|Path], Params) ->
     gen_server2:call(?MODULE, {exec, Key, Path, Params});
 spawn_exec(Key, Params) ->
     gen_server2:call(?MODULE, {exec, Key, Params}).
+
+%% @doc Execute an already installed operation, specified by the given
+%% unique key, with the given parameters and body.
+%% @spec spawn_exec([Key], [{string(), string()}], any()) -> {ok, any()} | {error}
+spawn_exec([Key], Params, Body) ->
+    gen_server2:call(?MODULE, {exec_body, Key, Params, Body});
+spawn_exec([Key|Path], Params, Body) ->
+    gen_server2:call(?MODULE, {exec_body, Key, Path, Params, Body});
+spawn_exec(Key, Params, Body) ->
+    gen_server2:call(?MODULE, {exec_body, Key, Params, Body}).
 
 %% @doc Install and execute a new operation on this peer, and then delete it.
 %% @spec remote([{string(), any()}]) -> {ok, any()} | {error}
@@ -110,6 +120,12 @@ handle_call({exec, Key, Params}, From, Spawned) ->
     {noreply, Spawned};
 handle_call({exec, Key, Path, Params}, From, Spawned) ->
     spawn(fun() -> handle_exec({Key, Path, Params}, From, Spawned) end),
+    {noreply, Spawned};
+handle_call({exec_body, Key, Params, Body}, From, Spawned) ->
+    spawn(fun() -> handle_exec_body({Key, Params, Body}, From, Spawned) end),
+    {noreply, Spawned};
+handle_call({exec_body, Key, Path, Params, Body}, From, Spawned) ->
+    spawn(fun() -> handle_exec_body({Key, Path, Params, Body}, From, Spawned) end),
     {noreply, Spawned};
 handle_call({list, Param}, From, Spawned) ->
 	spawn(fun() -> handle_list(Param, From, Spawned) end),
@@ -168,6 +184,25 @@ handle_exec({Key, Path, Params}, From, Spawned) ->
     case ets:lookup(Spawned, list_to_binary(Key)) of
         [{_, Pid}|_T] ->
             Res = crest_utils:rpc(Pid, {Path, Params}),
+            log4erl:info("Executed the existing key ~p~n", [Key]),
+            gen_server2:reply(From, {ok, Res});
+        [] ->
+            gen_server2:reply(From, {error})
+    end.
+
+handle_exec_body({Key, Params, Body}, From, Spawned) ->
+    case ets:lookup(Spawned, list_to_binary(Key)) of
+        [{_, Pid}|_T] ->
+            Res = crest_utils:rpc(Pid, {Params, Body}),
+            log4erl:info("Executed the existing key ~p~n", [Key]),
+            gen_server2:reply(From, {ok, Res});
+        [] ->
+            gen_server2:reply(From, {error})
+    end;
+handle_exec_body({Key, Path, Params, Body}, From, Spawned) ->
+    case ets:lookup(Spawned, list_to_binary(Key)) of
+        [{_, Pid}|_T] ->
+            Res = crest_utils:rpc(Pid, {Path, Params, Body}),
             log4erl:info("Executed the existing key ~p~n", [Key]),
             gen_server2:reply(From, {ok, Res});
         [] ->

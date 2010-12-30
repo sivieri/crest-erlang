@@ -66,6 +66,7 @@ var mirror_created = false;
 var w_tl;
 var url_update;
 var t_all;
+var managerUrl = "/crest/url/9918f274-946e-4078-a783-7edbb8e4b7c2";
 var JSONs = new Object();
 var colors = new Object();
 colors['W_0'] = "blue";
@@ -126,7 +127,7 @@ function showMenu(evt){
 									"to": id
 	    					};
 								dojo.rawXhrPost({ 
-    							url: "/widget/manager/link", 
+    							url: managerUrl + "/widget/manager/link", 
     							handleAs: "json", 
     							postData: dojo.toJson(d), 
     							headers: {"Content-Type": "application/json"} 
@@ -438,7 +439,7 @@ function add_widget(){
 		host: loc
 	};
 	dojo.rawXhrPost({ 
-  	url: "/widget/manager/create", 
+  	url: managerUrl + "/widget/manager/create", 
     handleAs: "json", 
     postData: dojo.toJson(d), 
     headers: {"Content-Type": "application/json"} 
@@ -903,7 +904,7 @@ function _changeColor(id, newColor){
   });
 }
 function _updateAll(){
-	var mapStore = new dojo.data.ItemFileWriteStore({url: "/widget/manager/maps", urlPreventCache:true});
+	var mapStore = new dojo.data.ItemFileWriteStore({url: managerUrl + "/widget/manager/maps", urlPreventCache:true});
   mapStore.fetch( {
     onComplete: function(data,response) {
 			function gotWid(items, request) {
@@ -1019,7 +1020,7 @@ function init(){
 				color: c
 	    };
 		dojo.rawXhrPost({ 
-    	url: "/widget/manager/move", 
+    	url: managerUrl +  "/widget/manager/move", 
     	handleAs: "json", 
     	postData: dojo.toJson(d), 
     	headers: {"Content-Type": "application/json"} 

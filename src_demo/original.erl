@@ -33,7 +33,7 @@ get_function() ->
                 Pid ! {self(), "Original demo instances list"},
                 F(F, Instances);
             {Pid, {"param", "operation"}} ->
-                Pid ! {self(), "GET/POST"},
+                Pid ! {self(), "GET"},
                 F(F, Instances);
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), [{"instance", "string()"}]},
@@ -86,15 +86,16 @@ get_manager() ->
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), []},
                 F(F, Instances);
-            {Pid, {["widget", "manager", "create"], [{"type", "widget"},
-                                                     {"id", Id},
-                                                     {"title", Title},
-                                                     {"x", X},
-                                                     {"y", Y},
-                                                     {"width", Width},
-                                                     {"height", Height},
-                                                     {"color", Color},
-                                                     {"host", Host}]}} ->
+            {Pid, {["widget", "manager", "create"], [], Body}} ->
+                Obj = mochijson2:decode(Body),
+                Id = crest_json:destructure("Obj.id", Obj),
+                Title = crest_json:destructure("Obj.title", Obj),
+                X = crest_json:destructure("Obj.x", Obj),
+                Y = crest_json:destructure("Obj.y", Obj),
+                Width = crest_json:destructure("Obj.width", Obj),
+                Height = crest_json:destructure("Obj.height", Obj),
+                Color = crest_json:destructure("Obj.color", Obj),
+                Host = crest_json:destructure("Obj.host", Obj),
                 case Title of
                     "URL Selector" ->
                         Res = crest_operations:install_local("urlsel"),
@@ -123,13 +124,14 @@ get_manager() ->
                         Pid ! {self(), {error}}
                 end,
                 F(F, NewInstances);
-            {Pid, {["widget", "manager", "move"], [{"id", Id},
-                                                   {"title", _Title},
-                                                   {"x", X},
-                                                   {"y", Y},
-                                                   {"width", Width},
-                                                   {"height", Height},
-                                                   {"color", Color}]}} ->
+            {Pid, {["widget", "manager", "move"], [], Body}} ->
+                Obj = mochijson2:decode(Body),
+                Id = crest_json:destructure("Obj.id", Obj),
+                X = crest_json:destructure("Obj.x", Obj),
+                Y = crest_json:destructure("Obj.y", Obj),
+                Width = crest_json:destructure("Obj.width", Obj),
+                Height = crest_json:destructure("Obj.height", Obj),
+                Color = crest_json:destructure("Obj.color", Obj),
                 case dict:find(Id, Instances) of
                     {ok, Widget} ->
                         NewWidget = Widget#widget{x = X, y = Y, width = Width, height = Height, color = Color},
@@ -140,9 +142,10 @@ get_manager() ->
                         Pid ! {self(), {error}}
                 end,
                 F(F, NewInstances);
-            {Pid, {["widget", "manager", "link"], [{"type", "link"},
-                                                   {"from", IdFrom},
-                                                   {"to", IdTo}]}} ->
+            {Pid, {["widget", "manager", "link"], [], Body}} ->
+                Obj = mochijson2:decode(Body),
+                IdFrom = crest_json:destructure("Obj.from", Obj),
+                IdTo = crest_json:destructure("Obj.to", Obj),
                 case dict:find(IdFrom, Instances) of
                     {ok, WidgetFrom} ->
                         case dict:find(IdTo, Instances) of
@@ -160,7 +163,7 @@ get_manager() ->
                         Pid ! {self(), {error}}
                 end,
                 F(F, NewInstances);
-            {Pid, {[{"widget", "manager", "maps"}], _}} ->
+            {Pid, {["widget", "manager", "maps"], _}} ->
                 Pid ! {self(), {"application/json", serialize_widgets(Instances)}},
                 F(F, Instances);
             Any ->
@@ -184,7 +187,9 @@ urlsel() ->
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), []},
                 F(F, FeedUrl);
-            {Pid, [{"id", _Id}, {"url", Url}]} ->
+            {Pid, {[], Body}} ->
+                Obj = mochijson2:decode(Body),
+                Url = crest_json:destructure("Obj.url", Obj),
                 Pid ! {self(), {ok}},
                 F(F, Url);
             {Pid, _} ->
@@ -230,7 +235,11 @@ rss_feed() ->
 %% Internal API
 
 serialize_widgets(Widgets) ->
-    SerWidgets = dict:fold(fun(Widget, AccIn) ->
+    case dict:size(Widgets) of
+        0 ->
+            SerWidgets = [];
+        _ ->
+            SerWidgets = dict:fold(fun(Widget, AccIn) ->
                                    El = {struct, [{erlang:iolist_to_binary("x"), Widget#widget.x},
                                                   {erlang:iolist_to_binary("y"), Widget#widget.y},
                                                   {erlang:iolist_to_binary("url"), erlang:iolist_to_binary("/crest/url/" ++ Widget#widget.url)},
@@ -242,7 +251,8 @@ serialize_widgets(Widgets) ->
                                                   {erlang:iolist_to_binary("title"), erlang:iolist_to_binary(Widget#widget.title)},
                                                   {erlang:iolist_to_binary("id"), erlang:iolist_to_binary(Widget#widget.id)}]},
                                    [El|AccIn]
-                                   end, [], Widgets),
+                                   end, [], Widgets)
+    end,
     {struct, [{erlang:iolist_to_binary("items"), SerWidgets}]}.
 
 feed_to_json(List) ->
