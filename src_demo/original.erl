@@ -87,81 +87,13 @@ get_manager() ->
                 Pid ! {self(), []},
                 F(F, Instances);
             {Pid, {["widget", "manager", "create"], [], Body}} ->
-                Obj = mochijson2:decode(Body),
-                Id = crest_json:destructure("Obj.id", Obj),
-                Title = crest_json:destructure("Obj.title", Obj),
-                X = crest_json:destructure("Obj.x", Obj),
-                Y = crest_json:destructure("Obj.y", Obj),
-                Width = crest_json:destructure("Obj.width", Obj),
-                Height = crest_json:destructure("Obj.height", Obj),
-                Color = crest_json:destructure("Obj.color", Obj),
-                Host = crest_json:destructure("Obj.host", Obj),
-                case Title of
-                    "URL Selector" ->
-                        Res = crest_operations:install_local("urlsel"),
-                        case Res of
-                            {ok, Body} ->
-                                Widget = #widget{id = Id, url = Body, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
-                                NewInstances = dict:store(Id, Widget, Instances),
-                                Pid ! {self(), {ok}};
-                            {error} ->
-                                NewInstances = Instances,
-                                Pid ! {self(), {error}}                             
-                        end;
-                    "RSS Reader" ->
-                        Res = crest_operations:install_local("rssfeed"),
-                        case Res of
-                            {ok, Body} ->
-                                Widget = #widget{id = Id, url = Body, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
-                                NewInstances = dict:store(Id, Widget, Instances),
-                                Pid ! {self(), {ok}};
-                            {error} ->
-                                NewInstances = Instances,
-                                Pid ! {self(), {error}}                                
-                        end;
-                    _Any ->
-                        NewInstances = Instances,
-                        Pid ! {self(), {error}}
-                end,
+                NewInstances = do_create(Pid, Instances, Body),
                 F(F, NewInstances);
             {Pid, {["widget", "manager", "move"], [], Body}} ->
-                Obj = mochijson2:decode(Body),
-                Id = crest_json:destructure("Obj.id", Obj),
-                X = crest_json:destructure("Obj.x", Obj),
-                Y = crest_json:destructure("Obj.y", Obj),
-                Width = crest_json:destructure("Obj.width", Obj),
-                Height = crest_json:destructure("Obj.height", Obj),
-                Color = crest_json:destructure("Obj.color", Obj),
-                case dict:find(Id, Instances) of
-                    {ok, Widget} ->
-                        NewWidget = Widget#widget{x = X, y = Y, width = Width, height = Height, color = Color},
-                        NewInstances = dict:store(Id, NewWidget, Instances),
-                        Pid ! {self(), {ok}};
-                    error ->
-                        NewInstances = Instances,
-                        Pid ! {self(), {error}}
-                end,
+                NewInstances = do_move(Pid, Instances, Body),
                 F(F, NewInstances);
             {Pid, {["widget", "manager", "link"], [], Body}} ->
-                Obj = mochijson2:decode(Body),
-                IdFrom = crest_json:destructure("Obj.from", Obj),
-                IdTo = crest_json:destructure("Obj.to", Obj),
-                case dict:find(IdFrom, Instances) of
-                    {ok, WidgetFrom} ->
-                        case dict:find(IdTo, Instances) of
-                            {ok, WidgetTo} ->
-                                NewWidget = WidgetFrom#widget{linkto = IdTo},
-                                NewInstances = dict:store(IdFrom, NewWidget, Instances),
-                                crest_operations:invoke_local_lambda(WidgetTo#widget.url, {"link", WidgetFrom#widget.url}),
-                                Pid ! {self(), {ok}};
-                            {error} ->
-                                NewInstances = Instances,
-                                Pid ! {self(), {error}}
-                        end;
-                    error ->
-                        NewInstances = Instances,
-                        Pid ! {self(), {error}}
-                end,
+                NewInstances = do_link(Pid, Instances, Body),
                 F(F, NewInstances);
             {Pid, {["widget", "manager", "maps"], _}} ->
                 Pid ! {self(), {"application/json", mochijson2:encode(serialize_widgets(Instances))}},
@@ -194,7 +126,7 @@ urlsel() ->
                 F(F, Url);
             {Pid, _} ->
                 Answer = {struct, [{erlang:iolist_to_binary("items"), [{struct, [{erlang:iolist_to_binary("url"), erlang:iolist_to_binary(FeedUrl)}]}]}]},
-                Pid ! {self(), {"application/json", Answer}},
+                Pid ! {self(), {"application/json", mochijson2:encode(Answer)}},
                 F(F, FeedUrl)
         end
     end,
@@ -215,14 +147,21 @@ rss_feed() ->
                 Pid ! {self(), []},
                 F(F, UrlSel);
             {Pid, [{"link", Key}]} ->
-                Pid ! ok,
+                Pid ! {self(), ok},
                 F(F, Key);
             {Pid, _} ->
-                case crest_utils:http_get(UrlSel) of
-                    {ok, Feed} ->
-                        Res = feed_to_json(parse_feed(Feed)),
-                        Pid ! {self(), {"application/json", Res}};
-                    error ->
+                case crest_operations:invoke_local_lambda(UrlSel, []) of
+                    {ok, {_CT, Bin}} ->
+                        Obj = mochijson2:decode(Bin),
+                        Url = crest_json:destructure("Obj.items[0].url", Obj),
+                        case crest_utils:http_get(Url) of
+                            {ok, Feed} ->
+                                Res = feed_to_json(parse_feed(Feed)),
+                                Pid ! {self(), {"application/json", mochijson2:encode(Res)}};
+                            error ->
+                                Pid ! {self(), {error}}
+                        end;
+                    {error} ->
                         Pid ! {self(), {error}}
                 end,
                 F(F, UrlSel)
@@ -287,3 +226,85 @@ first(Item, Tag) ->
 textOf(Item) ->
     lists:flatten([X#xmlText.value || X <- Item#xmlElement.content,
                       element(1,X) == xmlText]).
+
+do_create(Pid, Instances, Body) ->
+    Obj = mochijson2:decode(Body),
+    Id = crest_json:destructure("Obj.id", Obj),
+    Title = crest_json:destructure("Obj.title", Obj),
+    X = crest_json:destructure("Obj.x", Obj),
+    Y = crest_json:destructure("Obj.y", Obj),
+    Width = crest_json:destructure("Obj.width", Obj),
+    Height = crest_json:destructure("Obj.height", Obj),
+    Color = crest_json:destructure("Obj.color", Obj),
+    Host = crest_json:destructure("Obj.host", Obj),
+    case Title of
+        "URL Selector" ->
+            Res = crest_operations:install_local("urlsel"),
+            case Res of
+                {ok, UUID} ->
+                    Widget = #widget{id = Id, url = UUID, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
+                    Pid ! {self(), {ok}},
+                    dict:store(Id, Widget, Instances);
+                {error} ->
+                    Pid ! {self(), {error}},
+                    Instances
+            end;
+        "RSS Reader" ->
+            Res = crest_operations:install_local("rssfeed"),
+            case Res of
+                {ok, UUID} ->
+                    Widget = #widget{id = Id, url = UUID, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
+                    Pid ! {self(), {ok}},
+                    dict:store(Id, Widget, Instances);
+                {error} ->
+                    Pid ! {self(), {error}},
+                    Instances
+            end;
+        _Any ->
+               Pid ! {self(), {error}},
+               Instances
+    end.
+
+do_move(Pid, Instances, Body) ->
+    Obj = mochijson2:decode(Body),
+    Id = crest_json:destructure("Obj.id", Obj),
+    X = crest_json:destructure("Obj.x", Obj),
+    Y = crest_json:destructure("Obj.y", Obj),
+    Width = crest_json:destructure("Obj.width", Obj),
+    Height = crest_json:destructure("Obj.height", Obj),
+    Color = crest_json:destructure("Obj.color", Obj),
+    case dict:find(Id, Instances) of
+        {ok, Widget} ->
+            NewWidget = Widget#widget{x = X, y = Y, width = Width, height = Height, color = Color},
+            Pid ! {self(), {ok}},
+            dict:store(Id, NewWidget, Instances);
+        error ->
+            Pid ! {self(), {error}},
+            Instances
+    end.
+
+do_link(Pid, Instances, Body) ->
+    Obj = mochijson2:decode(Body),
+    IdFrom = crest_json:destructure("Obj.from", Obj),
+    IdTo = crest_json:destructure("Obj.to", Obj),
+    case dict:find(IdFrom, Instances) of
+        {ok, WidgetFrom} ->
+            case dict:find(IdTo, Instances) of
+                {ok, WidgetTo} ->
+                    NewWidget = WidgetFrom#widget{linkto = IdTo},
+                    case crest_operations:invoke_local_lambda(WidgetTo#widget.url, [{"link", WidgetFrom#widget.url}]) of
+                        {ok, _Res} ->
+                            Pid ! {self(), {ok}},
+                            dict:store(IdFrom, NewWidget, Instances);
+                        {error} ->
+                            Pid ! {self(), {error}},
+                            Instances
+                    end;
+                {error} ->
+                    Pid ! {self(), {error}},
+                    Instances
+            end;
+        error ->
+            Pid ! {self(), {error}},
+            Instances
+     end.

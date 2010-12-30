@@ -93,8 +93,10 @@ invoke_lambda(Method, Host, Key, Params) ->
 
 %% @doc Invoke an already installed computation in the same peer.
 %% @spec invoke_local_lambda(string(), [{string(), string()}]) -> {ok, Body} | {error}
+invoke_local_lambda(Key, Params) when length(Key) == 1 ->
+    crest_peer:spawn_exec(Key, Params);
 invoke_local_lambda(Key, Params) ->
-    crest_peer:spawn_exec(Key, Params).
+    crest_peer:spawn_exec([Key], Params).
 
 %% Internal API
 

@@ -28,7 +28,12 @@
 %% @doc Call this function with a JSON-decoded structure and
 %% a string representing the inner part wanted, and that part
 %% is returned.
-%% @spec destructure(string(), json_term()) -> iolist()
+%% @spec destructure(string(), json_term()) -> any()
 destructure(JS, JSON) ->
     F = destructure_json:parse(JS),
-    F(JSON).
+    case F(JSON) of
+        Value when is_binary(Value) ->
+            binary_to_list(Value);
+        Value ->
+            Value
+    end.

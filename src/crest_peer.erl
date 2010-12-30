@@ -176,7 +176,16 @@ handle_exec({Key, Params}, From, Spawned) ->
         [{_, Pid}|_T] ->
             Res = crest_utils:rpc(Pid, Params),
             log4erl:info("Executed the existing key ~p~n", [Key]),
-			gen_server2:reply(From, {ok, Res});
+            case Res of
+                {ok} -> 
+                    gen_server2:reply(From, {ok});
+                {ok, Body} ->
+                    gen_server2:reply(From, {ok, Body});
+                {error} ->
+                    gen_server2:reply(From, {error});
+                Body ->
+                    gen_server2:reply(From, {ok, Body})
+            end;
         [] ->
 			gen_server2:reply(From, {error})
     end;
@@ -185,26 +194,53 @@ handle_exec({Key, Path, Params}, From, Spawned) ->
         [{_, Pid}|_T] ->
             Res = crest_utils:rpc(Pid, {Path, Params}),
             log4erl:info("Executed the existing key ~p~n", [Key]),
-            gen_server2:reply(From, {ok, Res});
+            case Res of
+                {ok} -> 
+                    gen_server2:reply(From, {ok});
+                {ok, Body} ->
+                    gen_server2:reply(From, {ok, Body});
+                {error} ->
+                    gen_server2:reply(From, {error});
+                Body ->
+                    gen_server2:reply(From, {ok, Body})
+            end;
         [] ->
             gen_server2:reply(From, {error})
     end.
 
-handle_exec_body({Key, Params, Body}, From, Spawned) ->
+handle_exec_body({Key, Params, Msg}, From, Spawned) ->
     case ets:lookup(Spawned, list_to_binary(Key)) of
         [{_, Pid}|_T] ->
-            Res = crest_utils:rpc(Pid, {Params, Body}),
+            Res = crest_utils:rpc(Pid, {Params, Msg}),
             log4erl:info("Executed the existing key ~p~n", [Key]),
-            gen_server2:reply(From, {ok, Res});
+            case Res of
+                {ok} -> 
+                    gen_server2:reply(From, {ok});
+                {ok, Body} ->
+                    gen_server2:reply(From, {ok, Body});
+                {error} ->
+                    gen_server2:reply(From, {error});
+                Body ->
+                    gen_server2:reply(From, {ok, Body})
+            end;
         [] ->
             gen_server2:reply(From, {error})
     end;
-handle_exec_body({Key, Path, Params, Body}, From, Spawned) ->
+handle_exec_body({Key, Path, Params, Msg}, From, Spawned) ->
     case ets:lookup(Spawned, list_to_binary(Key)) of
         [{_, Pid}|_T] ->
-            Res = crest_utils:rpc(Pid, {Path, Params, Body}),
+            Res = crest_utils:rpc(Pid, {Path, Params, Msg}),
             log4erl:info("Executed the existing key ~p~n", [Key]),
-            gen_server2:reply(From, {ok, Res});
+            case Res of
+                {ok} -> 
+                    gen_server2:reply(From, {ok});
+                {ok, Body} ->
+                    gen_server2:reply(From, {ok, Body});
+                {error} ->
+                    gen_server2:reply(From, {error});
+                Body ->
+                    gen_server2:reply(From, {ok, Body})
+            end;
         [] ->
             gen_server2:reply(From, {error})
     end.
