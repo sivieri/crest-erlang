@@ -235,11 +235,7 @@ rss_feed() ->
 %% Internal API
 
 serialize_widgets(Widgets) ->
-    case dict:size(Widgets) of
-        0 ->
-            SerWidgets = [];
-        _ ->
-            SerWidgets = dict:fold(fun(Widget, AccIn) ->
+    SerWidgets = dict:fold(fun(_Id, Widget, AccIn) ->
                                    El = {struct, [{erlang:iolist_to_binary("x"), Widget#widget.x},
                                                   {erlang:iolist_to_binary("y"), Widget#widget.y},
                                                   {erlang:iolist_to_binary("url"), erlang:iolist_to_binary("/crest/url/" ++ Widget#widget.url)},
@@ -251,8 +247,7 @@ serialize_widgets(Widgets) ->
                                                   {erlang:iolist_to_binary("title"), erlang:iolist_to_binary(Widget#widget.title)},
                                                   {erlang:iolist_to_binary("id"), erlang:iolist_to_binary(Widget#widget.id)}]},
                                    [El|AccIn]
-                                   end, [], Widgets)
-    end,
+                                   end, [], Widgets),
     {struct, [{erlang:iolist_to_binary("items"), SerWidgets}]}.
 
 feed_to_json(List) ->
