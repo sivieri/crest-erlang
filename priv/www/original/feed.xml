@@ -1,250 +1,161 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"
-	xmlns:content="http://purl.org/rss/1.0/modules/content/"
-	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
-	xmlns:dc="http://purl.org/dc/elements/1.1/"
-	xmlns:atom="http://www.w3.org/2005/Atom"
-	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
-	xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
-	>
-
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="http://sports.espn.go.com/rss/friendlyRSSDemo.xsl" type="text/xsl" media="screen"?>
+<rss version="2.0" 	xmlns:dc="http://purl.org/dc/elements/1.1/"	xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"	xmlns:admin="http://webns.net/mvcb/"	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"	xmlns:atom="http://purl.org/atom/ns#"	xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
-	<title>Chimæra &#38; Bellerophon</title>
-	<atom:link href="http://www.chimera-bellerofonte.eu/feed/" rel="self" type="application/rss+xml" />
-	<link>http://www.chimera-bellerofonte.eu</link>
-	<description>Stream of consciousness...</description>
-	<lastBuildDate>Thu, 23 Dec 2010 12:25:55 +0000</lastBuildDate>
-	<language>en</language>
+	<title>ESPN.com</title>
+	<link>http://espn.go.com/</link>	<description>Latest news from ESPN.com</description>
+	<language>en-us</language>
+   <atom:link rel="self" href="http://sports.espn.go.com/espn/rss/news?null" />
+	<lastBuildDate>Mon, 27 Jul 2009 18:22:03 PDT</lastBuildDate>
+	<docs>http://backend.userland.com/rss</docs>
+	<managingEditor>webmaster@espn.go.com</managingEditor>
+ <image> 
+     <url>http://a.espncdn.com/i/tvlistings/tv_espn_original.gif</url>
+	<title>ESPN logo</title>
+	<link>http://espn.go.com</link>
+	<width>84</width>
+	<height>34</height>
+ </image> 
+ <ttl>30</ttl> 
+	<dc:rights>Copyright 2009</dc:rights>
+	<admin:generatorAgent rdf:resource="http://espn.go.com/rss/?v=0.9beta"/>
+	<admin:errorReportsTo rdf:resource="mailto:customer.service@espn.go.com"/>
 	<sy:updatePeriod>hourly</sy:updatePeriod>
 	<sy:updateFrequency>1</sy:updateFrequency>
-	<generator>http://wordpress.org/?v=3.0.3</generator>
-		<item>
-		<title>Presentazione della Tesi Magistrale</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/presentazione-della-tesi-magistrale/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/presentazione-della-tesi-magistrale/#comments</comments>
-		<pubDate>Thu, 23 Dec 2010 12:20:11 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Virtual world]]></category>
-		<category><![CDATA[Erlang]]></category>
-		<category><![CDATA[informatica]]></category>
-		<category><![CDATA[laurea]]></category>
-		<category><![CDATA[università]]></category>
+	<sy:updateBase>2000-01-01T12:00+00:00</sy:updateBase>
+<item>
+<dc:creator><![CDATA[ESPN.com news services]]></dc:creator>
+<title><![CDATA[NFL commissioner Roger Goodell conditionally reinstates Michael Vick]]></title>
+<description><![CDATA[Michael Vick was conditionally reinstated by NFL commissioner Roger Goodell on Monday and could play in regular season games as early as October.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:50:51 PDT</pubDate>
+<guid>http://sports.espn.go.com/nfl/news/story?id=4359354&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nfl/news/story?id=4359354&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1225</guid>
-		<description><![CDATA[]]></description>
-			<content:encoded><![CDATA[<div style="width:425px" id="__ss_6316857"><strong style="display:block;margin:12px 0 4px"></strong><object id="__sse6316857" width="425" height="355"><param name="movie" value="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=presentazione-101223055315-phpapp01&#038;stripped_title=tesi-magistrale&#038;userName=alessandro.sivieri" /><param name="allowFullScreen" value="true"/><param name="allowScriptAccess" value="always"/><embed name="__sse6316857" src="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=presentazione-101223055315-phpapp01&#038;stripped_title=tesi-magistrale&#038;userName=alessandro.sivieri" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="425" height="355"></embed></object></div>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/presentazione-della-tesi-magistrale/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Peter Norvig</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/peter-norvig/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/peter-norvig/#comments</comments>
-		<pubDate>Wed, 22 Dec 2010 21:20:26 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Aforismi]]></category>
+<item>
+<dc:creator><![CDATA[ESPN.com news services]]></dc:creator>
+<title><![CDATA[Sources: Pete Rose's status the same, despite report]]></title>
+<description><![CDATA[Pete Rose's status with baseball remains the same, despite a report that Bud Selig is "seriously considering" reinstatement of the hits king.]]></description>
+<pubDate>Mon, 27 Jul 2009 16:54:36 PDT</pubDate>
+<guid>http://sports.espn.go.com/mlb/news/story?id=4358260&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/mlb/news/story?id=4358260&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1223</guid>
-		<description><![CDATA[Several people have asked what programming language they should learn first. There is no one answer, but consider these points: Use your friends. When asked &#8220;what operating system should I use, Windows, Unix, or Mac?&#8221;, my answer is usually: &#8220;use whatever your friends use.&#8221; The advantage you get from learning from your friends will offset [...]]]></description>
-			<content:encoded><![CDATA[<p>Several people have asked what programming language they should learn first. There is no one answer, but consider these points:</p>
-<ul>
-<li><em>Use your friends</em>. When asked &#8220;what operating system should I use, Windows, Unix, or Mac?&#8221;, my answer is usually: &#8220;use whatever your friends use.&#8221; The advantage you get from learning from your friends will offset any intrinsic difference between OS, or between programming languages. Also consider your future friends: the community of programmers that you will be a part of if you continue. Does your chosen language have a large growing community or a small dying one? Are there books, web sites, and online forums to get answers from? Do you like the people in those forums?</li>
-<li><em>Keep it simple</em>. Programming languages such as C++ and Java are designed for professional development by large teams of experienced programmers who are concerned about the run-time efficiency of their code. As a result, these languages have complicated parts designed for these circumstances. You&#8217;re concerned with learning to program. You don&#8217;t need that complication. You want a language that was designed to be easy to learn and remember by a single new programmer.</li>
-<li><em>Play.</em> Which way would you rather learn to play the piano: the normal, interactive way, in which you hear each note as soon as you hit a key, or &#8220;batch&#8221; mode, in which you only hear the notes after you finish a whole song? Clearly, interactive mode makes learning easier for the piano, and also for programming. Insist on a language with an interactive mode and use it.</li>
-</ul>
-<p>Given these criteria, my recommendations for a first programming language would be <strong><a href="http://python.org/">Python</a></strong> or <strong><a href="http://www.schemers.org/">Scheme</a></strong>. But your circumstances may vary, and there are other good choices. If your age is a single-digit, you might prefer <a href="http://alice.org/">Alice</a> or <a href="http://www.squeak.org/">Squeak</a> (older learners might also enjoy these). The important thing is that you choose and get started.</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/peter-norvig/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Altri strumenti da imparare&#8230;</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/altri-strumenti-da-imparare/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/altri-strumenti-da-imparare/#comments</comments>
-		<pubDate>Mon, 20 Dec 2010 23:11:03 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Real world]]></category>
-		<category><![CDATA[musica]]></category>
-		<category><![CDATA[Studio Siv]]></category>
-		<category><![CDATA[ukulele]]></category>
+<item>
+<dc:creator><![CDATA[ESPN.com news services]]></dc:creator>
+<title><![CDATA[Manhattan district attorney wants Plaxico Burress in jail 'by trial or plea']]></title>
+<description><![CDATA[Manhattan's district attorney says he wants Giants wide receiver Plaxico Burress to serve time in prison, the New York Post reported.]]></description>
+<pubDate>Mon, 27 Jul 2009 18:03:23 PDT</pubDate>
+<guid>http://sports.espn.go.com/nfl/news/story?id=4358123&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nfl/news/story?id=4358123&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1218</guid>
-		<description><![CDATA[Questa volta grazie agli amici, mi è stato regalato un nuovo strumento: un ukulele! Entra di diritto a far parte dello Studio Siv, e si aggiunge alla lista di strumenti che devo imparare a suonare (almeno un minimo)&#8230; Un grazie a tutti quelli che hanno partecipato al regalo!]]></description>
-			<content:encoded><![CDATA[<div id="attachment_1219" class="wp-caption alignnone" style="width: 310px"><a href="http://www.chimera-bellerofonte.eu/wp-content/uploads/2010/12/20122010003.jpg"><img class="size-medium wp-image-1219" title="Ukulele" src="http://www.chimera-bellerofonte.eu/wp-content/uploads/2010/12/20122010003-300x225.jpg" alt="Ukulele" width="300" height="225" /></a><p class="wp-caption-text">Ukulele</p></div>
-<p>Questa volta grazie agli amici, mi è stato regalato un nuovo strumento: un <a title="Ukulele" href="http://en.wikipedia.org/wiki/Ukulele">ukulele</a>! Entra di diritto a far parte dello <a title="Studio Siv" href="http://www.chimera-bellerofonte.eu/tag/studio-siv/">Studio Siv</a>, e si aggiunge alla lista di strumenti che devo imparare a suonare (almeno un minimo)&#8230;</p>
-<p>Un grazie a tutti quelli che hanno partecipato al regalo!</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/altri-strumenti-da-imparare/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Laurea</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/laurea/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/laurea/#comments</comments>
-		<pubDate>Sun, 19 Dec 2010 11:51:33 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Real world]]></category>
-		<category><![CDATA[laurea]]></category>
-		<category><![CDATA[università]]></category>
+<item>
+<dc:creator><![CDATA[Jayson Stark]]></dc:creator>
+<title><![CDATA[Source: Toronto Blue Jays, Philadelphia Phillies trade talks over Roy Halladay 'not going well']]></title>
+<description><![CDATA[The Blue Jays and Phillies continue to talk about a deal that would send Roy Halladay to Philadelphia. But those talks are "not going well," one source with knowledge of the discussions told ESPN.com.]]></description>
+<pubDate>Mon, 27 Jul 2009 16:48:06 PDT</pubDate>
+<guid>http://sports.espn.go.com/mlb/news/story?id=4359405&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/mlb/news/story?id=4359405&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1212</guid>
-		<description><![CDATA[]]></description>
-			<content:encoded><![CDATA[<div id="attachment_1213" class="wp-caption alignnone" style="width: 235px"><a href="http://www.chimera-bellerofonte.eu/wp-content/uploads/2009/10/2010_12_Sivieri.pdf"><img class="size-medium wp-image-1213 " title="Architetture e linguaggi per Runtime Software Adaptation: Computational REST ed Erlang" src="http://www.chimera-bellerofonte.eu/wp-content/uploads/2010/12/18122010-225x300.jpg" alt="Architetture e linguaggi per Runtime Software Adaptation: Computational REST ed Erlang" width="225" height="300" /></a><p class="wp-caption-text">Architetture e linguaggi per Runtime Software Adaptation: Computational REST ed Erlang</p></div>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/laurea/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Tom Steinberg</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/tom-steinberg/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/tom-steinberg/#comments</comments>
-		<pubDate>Sat, 18 Dec 2010 10:34:53 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Aforismi]]></category>
+<item>
+<dc:creator><![CDATA[Shaun Assael]]></dc:creator>
+<title><![CDATA[Second man claims ex-Indianapolis Colts WR Marvin Harrison shot him]]></title>
+<description><![CDATA[A second man has filed suit against Marvin Harrison over a 2008 shooting.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:09:52 PDT</pubDate>
+<guid>http://sports.espn.go.com/nfl/news/story?id=4359721&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nfl/news/story?id=4359721&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1210</guid>
-		<description><![CDATA[Internet non serve a far cambiare idea alla gente, ma solo a rafforzarla in quel che già pensa e a farle fare qualcosa per realizzarlo, tipo finanziare un candidato.]]></description>
-			<content:encoded><![CDATA[<p>Internet non serve a far cambiare idea alla gente, ma solo a rafforzarla in quel che già pensa e a farle fare qualcosa per realizzarlo, tipo finanziare un candidato.</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/tom-steinberg/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Riflessioni su C e Python (ripubblicato)</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/riflessioni-su-c-e-python-ripubblicato/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/riflessioni-su-c-e-python-ripubblicato/#comments</comments>
-		<pubDate>Sun, 12 Dec 2010 23:30:06 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Oldies]]></category>
-		<category><![CDATA[oldies]]></category>
+<item>
+<dc:creator><![CDATA[Marc Stein]]></dc:creator>
+<title><![CDATA[Dwyane Wade of the Miami Heat continues recruitment of Lamar Odom in LA]]></title>
+<description><![CDATA[Dwyane Wade announced via his Twitter account late Sunday night that he has flown to Los Angeles to bring Lamar Odom back to the Heat.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:33:11 PDT</pubDate>
+<guid>http://sports.espn.go.com/nba/news/story?id=4359259&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nba/news/story?id=4359259&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1205</guid>
-		<description><![CDATA[Edit: articolo del sito vecchio, recuperato e rigirato come post&#8230; Questo piccolo articolo nasce dalla mia esperienza personale degli ultimi 3 mesi: costretto a casa dall&#8217;università a causa di un infortunio, mi sono dedicato alla programmazione (trascurando gli studi, ma questa è un&#8217;altra storia&#8230;), ed ora (8 gennaio 2006) sto scrivendo un programma in Python [...]]]></description>
-			<content:encoded><![CDATA[<div>
-<p><em>Edit: articolo del sito vecchio, recuperato e rigirato come post&#8230;</em></p>
-<p>Questo piccolo articolo nasce dalla mia esperienza personale degli ultimi 3 mesi: costretto a casa dall&#8217;università a causa di un infortunio, mi sono dedicato alla programmazione (trascurando gli studi, ma questa è un&#8217;altra storia&#8230;), ed ora (8 gennaio 2006) sto scrivendo un programma in Python che avevo ancora quest&#8217;estate scritto in C, e vorrei discutere del mio passaggio tra questi due linguaggi.</p>
-<p>Diciamo che la mia idea era innanzitutto di passare a programmare ad oggetti, in vista del corso del prossimo semestre di Ingegneria del software, in cui dovremo programmare in Java; avendo però qualche dubbio sulla programmazione in Java usando le librerie GTK per la parte grafica, e non avendo abbastanza banda (W la 56k!) per passare ad un costruttore di GUI in Swing stile Glade (per Eclipse), e certamente rifiutandomi di scrivere tutto il codice di GUI a mano, insomma mi sono affacciato a Python , di cui affascinano soprattutto le liste dinamiche inserite come tipo predefinito (in C sono un delirio di gestione, diventano un po&#8217; più facili usando le glib, se Dio vuole, ma sono comunque ancora casiniste) ed il fatto che per la maggior parte delle cose ci sono moduli predefiniti semplicissimi da usare. Altra cosa importantissima, ha le eccezioni (costrutto try&#8230; except) che permette di intercettare molto facilmente gli errori, ed evita la maggior parte delle volte cose come errori di out of memory (avete presente quando un programma parte per la tangente, si freeza e vedete la CPU partire a palla al 100%, e l&#8217;unica soluzione è un bel kill&#8230; ecco, in Python è mooolto raro, in C è un festival!) e permette, essendo un linguaggio interpretato, di avere una fase di testing veloce e molto precisa, in C bisogna compilare con supporto di debug (flag -g al compilatore), usare gdb e non sempre vi viene dato un errore preciso (specie se sforate la memoria di un qualche vettore in un posto strano da trovare a mano). Infine, la cosa che mi ha dato una grossa spinta (quella definitiva) è stata la gestione delle stringhe.</p>
-<p>Ammetto che in C ho dei grossi problemi con le stringhe. Tutto il resto bene o male funziona, ma la gestione delle stringhe è delirante. Non riesco, semplicemente, a lavorare. Esempio: ho costruito un&#8217;interfaccia grafica per convert di ImageMagick, inizialmente in C: in pratica permette di fare batch conversions di cartelle di immagini. Bene, la questione è che in C per gestire bene cose come i cambiamenti di estensione ai nomi ed il fatto che i nomi di files sono di lunghezza varia, uno pensa di usare puntatori a char e di usare free per liberarli&#8230; ebbene, da me non funziona assolutamente: la free mi dà continuamente errore, SEGFAULT a manetta, gdb a volte partiva per la tangente dandomi un fallback di 30 righe, tutti errori della glib o di gtk (probabilmente sforavo e invadevo la memoria di queste librerie) impossibili da seguire, impossibile capire dove. Il problema l&#8217;ho risolto facilmente: ho creato tutti vettori di stringhe di lunghezza prefissata, e tutto viene benissimo. Ma non è la sua. Poi ho cambiato linguaggio.</p>
-<p>In 3 giorni (da 0 a Python) ho creato una versione di tale GUI perfettamente funzionante, con le stringhe dinamicamente allocate (tutto automatico) e molto meno codice. Sempre in GTK. I files di Glade (caricati ovviamente dinamicamente, in C con libglade ed in Python con pyGTK) uguali.</p>
-<p>Scrivo oggi questo perchè sto scrivendo un programma che estrae l&#8217;audio da dvd, utile per creare mp3 da concerti live per esempio; quest&#8217;estate avevo fatto tutto in C, poi avevo mollato sempre per il discorso stringhe. Ora, in 2 settimane ho raggiunto un programma funzionante, seppur ancora indietro come implementazione (manca ad esempio una gestione di threads come si deve, al momento è tutto lineare).</p>
-<p>Mi trovo ad essere molto d&#8217;accordo, in definitiva, con Eric S. Raymond (che tutti spero sappiate chi è), che scrisse nel 2000 un bellissimo articolo su LinuxJournal intitolato Why Python, in cui afferma ad un certo punto una cosa estremamente chiara e secondo me a ragion veduta: se non si devono fare programmi che siano kernel hacks o grafica 3D, è molto più comodo usare innanzitutto un linguaggio che abbia una gestione della memoria come si deve (in C e C++ come ben sappiamo non esiste ed è direi la sola ed unica causa di problemi in programmi scritti in tali linguaggi), poi si può tranquillamente usare un linguaggio interpretato, la velocità dei computer al giorno d&#8217;oggi non penalizza assolutamente un uso runtime di interpretazione e compilazione del linguaggio, per programmi che non appartengono ai tipi descritti sopra. Ho trovato anche una seconda visione come la mia, di John K. Ousterhout, addirittura ancor più vecchia, del 1998 (ma aggiornata poi nel 2001), in cui si afferma che programmi collante, tra GUI ed altri componenti, oggi nel 3° millennio sono usabili comodamente in linguaggi interpretati, mentre i linguaggi di alto livello (Java e C++ et similia) servono per le librerie che poi quegli interpreti usano, oppure in programmi che richiedono prestazioni di un certo tipo, magari per gli algoritmi complicati o grandi moli di dati. Per esempio, qualche mese fa avevo provato ad usare la zlib in C per fare un programma che comprimesse e decomprimesse files: la decompressione non ha assolutamente funzionato, la gestione è secondo me molto difficoltosa, bisogna leggere l&#8217;header scritto dalla libreria, per vedere le dimensioni iniziali e finali, anche lì problemi di gestione e codice di esempio mal commentato. In Python, in 10 minuti ho imparato a comprimere e decomprimere files, compreso il tempo servitomi a leggere la documentazione del modulo zipfile, senza contare il fatto che l&#8217;interprete a linea di comando è estremamente utile, permette di provare il codice letteralmente al volo, prima di scriverlo in uno script o un programma.</p>
-<p>Torniamo ancora alla velocità, che può sembrare a molti difficile: se avete programmi di medio uso, che non necessitano di prestazioni, su un computer moderno non avranno problemi di alcun tipo! Uno script scritto qui al volo su un AMD Sempron 3000+ (1800 Mhz reali) si esegue in 5 secondi, compreso il tempo che impiega la CPU a salire da 800 Mhz (frequenza di riposo) a 1800:</p>
-<p><code>from random import randint</code></p>
-<p>n_min=0<br />
-n_max=1000<br />
-n_test=1000000<br />
-count=[]<br />
-total=0<br />
-med_min=n_max<br />
-med_max=n_max<br />
-for i in range(n_max):<br />
-count.append(0)<br />
-for i in range(n_test):<br />
-n=randint(n_min, n_max-1)<br />
-count[n]=count[n]+1<br />
-for i in range(n_max):<br />
-if count[i]&gt;n_max and count[i]&gt;med_max:<br />
-med_max=i<br />
-if count[i]&lt;n_max and count[i]&lt;med_min:<br />
-med_min=i<br />
-print “Sono state effettuate %d estrazioni, da %d a %d” % (n_test, n_min, n_max)<br />
-print &#8220;Il numero estratto meno volte (%d) e&#8217; %d&#8221; % (count[med_min], med_min)<br />
-print &#8220;Il numero estratto piu&#8217; volte (%d) e&#8217; %d&#8221; % (count[med_max], med_max)</p>
-<p>Questo codice estrae n_test volte i numeri di un intervallo stabilito, e ricerca la frequenza più alta e più bassa dell&#8217;estrazione. Può benissimo essere che il vettore iniziale possa essere preparato ed inizializzato in maniera più furba, in ogni caso queste 20 righe vengono eseguite in 5 secondi (circa): un tempo accettabile no? Una GUI costruita con Glade e caricata dinamicamente porta il programma ad un tempo di boot di mezzo secondo, se poi si suddividono i files di tali applicazioni in sottofiles (ad esempio uno per ogni finestra separata del programma) ecco che si riducono e distribuiscono i tempi di attesa (del tutto accettabili, secondo la mia attuale esperienza). Se poi pensiamo che Google fa un uso intensivo di Python ed è il motore di ricerca più veloce&#8230;</p>
-<p>Al momento, questo è ciò che vi dico riguardo tale argomento, ognuno faccia le proprie riflessioni e veda cosa effettivamente gli conviene usare.</p>
-</div>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/riflessioni-su-c-e-python-ripubblicato/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Polimi live DVD (ripubblicato)</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/polimi-live-dvd-ripubblicato/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/polimi-live-dvd-ripubblicato/#comments</comments>
-		<pubDate>Sun, 12 Dec 2010 23:28:47 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Oldies]]></category>
-		<category><![CDATA[oldies]]></category>
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[Tony Bernazard, New York Mets executive, reportedly fired by New York Mets]]></title>
+<description><![CDATA[Omar Minaya fired a team executive Monday for a series of blowups, then openly questioned the motives of a local beat writer.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:43:47 PDT</pubDate>
+<guid>http://sports.espn.go.com/mlb/news/story?id=4359215&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/mlb/news/story?id=4359215&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1201</guid>
-		<description><![CDATA[Edit: articolo del sito vecchio, recuperato e rigirato come post&#8230; Riguardando ora i contenuti del vecchio sito, non posso fare a meno di ripubblicare quanto avevo scritto in tempi non sospetti (la data, registrata nell&#8217;html originale prodotto da OpenOffice, mi dice &#8221;2006-01-08T21:25:11&#8243;, quindi&#8230;) su un mio progetto, che purtroppo (per come poi sono andate le cose) [...]]]></description>
-			<content:encoded><![CDATA[<div>
-<p><em>Edit: articolo del sito vecchio, recuperato e rigirato come post&#8230;</em></p>
-<p>Riguardando ora i contenuti del vecchio sito, non posso fare a meno di ripubblicare quanto avevo scritto in tempi non sospetti (la data, registrata nell&#8217;html originale prodotto da OpenOffice, mi dice &#8221;2006-01-08T21:25:11&#8243;, quindi&#8230;) su un mio progetto, che purtroppo (per come poi sono andate le cose) non ho portato a lungo avanti, anche se&#8230; ora con Polinux&#8230; <img src='http://www.chimera-bellerofonte.eu/wp-includes/images/smilies/icon_smile.gif' alt=':-)' class='wp-smiley' /> </p>
-<p>&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;&#8212;</p>
-<p>Ubuntu 6.10 &#8211; Polimi inginf Live DVD</p>
-<p>L&#8217;intento di ricreare un Live CD/DVD di GNU/Linux con i programmi da noi utilizzati durante il corso di studi mi ronzava in testa ormai da un po&#8217;, sia per permettere una diffusione magari piu&#8217; ampia di un Sistema Operativo decente (GNU/Linux appunto), sia perche&#8217; in qualunque caso ed in qualunque momento sia possibile avere tutti i programmi che ci possono essere necessari per “lavorare” per l&#8217;universita&#8217;. Inizialmente mi ero orientato verso una rimasterizzazione di Knoppix, madre di tutti i live CD, tuttavia il procedimento da seguire non e&#8217; proprio comodissimo (anche se si e&#8217; notevolmente semplificato con l&#8217;introduzione di UnionFS, vedi articolo in un recente numero di “Linux &amp; co.”) e quindi non mi ero mai deciso a farlo; tuttavia proprio la scorsa settimana ho scoperto un tool (in Python <img src='http://www.chimera-bellerofonte.eu/wp-includes/images/smilies/icon_wink.gif' alt=';)' class='wp-smiley' />  che serve a rimasterizzare il live CD della Ubuntu ed ecco che, appena tornato a Milano, mi sono dato da fare (in aula informatica finalmente si viaggia ad una velocita&#8217; decente) ed ho sfornato l “Ubuntu 6.10 Polimi inginf Live DVD”, al momento ho dato 1.1 come numero di tale versione, perfettamente funzionante. Chiarisco subito che non ho alcuna intenzione di creare una nuova distro o di scrivere personalmente alcunche&#8217;, mi limito ad aggiungere pacchetti che comunque trovereste sugli archivi di (K)Ubuntu: io mi limito a semplificarvi il lavoro (ed a rendere tali pacchetti fruibili in versione live).</p>
-<p>Rapidamente vi dico che ci sono i pacchetti base del DM (al momento Gnome, visto che ho rimasterizzato Ubuntu, vedro&#8217; poi in seguito se convertire la live a KDE, non e&#8217; comunque strettamente necessario), poi ad uso normale del pc abbiamo Firefox come Web Browser, Thunderbird come client di posta, OpenOffice per l&#8217;ufficio; per la rete ci sono installati Apache, MySQL e phpmyadmin (che trovate in http://localhost/phpmyadmin), piu&#8217; Firestarter come firewall (da configurare manualmente una volta avviata la distribuzione) ed ndiswrapper (cui dovete passare i driver della vostra scheda wireless); in multimedia abbiamo K3b, il re dei programmi di masterizzazione; mplayer/mencoder, ottimo video player testuale; Noteedit, editor di spartiti musicali; amaroK, stupendo player audio con cui gestire facilmente la vostra collezione musicale; Audacity come editor di files wav/mp3/ogg; infine alcuni strumenti a linea di comando molto utili, come sox, ImageMagick e normalize (usato per normalizzare la musica in fase di creazione di cd audio su k3b).</p>
-<p>Per l&#8217;universita&#8217; invece abbiamo il gia&#8217; citato OpenOffice, cui aggiungere Kile per la scrittura di documenti in LaTex (eventualmente potrei aggiungere Lyx, devo ancora decidere); per la programmazione ci sono Python, utilizzabile da qualunque editor di testi o da Eclipse tramite l&#8217;apposito plugin; C/C++ (gcc 4.x), cui aggiungere Glade 2 per creare interfacce grafiche (sfruttabili comunque anche in altri linguaggi) ed Anjuta come editor di progetti (anche se lo stesso Eclipse ha incluso il plugin per lo sviluppo in C/C++); Eclipse 3.1.2 con installati e raggiungibili sia Gnu Gcj 1.4.2 (installato automaticamente utilizzando apt-get) sia Sun Java JDK 1.5.0_06 (impostero&#8217; presto tale jdk come predefinito, il workspace di default si trova nella home directory, sottocartella “workspace”); octave come linguaggio matematico al posto di Matlab; gEDA e Klogic per creare e testare circuiti elettrici e digitali; Kalzium come tavola periodica degli elementi (se siete connessi ad Internet inoltre permette di ottenere numerose informazioni aggiuntive a quelle gia&#8217; presenti). Inoltre in http://localhost/java5 trovate le API di Java 5 (installato ed utilizzabile da Eclipse o da console). Se poi volete utilizzare metodi estremamente efficaci di creare documentazione per il vostro codice (in pressochè qualunque linguaggio di programmazione) allora usate Doxygen, strumento estremamente potente per la creazione di html e pdf di documentazione. E&#8217; poi stato aggiunto NS (Network Simulator), programma usato nei corsi di reti, ancora tuttavia da testare (e da aggiungere la sua interfaccia grafica NScript).</p>
-<p>Per qualunque programma aggiuntivo contattatemi pure liberamente: al momento il Live DVD “pesa” 1.2 Gb, quindi prima di riempire un DVD manca ancora mooolto spazio <img src='http://www.chimera-bellerofonte.eu/wp-includes/images/smilies/icon_biggrin.gif' alt=':D' class='wp-smiley' /> </p>
-<p>Buon divertimento!</p>
-<p>Sir Alex</p>
-</div>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/polimi-live-dvd-ripubblicato/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Erlang R14B01 in PPA</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/erlang-r14b01-in-ppa/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/erlang-r14b01-in-ppa/#comments</comments>
-		<pubDate>Sat, 11 Dec 2010 15:00:38 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Uncategorized]]></category>
+<item>
+<dc:creator><![CDATA[Marc Stein]]></dc:creator>
+<title><![CDATA[Sources: Charlotte Bobcats, New Orleans Hornets talk Tyson Chandler for Emeka Okafor]]></title>
+<description><![CDATA[Sources say the Bobcats and Hornets are in talks to trade Tyson Chandler for Emeka Okafor.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:48:10 PDT</pubDate>
+<guid>http://sports.espn.go.com/nba/news/story?id=4359609&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nba/news/story?id=4359609&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1198</guid>
-		<description><![CDATA[E&#8217; appena stato pubblicata in Debian Experimental la nuova versione di Erlang, mantenimento della 14B, e ieri sera ho girato la medesima versione sul mio PPA, seguendo quindi il mio piano di pubblicare in parallelo ai rami Debian i pacchetti di questo linguaggio, almeno fino a che quelli ufficiali di Ubuntu non siano decentemente aggiornati. [...]]]></description>
-			<content:encoded><![CDATA[<p>E&#8217; appena stato pubblicata in Debian Experimental la nuova versione di <a title="R14B01" href="http://www.erlang.org/download/otp_src_R14B01.readme">Erlang</a>, mantenimento della 14B, e ieri sera ho girato la medesima versione sul <a title="PPA" href="https://launchpad.net/~scattino/+archive/ppa">mio PPA</a>, seguendo quindi il mio piano di pubblicare in parallelo ai rami Debian i pacchetti di questo linguaggio, almeno fino a che quelli ufficiali di Ubuntu non siano decentemente aggiornati.</p>
-<p>Volevo inoltre aggiungere due parole sui PPA, argomento magari da approfondire in seguito: qualcuno ha discusso la sicurezza di installare pacchetti da gente sostanzialmente sconosciuta, che potrebbe aggiungere ai sorgenti anche malware o spyware; io naturalmente posso solo provare ad assicurarvi che non modifico minimamente il software che pubblico, ma lo faccio compilare dal sistema &#8220;così com&#8217;è&#8221;. Peraltro, se i programmi installati da un archivio online su Launchpad violano il vostro sistema, potete rivolgervi alla Canonical, dato che il pubblicatore di detti programmi avrebbe a quel punto violato la &#8220;<a title="Launchpad Code of Conduct" href="https://launchpad.net/codeofconduct">Code of conduct</a>&#8221; del sito, che ognuno di noi ha (digitalmente) firmato all&#8217;atto di iscrizione.</p>
-<p>Insomma: qualche rassicurazione c&#8217;è, chiaramente fino ad un certo punto. Nel caso, sapete dove trovarmi&#8230;</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/erlang-r14b01-in-ppa/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>Tsung: test di carico (semi-)automatizzati</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/tsung-test-di-carico-semi-automatizzati/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/tsung-test-di-carico-semi-automatizzati/#comments</comments>
-		<pubDate>Fri, 10 Dec 2010 19:14:41 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Virtual world]]></category>
-		<category><![CDATA[Erlang]]></category>
-		<category><![CDATA[informatica]]></category>
-		<category><![CDATA[Tsung]]></category>
-		<category><![CDATA[web]]></category>
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[Brandon Marshall reports to Denver Broncos training camp]]></title>
+<description><![CDATA[Brandon Marshall reported to the first day of the Broncos' training camp on Monday.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:42:10 PDT</pubDate>
+<guid>http://sports.espn.go.com/nfl/trainingcamp09/news/story?id=4359019&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nfl/trainingcamp09/news/story?id=4359019&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1194</guid>
-		<description><![CDATA[C&#8217;è un nuovo arrivato nel mio PPA: si tratta di Tsung, uno strumento per eseguire test di carico verso server Web ma non solo; è scritto in Erlang, e ne sfrutta tutte le caratteristiche di distribuzione tra i processi per un&#8217;esecuzione rapida ed indolore (per il PC da cui viene lanciato), e può essere configurato [...]]]></description>
-			<content:encoded><![CDATA[<p>C&#8217;è un nuovo arrivato nel <a title="Scattino PPA" href="https://launchpad.net/~scattino/+archive/ppa">mio PPA</a>: si tratta di <a title="Tsung" href="http://tsung.erlang-projects.org/">Tsung</a>, uno strumento per eseguire test di carico verso server Web ma non solo; è scritto in <a title="Erlang" href="http://www.erlang.org">Erlang</a>, e ne sfrutta tutte le caratteristiche di distribuzione tra i processi per un&#8217;esecuzione rapida ed indolore (per il PC da cui viene lanciato), e può essere configurato per lanciare richieste utilizzando HTTP, WebDAV, Jabber, [My|Postgre]SQL ed LDAP.</p>
-<p>La configurazione avviene tramite un file XML, che può essere parzialmente generato tramite una sorta di &#8220;registrazione&#8221; delle proprie azioni: il programma infatti può installare un proxy tramite cui è in grado di salvare tutte le richieste effettuate in remoto, sia http che https, e successivamente si può partire da questo e personalizzarne solamente la configurazione dei client e la tempistica delle richieste stesse.</p>
-<p>Offre inoltre la possibilità di effettuare un parsing della risposta del server, per confrontarla con quanto ci si aspetta di ricevere, o di inserire dinamicamente dei parametri ricavati ad esempio da funzioni sviluppate <em>ad hoc</em> in Erlang.</p>
-<p>Le statistiche prodotte vengono ricavate tramite diversi agenti in grado di monitorare la rete: il primo è nativo del linguaggio ma richiede configurazioni particolari di ssh; il secondo è <a title="SNMP" href="http://en.wikipedia.org/wiki/Simple_Network_Management_Protocol">SNMP</a> ed il terzo è <a title="Munin" href="http://munin-monitoring.org/">Munin</a>: entrambi devono essere presenti lato client, sono installabili facilmente sulle distribuzioni più diffuse, ed io personalmente ho puntato sul secondo dato che la configurazione base del <em>nodo</em> è sufficiente allo scopo (si tratta solamente di modificare l&#8217;IP in ingresso, da <em>loopback</em> a quello del PC da cui lanciate i client simulati).</p>
-<p>Insomma, dateci un&#8217;occhiata: i sorgenti del pacchetto Debian erano già presenti sul sito dell&#8217;applicativo, quindi il passo verso la pubblicazione nel PPA è stata piuttosto breve, ed i miei test hanno dato esito positivo; in caso di problemi, fatemi sapere!</p>
-<p><em>Edit:</em> ho appena scoperto che esiste un tool secondario installato con il programma, chiamato <em>tsplot</em>, che è in grado di produrre grafici di confronto, mettendo assieme fonti differenti e permettendo così di individuare facilmente variazioni a fronte di diverse configurazioni passate al sistema. Risultati spettacolari&#8230;</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/tsung-test-di-carico-semi-automatizzati/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-		<item>
-		<title>CREST-Erlang</title>
-		<link>http://www.chimera-bellerofonte.eu/2010/12/crest-erlang/</link>
-		<comments>http://www.chimera-bellerofonte.eu/2010/12/crest-erlang/#comments</comments>
-		<pubDate>Sun, 05 Dec 2010 19:06:11 +0000</pubDate>
-		<dc:creator>Siv</dc:creator>
-				<category><![CDATA[Virtual world]]></category>
-		<category><![CDATA[CREST]]></category>
-		<category><![CDATA[Erlang]]></category>
-		<category><![CDATA[informatica]]></category>
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[BCS changes open Rose Bowl bids to outsiders]]></title>
+<description><![CDATA[Big Ten commissioner Jim Delany says some tweaking to the Bowl Championship Series rules has given greater access to the Rose Bowl to teams from outside the six conferences with automatic BCS bids -- such as Utah.]]></description>
+<pubDate>Mon, 27 Jul 2009 17:06:23 PDT</pubDate>
+<guid>http://sports.espn.go.com/ncf/news/story?id=4359924&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/ncf/news/story?id=4359924&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
 
-		<guid isPermaLink="false">http://www.chimera-bellerofonte.eu/?p=1191</guid>
-		<description><![CDATA[Oggi ho pubblicato il progetto scritto per la mia tesi di laurea specialistica (il cui testo sarà inserito tra le pubblicazioni dopo il 20 dicembre) su Github, è possibile scaricare il codice sorgente sia del framework che della demo. CREST-Erlang è un framework Web in grado di supportare il paradigma Computational REST, uno stile architetturale [...]]]></description>
-			<content:encoded><![CDATA[<p>Oggi ho <a title="CREST-Erlang" href="https://github.com/sivieri/crest-erlang">pubblicato</a> il progetto scritto per la mia tesi di laurea specialistica (il cui testo sarà inserito tra le <a title="Pubblicazioni" href="http://www.chimera-bellerofonte.eu/pubblicazioni/">pubblicazioni</a> dopo il 20 dicembre) su Github, è possibile scaricare il codice sorgente sia del framework che della demo.</p>
-<p>CREST-Erlang è un framework Web in grado di supportare il paradigma <a title="Computational REST" href="http://www.erenkrantz.com/CREST/">Computational REST</a>, uno stile architetturale che evolve <a title="REST" href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REpresentational State Transfer</a> e permette la trasmissione di computazioni assieme ai dati.</p>
-<p>Ho una lista di ulteriori modifiche da integrare, in parallelo ad un articolo che sto preparando per l&#8217;università, e qualunque nuova modifica verrà quindi inserita nel repository pubblico; il tutto è pubblicato sotto licenza <a title="LGPL" href="http://www.gnu.org/licenses/lgpl.html">LGPL</a> (salvo le librerie integrate, che seguono le proprie licenze, ed i moduli per la demo che sono pubblicati sotto <a title="GPL" href="http://www.gnu.org/licenses/gpl.html">GPL</a>), ed è utilizzabile all&#8217;interno di progetti compatibili. L&#8217;ultima versione è la 0.7.1, quindi si consiglia di non andare oltre il test delle applicazioni.</p>
-]]></content:encoded>
-			<wfw:commentRss>http://www.chimera-bellerofonte.eu/2010/12/crest-erlang/feed/</wfw:commentRss>
-		<slash:comments>0</slash:comments>
-		</item>
-	</channel>
-</rss>
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[Ferrari's Felipe Massa awake, talking to family, doctor says]]></title>
+<description><![CDATA[A doctor says Felipe Massa's life is no longer in danger, but that the Ferrari driver sustained an eye injury in his crash which could affect his future in Formula One.]]></description>
+<pubDate>Mon, 27 Jul 2009 16:09:06 PDT</pubDate>
+<guid>http://sports.espn.go.com/rpm/racing/f1/news/story?id=4358127&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/rpm/racing/f1/news/story?id=4358127&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
+
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[World championships: Aaron Peirsol ousted of signature event in world championships heat]]></title>
+<description><![CDATA[Aaron Peirsol was stunningly knocked out of in the 100-meter backstroke semifinals Monday.]]></description>
+<pubDate>Mon, 27 Jul 2009 13:53:12 PDT</pubDate>
+<guid>http://sports.espn.go.com/oly/swimming/news/story?id=4358159&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/oly/swimming/news/story?id=4358159&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
+
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[Tony Parker of the San Antonio Spurs injures ankle and thigh]]></title>
+<description><![CDATA[Spurs guard Tony Parker has a sprained ankle and injured thigh after colliding with an Austrian player during a recent basketball game.]]></description>
+<pubDate>Mon, 27 Jul 2009 09:40:41 PDT</pubDate>
+<guid>http://sports.espn.go.com/nba/news/story?id=4358844&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/nba/news/story?id=4358844&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
+
+<item>
+<dc:creator><![CDATA[Associated Press]]></dc:creator>
+<title><![CDATA[Bobby Valentine says he won't stay with Chiba Lotte Marines]]></title>
+<description><![CDATA[Bobby Valentine says he won't be back with the Chiba Lotte Marines next season even as the Japanese team's fans lobby management to keep him.]]></description>
+<pubDate>Mon, 27 Jul 2009 16:21:33 PDT</pubDate>
+<guid>http://sports.espn.go.com/mlb/news/story?id=4359030&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/mlb/news/story?id=4359030&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
+
+<item>
+<dc:creator><![CDATA[ESPNChicago.com]]></dc:creator>
+<title><![CDATA[Fighting Illini football coach Ron Zook would like to play Northwestern at Wrigley Field]]></title>
+<description><![CDATA[Fighting Illini football coach Ron Zook would like to play Northwestern at Wrigley Field.]]></description>
+<pubDate>Mon, 27 Jul 2009 11:07:27 PDT</pubDate>
+<guid>http://sports.espn.go.com/chicago/news/story?id=4358676&amp;campaign=rss&amp;source=ESPNHeadlines</guid>
+<link>http://sports.espn.go.com/chicago/news/story?id=4358676&amp;campaign=rss&amp;source=ESPNHeadlines</link>
+</item>
+
+</channel></rss>
