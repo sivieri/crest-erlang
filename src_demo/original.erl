@@ -190,12 +190,14 @@ serialize_widgets(Widgets) ->
     {struct, [{erlang:iolist_to_binary("items"), SerWidgets}]}.
 
 feed_to_json(List) ->
-    lists:map(fun({Title, Date, Desc}) ->
-                               {struct, [{erlang:iolist_to_binary("label"), erlang:iolist_to_binary(Title)},
+    Feeds = lists:map(fun({Title, Date, Desc}) ->
+                               {struct, [{erlang:iolist_to_binary("type"), erlang:iolist_to_binary("message")},
+                                         {erlang:iolist_to_binary("label"), erlang:iolist_to_binary(Title)},
                                          {erlang:iolist_to_binary("sent"), erlang:iolist_to_binary(Date)},
                                          {erlang:iolist_to_binary("text"), erlang:iolist_to_binary(Desc)}
                                          ]}
-                               end, List).
+                               end, List),
+    {struct, [{erlang:iolist_to_binary("items"), Feeds}]}.
 
 %% @reference http://www.trapexit.org/How_to_write_an_RSS_aggregator
 parse_feed(Content) ->
