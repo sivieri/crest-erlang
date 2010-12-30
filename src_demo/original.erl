@@ -164,7 +164,7 @@ get_manager() ->
                 end,
                 F(F, NewInstances);
             {Pid, {["widget", "manager", "maps"], _}} ->
-                Pid ! {self(), {"application/json", serialize_widgets(Instances)}},
+                Pid ! {self(), {"application/json", mochijson2:encode(serialize_widgets(Instances))}},
                 F(F, Instances);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
