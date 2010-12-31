@@ -149,7 +149,7 @@ rss_feed() ->
             {Pid, [{"link", Key}]} ->
                 Pid ! {self(), ok},
                 F(F, Key);
-            {Pid, _} ->
+            {Pid, _} when length(UrlSel) > 0 ->
                 case crest_operations:invoke_local_lambda(UrlSel, []) of
                     {ok, {_CT, Bin}} ->
                         Obj = mochijson2:decode(Bin),
@@ -164,6 +164,9 @@ rss_feed() ->
                     {error} ->
                         Pid ! {self(), {error}}
                 end,
+                F(F, UrlSel);
+            {Pid, _} ->
+                Pid ! {self(), {"application/json", mochijson2:encode(feed_to_json([]))}},
                 F(F, UrlSel)
         end
     end,
