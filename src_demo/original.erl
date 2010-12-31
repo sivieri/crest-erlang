@@ -211,10 +211,10 @@ parse_feed(Content) ->
 
 getElementsByTagName([H|T], Item) when H#xmlElement.name == Item ->
     [H | getElementsByTagName(T, Item)];
-getElementsByTagName([H|T], Item) when record(H, xmlElement) ->
+getElementsByTagName([H|T], Item) when is_record(H, xmlElement) ->
     getElementsByTagName(H#xmlElement.content, Item) ++
       getElementsByTagName(T, Item);                                                                  
-getElementsByTagName(X, Item) when record(X, xmlElement) ->
+getElementsByTagName(X, Item) when is_record(X, xmlElement) ->
     getElementsByTagName(X#xmlElement.content, Item);
 getElementsByTagName([_|T], Item) ->
     getElementsByTagName(T, Item);
