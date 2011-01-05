@@ -6,7 +6,7 @@
 			use_controller_vm="true" />
 	</clients>
 	<servers>
-		<server host="alex-laptop" port="8081" type="tcp" />
+		<server host="alex-laptop" port="8080" type="tcp" />
 	</servers>
 	<monitoring>
 		<monitor host="alex-laptop" type="erlang" />
@@ -52,189 +52,39 @@
 		</option>
 	</options>
 	<sessions>
-		<session name='rec20101231-16:16' probability='100' type='ts_http'>
-			<request>
-				<http url='http://localhost:8080/original/demo.html' version='1.1'
-					if_modified_since='Fri, 31 Dec 2010 16:16:11 GMT' method='GET'>
-				</http>
-			</request>
-			<request>
-				<http url='/original/dijit/tests/css/dijitTests.css' version='1.1'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812204042'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812207055'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http url='/original/dijit/themes/soria/images/buttonActive.png'
-					version='1.1' method='GET'>
-				</http>
-			</request>
-			<request>
-				<http url='/original/img/titleBar.png' version='1.1' method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/create'
-					version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_1&quot;,&quot;title&quot;:&quot;URL Selector&quot;,&quot;x&quot;:686.0833129882812,&quot;y&quot;:212.56666564941406,&quot;width&quot;:342,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812210071'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812210349'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http url='/original/data/rss.json?dojo.preventCache=1293812211746'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/create'
-					version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_2&quot;,&quot;title&quot;:&quot;RSS Reader&quot;,&quot;x&quot;:665.6666870117188,&quot;y&quot;:237.1666717529297,&quot;width&quot;:242,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812213079'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812213371'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/0a46783b-770d-4640-9fac-ce3e9cf840ac?dojo.preventCache=1293812214749'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/move'
-					version='1.1'
-					contents='{&quot;id&quot;:&quot;W_2&quot;,&quot;x&quot;:420,&quot;y&quot;:79,&quot;width&quot;:252,&quot;height&quot;:302,&quot;color&quot;:&quot;blue&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812216391'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/original/dijit/themes/soria/images/spriteRoundedIconsSmall.png'
-					version='1.1' method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/0a46783b-770d-4640-9fac-ce3e9cf840ac?dojo.preventCache=1293812217755'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/link'
-					version='1.1'
-					contents='{&quot;type&quot;:&quot;link&quot;,&quot;from&quot;:&quot;W_1&quot;,&quot;to&quot;:&quot;W_2&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812219400'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/0a46783b-770d-4640-9fac-ce3e9cf840ac?dojo.preventCache=1293812220763'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812221579'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812222403'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/0a46783b-770d-4640-9fac-ce3e9cf840ac?dojo.preventCache=1293812223772'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps?dojo.preventCache=1293812224585'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/821d9a8c-0bd8-4339-a32e-540aa1d672f9?dojo.preventCache=1293812225406'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-			<request>
-				<http
-					url='/crest/url/0a46783b-770d-4640-9fac-ce3e9cf840ac?dojo.preventCache=1293812226786'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'>
-				</http>
-			</request>
-		</session>
+		<session name='rec20101231-16:14' probability='100' type='ts_http'>
+            <request>
+                <http url='/original/dijit/tests/css/dijitTests.css'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/original/dijit/themes/soria/images/titleBarActive.png'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/original/dijit/themes/soria/images/buttonActive.png'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/original/img/titleBar.png' version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <dyn_variable name="widget1" json="items[0].url" />
+                <dyn_variable name="widget2" json="items[1].url" />
+                <http url='/crest/url/859a28f4-5be2-4675-954f-690dd45fe45c/widget/manager/maps'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+            <request>
+                <http url='%%_widget1%%'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+            <request>
+                <http url='%%_widget2%%'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+        </session>
 	</sessions>
 </tsung>

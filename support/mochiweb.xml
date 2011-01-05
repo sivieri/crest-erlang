@@ -6,7 +6,7 @@
 			use_controller_vm="true" />
 	</clients>
 	<servers>
-		<server host="alex-laptop" port="8081" type="tcp" />
+		<server host="alex-laptop" port="8080" type="tcp" />
 	</servers>
 	<monitoring>
 		<monitor host="alex-laptop" type="erlang" />
@@ -54,21 +54,8 @@
 	<sessions>
 		<session name='rec20101231-16:14' probability='100' type='ts_http'>
 			<request>
-				<http url='http://localhost:8080/dijit/tests/css/dijitTests.css'
+				<http url='/dijit/tests/css/dijitTests.css'
 					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812064778'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/favicon.ico' version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812067784'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
 			</request>
 			<request>
 				<http url='/dijit/themes/soria/images/titleBarActive.png'
@@ -82,96 +69,19 @@
 				<http url='/img/titleBar.png' version='1.1' method='GET'></http>
 			</request>
 			<request>
-				<http url='/manager/widget/manager/create' version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_1&quot;,&quot;title&quot;:&quot;URL Selector&quot;,&quot;x&quot;:934.3333129882812,&quot;y&quot;:211.96665954589844,&quot;width&quot;:342,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
+			    <dyn_variable name="widget1" json="items[0].url" />
+			    <dyn_variable name="widget2" json="items[1].url" />
+                <http url='/manager/widget/manager/maps'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
 			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812070794'
+				<http url='%%_widget1%%'
 					version='1.1' content_type='application/x-www-form-urlencoded'
 					method='GET'></http>
 			</request>
 			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812072147'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/create' version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_2&quot;,&quot;title&quot;:&quot;RSS Reader&quot;,&quot;x&quot;:120.31666564941406,&quot;y&quot;:206,&quot;width&quot;:242,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812073804'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812075159'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_2?dojo.preventCache=1293812076506'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/move' version='1.1'
-					contents='{&quot;id&quot;:&quot;W_2&quot;,&quot;x&quot;:490,&quot;y&quot;:183,&quot;width&quot;:252,&quot;height&quot;:302,&quot;color&quot;:&quot;blue&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http url='/dijit/themes/soria/images/spriteRoundedIconsSmall.png'
-					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812078173'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_2?dojo.preventCache=1293812079502'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/link' version='1.1'
-					contents='{&quot;type&quot;:&quot;link&quot;,&quot;from&quot;:&quot;W_1&quot;,&quot;to&quot;:&quot;W_2&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812081223'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_2?dojo.preventCache=1293812082511'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812082706'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812084228'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_2?dojo.preventCache=1293812085527'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/manager/maps?dojo.preventCache=1293812085714'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/manager/widget/W_1?dojo.preventCache=1293812087232'
+				<http url='%%_widget2%%'
 					version='1.1' content_type='application/x-www-form-urlencoded'
 					method='GET'></http>
 			</request>

@@ -52,134 +52,39 @@
 		</option>
 	</options>
 	<sessions>
-		<session name='rec20101231-16:18' probability='100' type='ts_http'>
-			<request>
-				<http url='/static/dojo/demo/dijit/tests/css/dijitTests.css'
-					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/static/dojo/demo/dijit/themes/soria/images/titleBarActive.png'
-					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/maps?dojo.preventCache=1293812326705'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/static/dojo/demo/dijit/themes/soria/images/buttonActive.png'
-					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/static/dojo/demo/img/titleBar.png' version='1.1'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/create' version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_1&quot;,&quot;title&quot;:&quot;URL Selector&quot;,&quot;x&quot;:659.4666748046875,&quot;y&quot;:314.6333312988281,&quot;width&quot;:342,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/maps?dojo.preventCache=1293812329710'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812330050'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/create' version='1.1'
-					contents='{&quot;type&quot;:&quot;widget&quot;,&quot;id&quot;:&quot;W_2&quot;,&quot;title&quot;:&quot;RSS Reader&quot;,&quot;x&quot;:655.0999755859375,&quot;y&quot;:74.96665954589844,&quot;width&quot;:242,&quot;height&quot;:17.2833,&quot;color&quot;:&quot;blue&quot;,&quot;host&quot;:&quot;Peer 1&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/maps?dojo.preventCache=1293812332721'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812333066'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/7528eb18-bc4a-455b-924f-830f934ca878?dojo.preventCache=1293812335106'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/move' version='1.1'
-					contents='{&quot;id&quot;:&quot;W_2&quot;,&quot;x&quot;:670,&quot;y&quot;:7,&quot;width&quot;:252,&quot;height&quot;:302,&quot;color&quot;:&quot;blue&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812336071'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/static/dojo/demo/dijit/themes/soria/images/spriteRoundedIconsSmall.png'
-					version='1.1' method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/link' version='1.1'
-					contents='{&quot;type&quot;:&quot;link&quot;,&quot;from&quot;:&quot;W_1&quot;,&quot;to&quot;:&quot;W_2&quot;}'
-					content_type='application/json; charset=UTF-8' method='POST'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/7528eb18-bc4a-455b-924f-830f934ca878?dojo.preventCache=1293812338121'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812339079'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/7528eb18-bc4a-455b-924f-830f934ca878?dojo.preventCache=1293812341130'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/maps?dojo.preventCache=1293812341315'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812342261'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/7528eb18-bc4a-455b-924f-830f934ca878?dojo.preventCache=1293812344138'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http url='/widget/manager/maps?dojo.preventCache=1293812344329'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-			<request>
-				<http
-					url='/mailbox/ff718f55-388d-4a25-81b7-4a203b1938cf?dojo.preventCache=1293812345265'
-					version='1.1' content_type='application/x-www-form-urlencoded'
-					method='GET'></http>
-			</request>
-		</session>
+		<session name='rec20101231-16:14' probability='100' type='ts_http'>
+            <request>
+                <http url='/static/dojo/demo/dijit/tests/css/dijitTests.css'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/static/dojo/demo/dijit/themes/soria/images/titleBarActive.png'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/static/dojo/demo/dijit/themes/soria/images/buttonActive.png'
+                    version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <http url='/static/dojo/demo/img/titleBar.png' version='1.1' method='GET'></http>
+            </request>
+            <request>
+                <dyn_variable name="widget1" json="items[0].url" />
+                <dyn_variable name="widget2" json="items[1].url" />
+                <http url='/widget/manager/maps'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+            <request>
+                <http url='%%_widget1%%'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+            <request>
+                <http url='%%_widget2%%'
+                    version='1.1' content_type='application/x-www-form-urlencoded'
+                    method='GET'></http>
+            </request>
+        </session>
 	</sessions>
 </tsung>
