@@ -67,7 +67,7 @@ loop(Req, DocRoot) ->
 				["crest", "local", T] ->
 					case crest_local:start_local(T) of
                         {ok, Key} ->
-                            Req:respond({200, [{"Content-Type", "text/plain"}], Key});
+                            Req:respond({200, [{"Content-Type", "application/json"}], mochijson2:encode(crest_utils:pack_key(Key))});
                         {error} ->
                             Req:respond({404, [], []})
                     end;

@@ -20,9 +20,14 @@
 %% @copyright 2010 Alessandro Sivieri
 
 -module(crest_utils).
--export([ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1, http_get/1]).
+-export([pack_key/1, ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1, http_get/1]).
 
 %% External API
+
+%% @doc Put a key in its correct JSON format, for sending it away.
+%% @spec pack_key(string()) -> {struct, [{binary(), binary()}]}
+pack_key(Key) ->
+    {struct, [{erlang:iolist_to_binary("Key"), erlang:iolist_to_binary(Key)}]}.
 
 %% @doc Get the content of the given URL.
 %% @spec http_get(string()) -> {ok, string()} | error

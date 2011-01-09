@@ -54,7 +54,7 @@ loop(Req, _DocRoot) ->
             case string:tokens(Path, "/") of
                 ["crest", "spawn"] ->
 					Key = crest_peer:spawn_install(Req:parse_post()),
-                    Req:respond({200, [{"Content-Type", "text/plain"}], [Key]});
+                    Req:respond({200, [{"Content-Type", "application/json"}], [mochijson2:encode(crest_utils:pack_key(Key))]});
 				["crest", "remote"] ->
 					case crest_peer:remote(Req:parse_post()) of
                         {ok, {CT, Message}} ->

@@ -26,7 +26,7 @@ $(document).ready(function(){
 	});
 	$("#localtable a").bind("click", function(event){
 		$.get($(this).attr("href"), {}, function(response){
-			$("#newlocal").html(response);
+			$("#newlocal").html(response.key);
 		});
 		return false;
 	});

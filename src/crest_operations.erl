@@ -45,8 +45,9 @@ invoke_spawn(Host, Module, Function) ->
 	ibrowse:start(),
 	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), []), crest_utils:ssl_options()),
     case Res of
-        {ok, "200", _, Body} ->
-            {ok, Body};
+        {ok, "200", _, Obj} ->
+            Key = crest_json:destructure("Obj.key", Obj),
+            {ok, Key};
 		{ok, _, _, _} ->
             {error};
 		{error, _Reason} ->
