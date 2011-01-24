@@ -31,8 +31,10 @@ get_word_frequency() ->
                 {Pid, [{"filename", Filename}, {"limit", Num}, {"address", Address}]} ->
                     {Limit, _} = string:to_integer(Num),
                     Dict = demo_text_mining:get_word_counts(Filename),
-                    Dict2 = dict:filter(fun(_Key, Value) -> if Value >= Limit -> true; true -> false end end, Dict),
-                    OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) -> if Count1 =< Count2 -> true; Count1 > Count2 -> false end end, dict:to_list(Dict2)),
+                    Dict2 = dict:filter(fun(_Key, Value) when Value >= Limit -> true;
+                                           (_Key, _Value) -> false end, Dict),
+                    OrderedList = lists:sort(fun({_Word1, Count1}, {_Word2, Count2}) when Count1 =< Count2 -> true;
+                                                ({_Word1, _Count1}, {_Word2, _Count2}) -> false end, dict:to_list(Dict2)),
                     StructList = lists:map(fun({Word, Count}) -> {struct, [{erlang:iolist_to_binary("word"), erlang:iolist_to_binary(Word)}, {erlang:iolist_to_binary("frequency"), Count}]} end, OrderedList),
                     Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},
 									   {erlang:iolist_to_binary("total"), length(StructList)},
