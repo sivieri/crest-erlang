@@ -3,43 +3,20 @@
 %% @copyright yyyy Someauthor
 
 -module(module_sample).
--export([get_function/0]).
+-export([my_service/0]).
 
 %% External API
 
-%% @doc Returns the closure to be executed remotely (as spawn or remote);
-%% note that the function has to call itself tail-recursively, if it has
-%% to be spawned (remote functions are invoked just once, and then their
-%% process is ended).
-%% It is required to correctly handle the param=name message, while the
-%% other responses need to include the Content-Type parameter of the
-%% answer data (see below).
-%% How to send this closure to the CREST peer is left to the developer
-%% (for example, through inets:http, or ibrowse).
-%% @spec get_function() -> fun()
-get_function() ->
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Closure service name"},
-                F(F);
-            {Pid, {"param", "operation"}} ->
-                Pid ! {self(), "GET/POST"},
-                F(F);
-            {Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"param1", "string()"}, {"param2", "integer()"}]},
-                F(F);
-            {Pid, [{Parameter1, Value1}, {Parameter2, Value2}]} ->
-                %% Compute your values here
-                Pid ! {self(), {"text/plain", "Return some relevant result here."}},
-                F(F);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
+my_service(State) ->
+    receive
+        {Pid, [{"par1", P1}, {"par2", P2}, ...]} ->
+            %% Do your job accessing par1, ... parN
+            %% eventually create a new state NewState
+            
+            %% Finish with a tail recursion
+            my_service(NewState)  
+            %% Or spawn myself on peer Hostname
+            invoke_spawn(Hostname, ?MODULE, fun() -> my_service(NewState) end) 
     end.
 
 %% Internal API

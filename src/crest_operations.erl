@@ -40,7 +40,7 @@ invoke_local_spawn(Module, Function) ->
 %% @doc Spawn a function on a certain host; the function module needs to be
 %% in the Erlang path.
 %% @spec invoke_spawn(string(), atom(), atom()) -> {ok, Key} | {error}
-invoke_spawn(Host, Module, Function) ->
+invoke_spawn(Host, Module, Function) when is_atom(Function) ->
 	ssl:start(),
 	ibrowse:start(),
 	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), []), crest_utils:ssl_options()),
@@ -51,6 +51,20 @@ invoke_spawn(Host, Module, Function) ->
 		{ok, _, _, _} ->
             {error};
 		{error, _Reason} ->
+            {error}
+    end;
+%% @spec invoke_spawn(string(), atom(), fun()) -> {ok, Key} | {error}
+invoke_spawn(Host, Module, Function) ->
+    ssl:start(),
+    ibrowse:start(),
+    Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Function, []), crest_utils:ssl_options()),
+    case Res of
+        {ok, "200", _, Obj} ->
+            Key = crest_json:destructure("Obj.key", Obj),
+            {ok, Key};
+        {ok, _, _, _} ->
+            {error};
+        {error, _Reason} ->
             {error}
     end.
 
