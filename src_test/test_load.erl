@@ -37,7 +37,7 @@ get_function_short() ->
             {Pid, [{"input", InputString}]} ->
                 spawn(fun() -> 
                     {InputInt, _} = string:to_integer(InputString),
-                    Res = math:tan(InputInt),
+                    Res = math:sqrt(InputInt),
                     Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}} end),
                 F(F);
             Any ->
