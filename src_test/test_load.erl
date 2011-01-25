@@ -32,13 +32,12 @@ get_function_short() ->
                 Pid ! {self(), "GET"},
                 F(F);
             {Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"input", "integer()"}]},
+                Pid ! {self(), [{"input", "string()"}]},
                 F(F);
-            {Pid, [{"input", InputString}]} ->
+            {Pid, [{"input", Input}]} ->
                 spawn(fun() -> 
-                    {InputInt, _} = string:to_integer(InputString),
-                    Res = math:sqrt(InputInt),
-                    Pid ! {self(), {"text/plain", crest_utils:format("~f", [Res])}} end),
+                    OutString = lists:reverse(Input),
+                    Pid ! {self(), {"text/plain", OutString}} end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
