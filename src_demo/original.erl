@@ -96,7 +96,7 @@ get_manager() ->
                 NewInstances = do_link(Pid, Instances, Body),
                 F(F, NewInstances);
             {Pid, {["widget", "manager", "maps"], _}} ->
-                Pid ! {self(), {"application/json", mochijson2:encode(serialize_widgets(Instances))}},
+                spawn(fun() -> do_serialize(Pid, Instances) end),
                 F(F, Instances);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -313,3 +313,6 @@ do_link(Pid, Instances, Body) ->
             Pid ! {self(), {error}},
             Instances
      end.
+
+do_serialize(Pid, Instances) ->
+    Pid ! {self(), {"application/json", mochijson2:encode(serialize_widgets(Instances))}}.
