@@ -35,9 +35,7 @@ get_function_short() ->
                 Pid ! {self(), [{"input", "string()"}]},
                 F(F);
             {Pid, [{"input", Input}]} ->
-                spawn(fun() -> 
-                    OutString = lists:reverse(Input),
-                    Pid ! {self(), {"text/plain", OutString}} end),
+                spawn(fun() -> handle_short(Pid, Input) end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -61,12 +59,7 @@ get_function_long() ->
                 Pid ! {self(), [{"input", "string()"}]},
                 F(F);
             {Pid, [{"input", InputString}]} ->
-                spawn(fun() -> 
-                    OutBin = lists:foldl(fun(_Elem, AccIn) ->
-                                                    crypto:md5(AccIn)
-                                                    end, InputString, lists:seq(1, 10)),
-                    OutString = lists:flatten([io_lib:format("~2.16.0b",[N])||N<-binary_to_list(OutBin)]),
-                    Pid ! {self(), {"text/plain", OutString}} end),
+                spawn(fun() -> handle_long(Pid, InputString) end),
                 F(F);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
@@ -76,3 +69,16 @@ get_function_long() ->
     fun() ->
         F(F)
     end.
+
+% Internal API
+
+handle_long(Pid, Param) ->
+    OutBin = lists:foldl(fun(_Elem, AccIn) ->
+                             crypto:md5(AccIn)
+                             end, Param, lists:seq(1, 10)),
+    OutString = lists:flatten([io_lib:format("~2.16.0b",[N])||N<-binary_to_list(OutBin)]),
+    Pid ! {self(), {"text/plain", OutString}}.
+
+handle_short(Pid, Param) ->
+    OutString = lists:reverse(Param),
+    Pid ! {self(), {"text/plain", OutString}}.
