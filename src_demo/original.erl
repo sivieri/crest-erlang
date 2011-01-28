@@ -125,8 +125,9 @@ urlsel() ->
                 Pid ! {self(), {ok}},
                 F(F, Url);
             {Pid, _} ->
-                Answer = {struct, [{erlang:iolist_to_binary("items"), [{struct, [{erlang:iolist_to_binary("url"), erlang:iolist_to_binary(FeedUrl)}]}]}]},
-                Pid ! {self(), {"application/json", mochijson2:encode(Answer)}},
+                spawn(fun() ->
+                    Answer = {struct, [{erlang:iolist_to_binary("items"), [{struct, [{erlang:iolist_to_binary("url"), erlang:iolist_to_binary(FeedUrl)}]}]}]},
+                    Pid ! {self(), {"application/json", mochijson2:encode(Answer)}} end),
                 F(F, FeedUrl)
         end
     end,
@@ -150,20 +151,21 @@ rss_feed() ->
                 Pid ! {self(), ok},
                 F(F, Key);
             {Pid, _} when length(UrlSel) > 0 ->
-                case crest_operations:invoke_local_lambda(UrlSel, []) of
-                    {ok, {_CT, Bin}} ->
-                        Obj = mochijson2:decode(Bin),
-                        Url = crest_json:destructure("Obj.items[0].url", Obj),
-                        case crest_utils:http_get(Url) of
-                            {ok, Feed} ->
-                                Res = feed_to_json(parse_feed(Feed)),
-                                Pid ! {self(), {"application/json", mochijson2:encode(Res)}};
-                            error ->
-                                Pid ! {self(), {error}}
-                        end;
-                    {error} ->
-                        Pid ! {self(), {error}}
-                end,
+                spawn(fun() ->
+                    case crest_operations:invoke_local_lambda(UrlSel, []) of
+                        {ok, {_CT, Bin}} ->
+                            Obj = mochijson2:decode(Bin),
+                            Url = crest_json:destructure("Obj.items[0].url", Obj),
+                            case crest_utils:http_get(Url) of
+                                {ok, Feed} ->
+                                    Res = feed_to_json(parse_feed(Feed)),
+                                    Pid ! {self(), {"application/json", mochijson2:encode(Res)}};
+                                error ->
+                                    Pid ! {self(), {error}}
+                            end;
+                        {error} ->
+                            Pid ! {self(), {error}}
+                    end end),
                 F(F, UrlSel);
             {Pid, _} ->
                 Pid ! {self(), {"application/json", mochijson2:encode(feed_to_json([]))}},
