@@ -27,7 +27,7 @@
 %% @doc Put a key in its correct JSON format, for sending it away.
 %% @spec pack_key(string()) -> {struct, [{binary(), binary()}]}
 pack_key(Key) ->
-    {struct, [{erlang:iolist_to_binary("Key"), erlang:iolist_to_binary(Key)}]}.
+    {struct, [{erlang:iolist_to_binary("key"), erlang:iolist_to_binary(Key)}]}.
 
 %% @doc Get the content of the given URL.
 %% @spec http_get(string()) -> {ok, string()} | error

@@ -43,7 +43,7 @@ get_function() ->
                 case Res of
                     {ok, Body} ->
                         NewInstances = [Body|Instances],
-                        Pid ! {self(), {"text/plain", Body}},
+                        Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(Body))}},
                         F(F, NewInstances);
                     {error} ->
                         Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
@@ -52,13 +52,13 @@ get_function() ->
             {Pid, []} ->
                 case Instances of
                     [H|_] ->
-                        Pid ! {self(), {"text/plain", H}};
+                        Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(H))}};
                     [] ->
                         Res = crest_operations:install_local("manager"),
                         case Res of
                             {ok, Body} ->
                                 NewInstances = [Body|Instances],
-                                Pid ! {self(), {"text/plain", Body}},
+                                Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(Body))}},
                                 F(F, NewInstances);
                             {error} ->
                                 Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
