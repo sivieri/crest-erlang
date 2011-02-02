@@ -26,6 +26,7 @@
 -define(NUM_ROUNDS, 180).
 -define(INTERARRIVAL, 3).
 -define(TEST_TYPE, "scheme").
+-define(HOST, "131.175.135.3").
 
 start(Filename) ->
     inets:start(),
@@ -83,42 +84,42 @@ do_test(Profile) ->
     case ?TEST_TYPE of
         "scheme" ->
             % SCHEME PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://131.175.135.26:8081/widget/manager/maps", Profile),
+            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8081/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
             Urls = ["/static/dojo/demo/demo.html","/static/dojo/demo/dijit/themes/soria/images/titleBarActive.png","/static/dojo/demo/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://131.175.135.26:8081"++X, Profile),
+    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8081" ++ X, Profile),
     			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
     			     list_to_integer(Len1)
     		     end,
     		     Urls);
         "mochiweb" ->
             % MOCHIWEB PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://131.175.135.26:8080/manager/widget/manager/maps", Profile),
+            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/manager/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
             Urls = ["/demo.html","/dijit/themes/soria/images/titleBarActive.png","/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-                     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://131.175.135.26:8080"++X, Profile),
+                     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
                      {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
                      list_to_integer(Len1)
                  end,
                  Urls);
         "erlang" ->
             % ERLANG PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://131.175.135.26:8080/crest/url/f3b71e5b-b4fb-41bf-a1e0-9ea7b5459368/widget/manager/maps", Profile),
+            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/f3b71e5b-b4fb-41bf-a1e0-9ea7b5459368/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/crest/url/")==1],
             Urls = ["/original/demo.html","/original/dijit/themes/soria/images/titleBarActive.png","/original/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://131.175.135.26:8080"++X, Profile),
+    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
     			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
     			     list_to_integer(Len1)
     		     end,
