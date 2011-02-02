@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,9 +15,9 @@
 %% You should have received a copy of the GNU Lesser General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Spawn test code, parallel invocations.
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(test_spawn_multiple).
 -export([main/1, get_function_pow/0, get_function_sqrt/0, get_function_reverser/0, request_pow/1, request_sqrt/1, request_reverse/1]).

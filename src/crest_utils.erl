@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,9 +15,9 @@
 %% You should have received a copy of the GNU Lesser General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Miscellaneous utilities.
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(crest_utils).
 -export([pack_key/1, ssl_options/0, format/2, rpc/2, first/1, pmap/2, get_lambda_params/3, get_lambda/1, code_hash/1, http_get/1]).

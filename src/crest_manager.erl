@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,11 +15,11 @@
 %% You should have received a copy of the GNU Lesser General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Manager module: it invokes all the currently spawned processes,
 %% searching for some parameters, then returns all data to the caller in
 %% JSON format.
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(crest_manager).
 -export([get_installed_data/0, get_local_data/0]).

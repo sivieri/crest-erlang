@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,9 +15,9 @@
 %% You should have received a copy of the GNU Lesser General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Supervisor for the spawn computations.
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(crest_spawn_sup).
 -behaviour(supervisor).

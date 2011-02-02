@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,7 +15,7 @@
 %% You should have received a copy of the GNU Lesser General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Server module of a CREST peer.
 %% It offers all the standard server start, stop and response
 %% methods, plus the two specific CREST operations: spawn (split
@@ -23,7 +23,7 @@
 %% All gen_server:call() operations are relegated to subprocesses,
 %% so that the main server process is never blocked waiting for
 %% an answer, and this allows this peer to call itself.
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(crest_peer).
 -behaviour(gen_server2).

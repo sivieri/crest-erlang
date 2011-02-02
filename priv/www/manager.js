@@ -1,4 +1,4 @@
-/* Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+/* Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
  * 
  * This file is part of CREST-Erlang.
  * 

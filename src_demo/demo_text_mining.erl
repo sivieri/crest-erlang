@@ -1,4 +1,4 @@
-%% Copyright (c) 2010 Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% Copyright (c) 2010,2011 Alessandro Sivieri <sivieri@elet.polimi.it>
 %% 
 %% This file is part of CREST-Erlang.
 %% 
@@ -15,14 +15,14 @@
 %% You should have received a copy of the GNU General Public License
 %% along with CREST-Erlang. If not, see <http://www.gnu.org/licenses/>.
 %% 
-%% @author Alessandro Sivieri <alessandro.sivieri@mail.polimi.it>
+%% @author Alessandro Sivieri <sivieri@elet.polimi.it>
 %% @doc Utility functions for calculating text mining weights:
 %% word frequency, term frequency - inverse document frequency,
 %% cosine similarity.
 %% This module is used for the thesis demo.
 %% @reference Word frequency: http://www.roberthorvick.com/2009/07/02/word-frequency-redux-erlang-list-comprehension-regex-and-list-folding/
 %% @reference Tf-Idf: http://en.wikipedia.org/wiki/Tf%E2%80%93idf
-%% @copyright 2010 Alessandro Sivieri
+%% @copyright 2010,2011 Alessandro Sivieri
 
 -module(demo_text_mining).
 -export([cosine_documents/1, get_word_counts/1, get_word_counts/2, print_dict/1, tf_idf/1]).
