@@ -24,14 +24,14 @@
 -module(test_launcher).
 -export([start/1, receiver/4, do_test/2]).
 -define(NUM_ROUNDS, 180).
--define(INTERARRIVAL, 1).
--define(TEST_TYPE, "erlang").
+-define(INTERARRIVAL, 3).
+-define(TEST_TYPE, "scheme").
 -define(HOST, "131.175.135.3").
 -define(CLIENT_SLEEP_TIME, 1000).
 
 start(Filename) ->
     inets:start(),
-    {ok, FileId} = file:open(Filename,[write]),
+    {ok, FileId} = file:open(Filename,[append]),
     register(receiver, spawn(?MODULE, receiver, [0, 0, 0, FileId])),
     do_round(0).
 
