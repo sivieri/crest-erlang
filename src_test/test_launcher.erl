@@ -25,8 +25,8 @@
 -export([start/1, receiver/4, do_test/2]).
 -define(NUM_ROUNDS, 180).
 -define(INTERARRIVAL, 3).
--define(TEST_TYPE, "scheme").
--define(HOST, "131.175.135.3").
+-define(TEST_TYPE, "erlang").
+-define(HOST, "131.175.135.132").
 -define(CLIENT_SLEEP_TIME, 1000).
 
 start(Filename) ->
@@ -113,7 +113,7 @@ do_test(Profile) ->
                  Urls);
         "erlang" ->
             % ERLANG PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/c895003c-ad0d-42d9-a9ce-199559c4346c/widget/manager/maps", Profile),
+            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/c2723f0f-c123-4d30-91e0-a147576e311e/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
