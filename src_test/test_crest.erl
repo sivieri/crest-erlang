@@ -22,7 +22,7 @@
 %% @copyright 2011 Alessandro Sivieri
 
 -module(test_crest).
--export([start/1, receiver/4, do_test/2]).
+-export([start/1, start_multiple/2, receiver/4, do_test/2]).
 -define(NUM_ROUNDS, 240).
 -define(INTERARRIVAL, 1).
 -define(TEST_TYPE, "erlang").
@@ -34,6 +34,9 @@ start(Filename) ->
     {ok, FileId} = file:open(Filename,[append]),
     register(receiver, spawn(?MODULE, receiver, [0, 0, 0, FileId])),
     do_round(0).
+
+start_multiple(Filename, N) ->
+	lists:foreach(fun(_) -> start(Filename) end, lists:seq(1, list_to_integer(N))).
 
 receiver(TotTime, TotBytes, NumReceived, OutFile) ->
     receive
