@@ -21,10 +21,10 @@
 %% @doc Load tests.
 %% @copyright 2011 Alessandro Sivieri
 
--module(test_launcher).
+-module(test_crest).
 -export([start/1, receiver/4, do_test/2]).
--define(NUM_ROUNDS, 180).
--define(INTERARRIVAL, 3).
+-define(NUM_ROUNDS, 240).
+-define(INTERARRIVAL, 1).
 -define(TEST_TYPE, "erlang").
 -define(HOST, "131.175.135.132").
 -define(CLIENT_SLEEP_TIME, 1000).
@@ -83,28 +83,10 @@ do_test(Profile, Time) ->
 do_test(Profile) ->
     ITime = now(),
     case ?TEST_TYPE of
-        "scheme" ->
-            % SCHEME PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8081/widget/manager/maps", Profile),
-            {"content-length", L} = lists:keyfind("content-length",1,Head),
-            Len = list_to_integer(L),
-            Tok = string:tokens(Body,"{}[]:, \""),
-            Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
-            Urls = ["/static/dojo/demo/demo.html","/static/dojo/demo/dijit/themes/soria/images/titleBarActive.png","/static/dojo/demo/dijit/themes/soria/images/buttonActive.png"]++Widgets,
-            LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8081" ++ X, Profile),
-    			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-    			     list_to_integer(Len1)
-    		     end,
-    		     Urls);
         "mochiweb" ->
             % MOCHIWEB PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/manager/widget/manager/maps", Profile),
-            {"content-length", L} = lists:keyfind("content-length",1,Head),
-            Len = list_to_integer(L),
-            Tok = string:tokens(Body,"{}[]:, \""),
-            Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
-            Urls = ["/demo.html","/dijit/themes/soria/images/titleBarActive.png","/dijit/themes/soria/images/buttonActive.png"]++Widgets,
+			String = rstring(),
+            Urls = ["/short?input=" ++ String,"/long?input=" ++ String,"/short?input=" ++ String,"/long?input=" ++ String],
             LLen = lists:map(fun(X) ->
                      {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
                      {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
@@ -113,23 +95,42 @@ do_test(Profile) ->
                  Urls);
         "erlang" ->
             % ERLANG PART
-            {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/c2723f0f-c123-4d30-91e0-a147576e311e/widget/manager/maps", Profile),
-            {"content-length", L} = lists:keyfind("content-length",1,Head),
-            Len = list_to_integer(L),
-            Tok = string:tokens(Body,"{}[]:, \""),
-            Widgets = [X || X <- Tok , string:str(X,"/crest/url/")==1],
-            Urls = ["/original/demo.html","/original/dijit/themes/soria/images/titleBarActive.png","/original/dijit/themes/soria/images/buttonActive.png"]++Widgets,
-            LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
-    			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-    			     list_to_integer(Len1)
-    		     end,
-    		     Urls)
+			String = rstring(),
+			Urls = ["/crest/local/short", "/crest/local/long"],
+			LLen = lists:map(fun(X) ->
+                     {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
+                     {"content-length", Len} = lists:keyfind("content-length",1,Head),
+					 [_, Key] = string:tokens(Body,"{}[]:, \""),
+            		 {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/" ++ Key ++ "?input=" ++ String, Profile),
+					 {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
+					 list_to_integer(Len) + list_to_integer(Len1)
+                 end,
+                 Urls)
     end,
     % COMMON PART
     FTime = now(),
     ElapsedTime = timer:now_diff(FTime,ITime),
-    TotLen = lists:sum(LLen)+Len,
-    receiver ! {ElapsedTime, TotLen},
+    receiver ! {ElapsedTime, lists:sum(LLen)},
     timer:sleep(?CLIENT_SLEEP_TIME),
     do_test(Profile).
+
+rstring() ->
+	StartList = lists:seq(97, 122),
+	shuffle(StartList).
+
+shuffle(List) ->
+   randomize(round(math:log(length(List)) + 0.5), List).
+
+randomize(1, List) ->
+   randomize(List);
+randomize(T, List) ->
+   lists:foldl(fun(_E, Acc) ->
+                  randomize(Acc)
+               end, randomize(List), lists:seq(1, (T - 1))).
+
+randomize(List) ->
+   D = lists:map(fun(A) ->
+                    {random:uniform(), A}
+             end, List),
+   {_, D1} = lists:unzip(lists:keysort(1, D)), 
+   D1.
