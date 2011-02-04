@@ -20,7 +20,7 @@
 %% @copyright 2010,2011 Alessandro Sivieri
 
 -module(crest_operations).
--export([install_local/1, invoke_local_spawn/2, invoke_spawn/3, invoke_remote/4, invoke_lambda/4, invoke_local_lambda/2]).
+-export([install_local/1, invoke_local_spawn/1, invoke_spawn/3, invoke_spawn/4, invoke_remote/4, invoke_remote/5, invoke_lambda/4, invoke_lambda/5, invoke_local_lambda/2]).
 
 %% External API
 
@@ -32,27 +32,13 @@ install_local(Name) ->
 
 %% @doc Spawn a function on this host; it can be done also through invoke_spawn,
 %% but this call bypasses a Web request to localhost.
-%% @spec invoke_local_spawn(atom(), atom()) -> {ok, string()}
-invoke_local_spawn(Module, Function) ->
-    Key = crest_peer:spawn_local_install({Module, Function}),
+%% @spec invoke_local_spawn(fun()) -> {ok, string()}
+invoke_local_spawn(Function) ->
+    Key = crest_peer:spawn_local_install(Function),
     {ok, Key}.
 
 %% @doc Spawn a function on a certain host; the function module needs to be
 %% in the Erlang path.
-%% @spec invoke_spawn(string(), atom(), atom()) -> {ok, Key} | {error}
-invoke_spawn(Host, Module, Function) when is_atom(Function) ->
-	ssl:start(),
-	ibrowse:start(),
-	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), []), crest_utils:ssl_options()),
-    case Res of
-        {ok, "200", _, Obj} ->
-            Key = crest_json:destructure("Obj.key", mochijson2:decode(Obj)),
-            {ok, Key};
-		{ok, _, _, _} ->
-            {error};
-		{error, _Reason} ->
-            {error}
-    end;
 %% @spec invoke_spawn(string(), atom(), fun()) -> {ok, Key} | {error}
 invoke_spawn(Host, Module, Function) ->
     ssl:start(),
@@ -68,13 +54,47 @@ invoke_spawn(Host, Module, Function) ->
             {error}
     end.
 
+%% @doc Spawn a function on a certain host; the function module needs to be
+%% in the Erlang path.
+%% @spec invoke_spawn(string(), integer(), atom(), fun()) -> {ok, Key} | {error}
+invoke_spawn(Host, Port, Module, Function) ->
+    ssl:start(),
+    ibrowse:start(),
+    Res = ibrowse:send_req("https://" ++ Host ++ ":" ++ integer_to_list(Port) ++ "/crest/spawn", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Function, []), crest_utils:ssl_options()),
+    case Res of
+        {ok, "200", _, Obj} ->
+            Key = crest_json:destructure("Obj.key", mochijson2:decode(Obj)),
+            {ok, Key};
+        {ok, _, _, _} ->
+            {error};
+        {error, _Reason} ->
+            {error}
+    end.
+
 %% @doc Spawn a function on a certain host and invoke it with parameters;
 %% the function module needs to be in the Erlang path.
-%% @spec invoke_remote(string(), atom(), atom(), [{string(), string()}]) -> {ok, Body} | {error}
+%% @spec invoke_remote(string(), atom(), fun(), [{string(), string()}]) -> {ok, Body} | {error}
 invoke_remote(Host, Module, Function, Params) ->
 	ssl:start(),
 	ibrowse:start(),
-	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/remote", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Module:Function(), Params), crest_utils:ssl_options()),
+	Res = ibrowse:send_req("https://" ++ Host ++ ":8443/crest/remote", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Function, Params), crest_utils:ssl_options()),
+	io:format("~p~n", [Res]),
+    case Res of
+        {ok, "200", _, Body} ->
+            {ok, Body};
+		{ok, _, _, _} ->
+            {error};
+		{error, _Reason} ->
+            {error}
+    end.
+
+%% @doc Spawn a function on a certain host and invoke it with parameters;
+%% the function module needs to be in the Erlang path.
+%% @spec invoke_remote(string(), integer(), atom(), fun(), [{string(), string()}]) -> {ok, Body} | {error}
+invoke_remote(Host, Port, Module, Function, Params) ->
+	ssl:start(),
+	ibrowse:start(),
+	Res = ibrowse:send_req("https://" ++ Host ++ ":" ++ integer_to_list(Port) ++ "/crest/remote", [{"Content-Type", "application/x-www-form-urlencoded"}], post, crest_utils:get_lambda_params(Module, Function, Params), crest_utils:ssl_options()),
 	io:format("~p~n", [Res]),
     case Res of
         {ok, "200", _, Body} ->
@@ -94,6 +114,27 @@ invoke_lambda(Method, Host, Key, Params) ->
 			Res = ibrowse:send_req("http://"++ Host ++ ":8080/crest/url/" ++ Key ++ "?" ++ mochiweb_util:urlencode(Params), [], get);
 		post ->
 			Res = ibrowse:send_req("http://"++ Host ++ ":8080/crest/url/" ++ Key, [{"Content-Type", "application/x-www-form-urlencoded"}], post, mochiweb_util:urlencode(Params));
+		_ ->
+			Res = {error, "Wrong method"}
+	end,
+    case Res of
+        {ok, "200", _, Body} ->
+            {ok, Body};
+		{ok, _, _, _} ->
+            {error};
+		{error, _Reason} ->
+            {error}
+    end.
+
+%% @doc Invoke an already installed computation with parameters.
+%% @spec invoke_lambda(get | post, string(), integer(), string(), [{string(), string()}]) -> {ok, Body} | {error}
+invoke_lambda(Method, Host, Port, Key, Params) ->
+	ibrowse:start(),
+	case Method of
+		get ->
+			Res = ibrowse:send_req("http://"++ Host ++ ":" ++ integer_to_list(Port) ++ "/crest/url/" ++ Key ++ "?" ++ mochiweb_util:urlencode(Params), [], get);
+		post ->
+			Res = ibrowse:send_req("http://"++ Host ++ ":" ++ integer_to_list(Port) ++ "/crest/url/" ++ Key, [{"Content-Type", "application/x-www-form-urlencoded"}], post, mochiweb_util:urlencode(Params));
 		_ ->
 			Res = {error, "Wrong method"}
 	end,

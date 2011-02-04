@@ -167,8 +167,8 @@ handle_spawn(Params, From) ->
     Key = crest_spawn:install(F),
 	gen_server2:reply(From, Key).
 
-handle_spawn_local({M, F}, From) ->
-    Key = crest_spawn:install(M:F()),
+handle_spawn_local(F, From) ->
+    Key = crest_spawn:install(F),
     gen_server2:reply(From, Key).
 
 handle_exec({Key, Params}, From, Spawned) ->

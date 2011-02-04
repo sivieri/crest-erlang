@@ -21,12 +21,124 @@
 %% @copyright 2010,2011 Alessandro Sivieri
 
 -module(demo).
--export([get_word_frequency/0, get_inverse_document_frequency/0, get_cosine_similarity/0, get_word_status_frequency/0]).
+-export([word_frequency/0, inverse_document_frequency/0, cosine_similarity/0, word_status_frequency/0, word_status_frequency/1, word_called_function/2, word_client_function/0]).
 
 %% External API
 
-get_word_frequency() ->
-    ClientFunction = fun() ->
+word_frequency() ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Word frequency demo"},
+                word_frequency();
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                word_frequency();
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
+                word_frequency();
+            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                AddressList2 = lists:map(fun(Element) -> {Element, Filename, Limit} end, AddressList),
+                Result = lists:foldl(word_called_function, [], AddressList2),
+                Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
+                word_frequency();
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
+                word_frequency()
+        end.
+
+inverse_document_frequency() ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Inverse document frequency demo"},
+                inverse_document_frequency();
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                inverse_document_frequency();
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
+                inverse_document_frequency();
+            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
+				AddressList = string:tokens(Addresses, "\r\n"),
+        		DocumentNumber = length(AddressList),
+				% Execution of the word frequency part
+				Res = crest_operations:install_local("word"),
+    			case Res of
+        			{ok, Body} ->
+            			Pid ! idf_invoke_service(Body, Addresses, Filename, Limit, DocumentNumber);
+					{error} ->
+            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
+    			end,
+                inverse_document_frequency();
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
+                inverse_document_frequency()
+        end.
+
+cosine_similarity() ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Cosine similarity demo"},
+                cosine_similarity();
+			{Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                cosine_similarity();
+			{Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
+                cosine_similarity();
+            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
+				AddressList = string:tokens(Addresses, "\r\n"),
+        		DocumentNumber = length(AddressList),
+				% Execution of the word frequency part
+				Res = crest_operations:install_local("word"),
+    			case Res of
+        			{ok, Body} ->
+            			Pid ! cosine_invoke_service(Body, Addresses, Filename, Limit, DocumentNumber);
+					{error} ->
+            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
+    			end,
+                cosine_similarity();
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
+                cosine_similarity()
+        end.
+
+word_status_frequency() ->
+	word_status_frequency(dict:new()).
+
+word_status_frequency(Status) ->
+        receive
+            {Pid, {"param", "name"}} ->
+                Pid ! {self(), "Word frequency demo, with status"},
+                word_status_frequency(Status);
+            {Pid, {"param", "operation"}} ->
+                Pid ! {self(), "POST"},
+                word_status_frequency(Status);
+            {Pid, {"param", "parameters"}} ->
+                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
+                word_status_frequency(Status);
+            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
+                AddressList = string:tokens(Addresses, "\r\n"),
+                DocumentNumber = length(AddressList),
+                % Execution of the word frequency part
+				Res = crest_operations:install_local("word"),
+                case Res of
+                    {ok, Body} ->
+                        {ResMsg, NewStatus} = wordstatus_invoke_service(Body, Addresses, Filename, Limit, DocumentNumber, Status),
+                        Pid ! ResMsg,
+                        word_status_frequency(NewStatus);
+                    {error} ->
+                        Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
+                        word_status_frequency(Status)
+                end;
+            {Pid, Other} ->
+                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
+                word_status_frequency(Status)
+        end.
+
+%% Internal API
+
+word_client_function() ->
             receive
                 {Pid, [{"filename", Filename}, {"limit", Num}, {"address", Address}]} ->
                     {Limit, _} = string:to_integer(Num),
@@ -42,45 +154,18 @@ get_word_frequency() ->
                     Pid ! {self(), {"application/json", mochijson2:encode(Result)}};
                 {Pid, Other} ->
                     Pid ! {self(), {"text/plain", lists:flatten(io_lib:format("Error: ~p", [Other]))}}
-            end
-        end,
-    CalledFunction = fun({Address, Filename, Limit}, AccIn) ->
-			Res = crest_operations:invoke_remote(Address, ?MODULE, ClientFunction, [{"filename", Filename}, {"limit", Limit}, {"address", Address}]),
+            end.
+
+word_called_function({Address, Filename, Limit}, AccIn) ->
+			Res = crest_operations:invoke_remote(Address, ?MODULE, fun() -> word_client_function() end, [{"filename", Filename}, {"limit", Limit}, {"address", Address}]),
             case Res of
                 {ok, Body} ->
                     [mochijson2:decode(Body)|AccIn];
                 {error} ->
                     AccIn
-            end
-        end,
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Word frequency demo"},
-                F(F);
-			{Pid, {"param", "operation"}} ->
-                Pid ! {self(), "POST"},
-                F(F);
-			{Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
-                F(F);
-            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
-                AddressList = string:tokens(Addresses, "\r\n"),
-                AddressList2 = lists:map(fun(Element) -> {Element, Filename, Limit} end, AddressList),
-                Result = lists:foldl(CalledFunction, [], AddressList2),
-                Pid ! {self(), {"application/json", mochijson2:encode(Result)}},
-                F(F);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
-    end.
+            end.
 
-get_inverse_document_frequency() ->
-	IDF = fun(Obj, N) ->
+idf(Obj, N) ->
 		% Recovering lists from JSON
 		DictList = lists:map(fun(I) ->
 									 Address = binary_to_list(crest_json:destructure(crest_utils:format("Obj[~p].ip", [I]), Obj)),
@@ -101,52 +186,19 @@ get_inverse_document_frequency() ->
 								   {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary(Address)},
 											 {erlang:iolist_to_binary("words"), Values}]}
 								   end, ValueDict),
-        {self(), {"application/json", mochijson2:encode(Result)}}
-		end,
-	InvokeService = fun(Key, Addresses, Filename, Limit, N) ->
+        {self(), {"application/json", mochijson2:encode(Result)}}.
+
+idf_invoke_service(Key, Addresses, Filename, Limit, N) ->
 		Res2 = crest_operations:invoke_lambda(post, "localhost", Key, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]),
 		case Res2 of
         	{ok, Body2} ->
             	Obj = mochijson2:decode(Body2),
-				IDF(Obj, N);
+				idf(Obj, N);
 			{error} ->
             	"error"
-    		end
-		end,
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Inverse document frequency demo"},
-                F(F);
-			{Pid, {"param", "operation"}} ->
-                Pid ! {self(), "POST"},
-                F(F);
-			{Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
-                F(F);
-            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
-				AddressList = string:tokens(Addresses, "\r\n"),
-        		DocumentNumber = length(AddressList),
-				% Execution of the word frequency part
-				Res = crest_operations:install_local("word"),
-    			case Res of
-        			{ok, Body} ->
-            			Pid ! InvokeService(Body, Addresses, Filename, Limit, DocumentNumber);
-					{error} ->
-            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
-    			end,
-                F(F);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
-    end.
+    		end.
 
-get_cosine_similarity() ->
-	Cosine = fun(Obj, N) ->
+cosine(Obj, N) ->
 		% Recovering lists from JSON
 		DictList = lists:map(fun(I) ->
 									 Address = binary_to_list(crest_json:destructure(crest_utils:format("Obj[~p].ip", [I]), Obj)),
@@ -165,52 +217,19 @@ get_cosine_similarity() ->
                                              {erlang:iolist_to_binary("ip2"), erlang:iolist_to_binary(Address2)},
                                              {erlang:iolist_to_binary("value"), Value}]}
                                    end, Cosines),
-        {self(), {"application/json", mochijson2:encode(Result)}}
-		end,
-	InvokeService = fun(Key, Addresses, Filename, Limit, N) ->
+        {self(), {"application/json", mochijson2:encode(Result)}}.
+
+cosine_invoke_service(Key, Addresses, Filename, Limit, N) ->
 		Res2 = crest_operations:invoke_lambda(post, "localhost", Key, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]),
 		case Res2 of
         	{ok, Body2} ->
             	Obj = mochijson2:decode(Body2),
-				Cosine(Obj, N);
+				cosine(Obj, N);
 			{error} ->
             	"Error"
-    		end
-		end,
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Cosine similarity demo"},
-                F(F);
-			{Pid, {"param", "operation"}} ->
-                Pid ! {self(), "POST"},
-                F(F);
-			{Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
-                F(F);
-            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
-				AddressList = string:tokens(Addresses, "\r\n"),
-        		DocumentNumber = length(AddressList),
-				% Execution of the word frequency part
-				Res = crest_operations:install_local("word"),
-    			case Res of
-        			{ok, Body} ->
-            			Pid ! InvokeService(Body, Addresses, Filename, Limit, DocumentNumber);
-					{error} ->
-            			Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
-    			end,
-                F(F);
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
-    end.
+    		end.
 
-get_word_status_frequency() ->
-        WordStatus = fun(Obj, N, OldDict) ->
+wordstatus(Obj, N, OldDict) ->
         % Recovering lists from JSON
         DictList = lists:map(fun(I) ->
                                      Address = binary_to_list(crest_json:destructure(crest_utils:format("Obj[~p].ip", [I]), Obj)),
@@ -224,9 +243,9 @@ get_word_status_frequency() ->
                                      end, lists:seq(0, N-1)),
         % Elaborate new status: DictList contains only one element
         {_, NewDict} = hd(DictList),
-        dict:merge(fun(_Word, Value1, Value2) -> Value1 + Value2 end, OldDict, NewDict)
-        end,
-    InvokeService = fun(Key, Addresses, Filename, Limit, N, Status) ->
+        dict:merge(fun(_Word, Value1, Value2) -> Value1 + Value2 end, OldDict, NewDict).
+
+wordstatus_invoke_service(Key, Addresses, Filename, Limit, N, Status) ->
         AddressList = string:tokens(Addresses, "\r\n"),
         case N of
             0 ->
@@ -237,7 +256,7 @@ get_word_status_frequency() ->
                               case Res2 of
                                   {ok, {{_,200,_}, _, Body2}} ->
                                       Obj = mochijson2:decode(Body2),
-                                      WordStatus(Obj, N, AccIn);
+                                      wordstatus(Obj, N, AccIn);
                                   {ok, {{_,_,_}, _, _}} ->
                                       AccIn;
                                   {error, _} ->
@@ -249,41 +268,4 @@ get_word_status_frequency() ->
         Result = {struct, [{erlang:iolist_to_binary("ip"), erlang:iolist_to_binary("Merged values")},
                            {erlang:iolist_to_binary("total"), length(StructList)},
                            {erlang:iolist_to_binary("words"), StructList}]},
-        {{self(), {"application/json", mochijson2:encode([Result])}}, FinalDict}
-        end,
-    F = fun(F, Status) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Word frequency demo, with status"},
-                F(F, Status);
-            {Pid, {"param", "operation"}} ->
-                Pid ! {self(), "POST"},
-                F(F, Status);
-            {Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"addresses", "string()"}, {"filename", "string()"}, {"limit", "integer()"}]},
-                F(F, Status);
-            {Pid, [{"addresses", Addresses}, {"filename", Filename}, {"limit", Limit}]} ->
-                AddressList = string:tokens(Addresses, "\r\n"),
-                DocumentNumber = length(AddressList),
-                % Execution of the word frequency part
-				Res = crest_operations:install_local("word"),
-                case Res of
-                    {ok, Body} ->
-                        {ResMsg, NewStatus} = InvokeService(Body, Addresses, Filename, Limit, DocumentNumber, Status),
-                        Pid ! ResMsg,
-                        F(F, NewStatus);
-                    {error} ->
-                        Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
-                        F(F, Status)
-                end;
-            {Pid, Other} ->
-                Pid ! {self(), {"text/plain", crest_utils:format("Error: ~p", [Other])}},
-                F(F, Status)
-        end
-    end,
-    fun() ->
-        F(F, dict:new())
-    end.
-
-%% Internal API
-
+        {{self(), {"application/json", mochijson2:encode([Result])}}, FinalDict}.

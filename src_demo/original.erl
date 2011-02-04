@@ -21,135 +21,119 @@
 
 -module(original).
 -include_lib("xmerl/include/xmerl.hrl").
--export([get_function/0, get_manager/0, urlsel/0, rss_feed/0]).
+-export([function/1, manager/1, urlsel/1, rss_feed/1]).
 -record(widget, {id, url, title = "", x = 0, y = 0, width = 0, height = 0, color = "", host = "", linkto = ""}).
 
 %% External API
 
-get_function() ->
-    F = fun(F, Instances) ->
+function(Instances) ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Original demo instances list"},
-                F(F, Instances);
+                function(Instances);
             {Pid, {"param", "operation"}} ->
                 Pid ! {self(), "GET"},
-                F(F, Instances);
+                function(Instances);
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), [{"instance", "string()"}]},
-                F(F, Instances);
+                function(Instances);
             {Pid, [{"instance", "new"}]} ->
-                Res = crest_operations:install_local("manager"),
+                Res = crest_operations:invoke_local_spawn(fun() -> manager(dict:new()) end),
                 case Res of
                     {ok, Body} ->
                         NewInstances = [Body|Instances],
                         Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(Body))}},
-                        F(F, NewInstances);
+                        function(NewInstances);
                     {error} ->
                         Pid ! {self(), {"text/plain", crest_utils:format("Error")}},
-                        F(F, Instances)
+                        function(Instances)
                 end;
             {Pid, []} ->
                 case Instances of
                     [H|_] ->
                         Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(H))}};
                     [] ->
-                        Res = crest_operations:install_local("manager"),
+                        Res = crest_operations:invoke_local_spawn(fun() -> manager(dict:new()) end),
                         case Res of
                             {ok, Body} ->
                                 NewInstances = [Body|Instances],
                                 Pid ! {self(), {"application/json", mochijson2:encode(crest_utils:pack_key(Body))}},
-                                F(F, NewInstances);
+                                function(NewInstances);
                             {error} ->
                                 Pid ! {self(), {"text/plain", crest_utils:format("Error")}}
                         end
                 end,
-                F(F, Instances);
+                function(Instances);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
-                F(F, Instances)
-        end
-    end,
-    fun() ->
-        F(F, [])
-    end.
+                function(Instances)
+        end.
 
-get_manager() ->
-    F = fun(F, Instances) ->
+manager(Instances) ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "Original demo main manager"},
-                F(F, Instances);
+                manager(Instances);
             {Pid, {"param", "operation"}} ->
                 Pid ! {self(), "GET/POST"},
-                F(F, Instances);
+                manager(Instances);
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), []},
-                F(F, Instances);
+                manager(Instances);
             {Pid, {["widget", "manager", "create"], [], Body}} ->
                 NewInstances = do_create(Pid, Instances, Body),
-                F(F, NewInstances);
+                manager(NewInstances);
             {Pid, {["widget", "manager", "move"], [], Body}} ->
                 NewInstances = do_move(Pid, Instances, Body),
-                F(F, NewInstances);
+                manager(NewInstances);
             {Pid, {["widget", "manager", "link"], [], Body}} ->
                 NewInstances = do_link(Pid, Instances, Body),
-                F(F, NewInstances);
+                manager(NewInstances);
             {Pid, {["widget", "manager", "maps"], _}} ->
                 spawn(fun() -> do_serialize(Pid, Instances) end),
-                F(F, Instances);
+                manager(Instances);
             Any ->
                 io:format("Spawned: ~p~n", [Any]),
-                F(F, Instances)
-        end
-    end,
-    fun() ->
-        F(F, dict:new())
-    end.
+                manager(Instances)
+        end.
 
-urlsel() ->
-    F = fun(F, FeedUrl) ->
+urlsel(FeedUrl) ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "URL selector"},
-                F(F, FeedUrl);
+                urlsel(FeedUrl);
             {Pid, {"param", "operation"}} ->
                 Pid ! {self(), "GET/POST"},
-                F(F, FeedUrl);
+                urlsel(FeedUrl);
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), []},
-                F(F, FeedUrl);
+                urlsel(FeedUrl);
             {Pid, {[], Body}} ->
                 Obj = mochijson2:decode(Body),
                 Url = crest_json:destructure("Obj.url", Obj),
                 Pid ! {self(), {ok}},
-                F(F, Url);
+                urlsel(Url);
             {Pid, _} ->
                 spawn(fun() ->
                     Answer = {struct, [{erlang:iolist_to_binary("items"), [{struct, [{erlang:iolist_to_binary("url"), erlang:iolist_to_binary(FeedUrl)}]}]}]},
                     Pid ! {self(), {"application/json", mochijson2:encode(Answer)}} end),
-                F(F, FeedUrl)
-        end
-    end,
-    fun() ->
-        F(F, "http://localhost:8080/original/feed.xml")
-    end.
+                urlsel(FeedUrl)
+        end.
 
-rss_feed() ->
-    F = fun(F, UrlSel) ->
+rss_feed(UrlSel) ->
         receive
             {Pid, {"param", "name"}} ->
                 Pid ! {self(), "RSS feed loader"},
-                F(F, UrlSel);
+                rss_feed(UrlSel);
             {Pid, {"param", "operation"}} ->
                 Pid ! {self(), "GET/POST"},
-                F(F, UrlSel);
+                rss_feed(UrlSel);
             {Pid, {"param", "parameters"}} ->
                 Pid ! {self(), []},
-                F(F, UrlSel);
+                rss_feed(UrlSel);
             {Pid, [{"link", Key}]} ->
                 Pid ! {self(), ok},
-                F(F, Key);
+                rss_feed(Key);
             {Pid, _} when length(UrlSel) > 0 ->
                 spawn(fun() ->
                     case crest_operations:invoke_local_lambda(UrlSel, []) of
@@ -166,15 +150,11 @@ rss_feed() ->
                         {error} ->
                             Pid ! {self(), {error}}
                     end end),
-                F(F, UrlSel);
+                rss_feed(UrlSel);
             {Pid, _} ->
                 Pid ! {self(), {"application/json", mochijson2:encode(feed_to_json([]))}},
-                F(F, UrlSel)
-        end
-    end,
-    fun() ->
-        F(F, "")
-    end.
+                rss_feed(UrlSel)
+        end.
 
 %% Internal API
 
@@ -246,7 +226,7 @@ do_create(Pid, Instances, Body) ->
     Host = crest_json:destructure("Obj.host", Obj),
     case Title of
         "URL Selector" ->
-            Res = crest_operations:install_local("urlsel"),
+            Res = crest_operations:invoke_local_spawn(fun() -> urlsel("http://localhost:8080/original/feed.xml") end),
             case Res of
                 {ok, UUID} ->
                     Widget = #widget{id = Id, url = UUID, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},
@@ -257,7 +237,7 @@ do_create(Pid, Instances, Body) ->
                     Instances
             end;
         "RSS Reader" ->
-            Res = crest_operations:install_local("rssfeed"),
+            Res = crest_operations:invoke_local_spawn(fun() -> rss_feed("") end),
             case Res of
                 {ok, UUID} ->
                     Widget = #widget{id = Id, url = UUID, title = Title, x = X, y = Y, width = Width, height = Height, color = Color, host = Host},

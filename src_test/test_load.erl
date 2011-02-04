@@ -20,54 +20,80 @@
 %% @copyright 2010,2011 Alessandro Sivieri
 
 -module(test_load).
--export([get_function_short/0, get_function_long/0]).
+-export([factory/0, short/0, long/0]).
 
-get_function_short() ->
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Short computation"},
-                F(F);
-            {Pid, {"param", "operation"}} ->
-                Pid ! {self(), "GET"},
-                F(F);
-            {Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"input", "string()"}]},
-                F(F);
-            {Pid, [{"input", Input}]} ->
-                spawn(fun() -> handle_short(Pid, Input) end),
-                F(F);
-            Any ->
-                io:format("Spawned: ~p~n", [Any]),
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
+factory() ->
+	receive
+        {Pid, {"param", "name"}} ->
+            Pid ! {self(), "Load test manager"},
+            factory();
+        {Pid, {"param", "operation"}} ->
+            Pid ! {self(), "GET"},
+            factory();
+        {Pid, {"param", "parameters"}} ->
+            Pid ! {self(), [{"service", "string()"}, {"port", "integer()"}]},
+            factory();
+        {Pid, [{"service", Input}, {"port", Port}]} ->
+            case Input of
+				"short" ->
+					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, short) of
+						{ok, Key} ->
+							Pid ! {self(), {"text/plain", Key}};
+						{error} ->
+							Pid ! {self(), {"text/plain", "Unable to spawn to localhost."}}
+					end;
+				"long" ->
+					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, long) of
+						{ok, Key} ->
+							Pid ! {self(), {"text/plain", Key}};
+						{error} ->
+							Pid ! {self(), {"text/plain", "Unable to spawn to localhost."}}
+					end;
+				_ ->
+					Pid ! {self(), {"text/plain", "Input must be long/short."}}
+			end,
+            factory();
+        Any ->
+            io:format("Spawned: ~p~n", [Any]),
+            factory()
     end.
 
-get_function_long() ->
-    F = fun(F) ->
-        receive
-            {Pid, {"param", "name"}} ->
-                Pid ! {self(), "Long computation"},
-                F(F);
-            {Pid, {"param", "operation"}} ->
-                Pid ! {self(), "GET"},
-                F(F);
-            {Pid, {"param", "parameters"}} ->
-                Pid ! {self(), [{"input", "string()"}]},
-                F(F);
-            {Pid, [{"input", InputString}]} ->
-                spawn(fun() -> handle_long(Pid, InputString) end),
-                F(F);
-            Any ->
-                io:format("Spawned: ~p~n", [Any]),
-                F(F)
-        end
-    end,
-    fun() ->
-        F(F)
+short() ->
+    receive
+        {Pid, {"param", "name"}} ->
+            Pid ! {self(), "Short computation"},
+            short();
+        {Pid, {"param", "operation"}} ->
+            Pid ! {self(), "GET"},
+            short();
+        {Pid, {"param", "parameters"}} ->
+            Pid ! {self(), [{"input", "string()"}]},
+            short();
+        {Pid, [{"input", Input}]} ->
+            spawn(fun() -> handle_short(Pid, Input) end),
+            short();
+        Any ->
+            io:format("Spawned: ~p~n", [Any]),
+            short()
+    end.
+
+long() ->
+    receive
+        {Pid, {"param", "name"}} ->
+            Pid ! {self(), "Long computation"},
+            long();
+        {Pid, {"param", "operation"}} ->
+            Pid ! {self(), "GET"},
+            long();
+        {Pid, {"param", "parameters"}} ->
+            Pid ! {self(), [{"input", "string()"}]},
+            long();
+        {Pid, [{"input", InputString}]} ->
+            spawn(fun() -> handle_long(Pid, InputString) end),
+            long();
+        Any ->
+            io:format("Spawned: ~p~n", [Any]),
+            long()
     end.
 
 % Internal API

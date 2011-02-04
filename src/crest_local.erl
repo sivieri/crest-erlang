@@ -126,7 +126,9 @@ do_reload(Locals) ->
 do_start_local(Locals, Name) ->
 	case dict:find(Name, Locals) of
 		{ok, Computation} ->
-            crest_operations:invoke_local_spawn(list_to_atom(Computation#computation.module), list_to_atom(Computation#computation.function));
+			M = list_to_atom(Computation#computation.module),
+			F = list_to_atom(Computation#computation.function),
+            crest_operations:invoke_local_spawn(fun() -> M:F() end);
 		error ->
 			{error}
 	end.
