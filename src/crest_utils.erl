@@ -103,13 +103,15 @@ get_lambda([{"module", ModuleName}, {"binary", ModuleBinary}, {"hash", ModuleHas
 			OldHash = code_hash(OldModuleBinary),
 			case string:equal(OldHash, ModuleHash) of
 				true ->
+					log4erl:info("Module already loaded: ~p~n", [ModuleName]),
 					binary_to_term(list_to_binary(FunBinary));
 				false ->
-					log4erl:info("Updating module bytecode: ~p~n", [ModuleName]),
+					log4erl:info("Updating module: ~p~n", [ModuleName]),
 					code:load_binary(ModuleAtom, Filename, ModuleRealBinary),
     				binary_to_term(list_to_binary(FunBinary))
 			end;
 		false ->
+			log4erl:info("Installing new module: ~p~n", [ModuleName]),
     		code:load_binary(ModuleAtom, Filename, ModuleRealBinary),
     		binary_to_term(list_to_binary(FunBinary))
 	end.
