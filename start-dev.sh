@@ -1,3 +1,9 @@
 #!/bin/sh
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 node_name"
+    exit 1
+fi
+
 cd `dirname $0`
-exec erl +P 1000000 -pa $PWD/ebin $PWD/deps/*/ebin -boot start_sasl -sname crest_dev -s crest -s reloader
+exec erl +P 1000000 -pa $PWD/ebin $PWD/deps/*/ebin -boot start_sasl -sname $1 -s crest -s reloader

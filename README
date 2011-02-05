@@ -28,8 +28,7 @@ compile everything with
 
 and launch the server using one of the three start* scripts:
 start.sh will launch the server without console output, start-dev.sh
-will output some logs directly to the console, and start-detached.sh
-will launch the server and detach it from the current shell.
+will output some logs directly to the console.
 
 3. Certificates and Certification Authority
 This framework requires SSL mutual authentication between peers; for
