@@ -25,8 +25,8 @@
 -export([start/1, start_multiple/2, receiver/4, do_test/2]).
 -define(NUM_ROUNDS, 240).
 -define(INTERARRIVAL, 1).
--define(TEST_TYPE, "erlang").
--define(HOST, "131.175.135.132").
+-define(TEST_TYPE, "mochiweb").
+-define(HOST, "192.168.1.3").
 -define(CLIENT_SLEEP_TIME, 1000).
 
 start(Filename) ->
@@ -83,19 +83,19 @@ do_test(Profile, Time) ->
     timer:exit_after(timer:seconds(Time), elapsed_time),
 	case ?TEST_TYPE of
 		"mochiweb" ->
-			Len1 = 0,
-			Len2 = 0,
+			Len1 = "0",
+			Len2 = "0",
 			Url1 = "http://" ++ ?HOST ++ ":8080/short?input=",
 			Url2 = "http://" ++ ?HOST ++ ":8080/long?input=";
 		"erlang" ->
-			{ok, {{_,200,_}, Head1, Key1}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/somekey?service=short&port=8444", Profile),
+			{ok, {{_,200,_}, Head1, Key1}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/8b36f797-ef74-4ff1-abcf-cc88a4ccf6f5?service=short&port=8444", Profile),
             {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-			{ok, {{_,200,_}, Head2, Key2}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/somekey?service=long&port=8444", Profile),
+			{ok, {{_,200,_}, Head2, Key2}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/8b36f797-ef74-4ff1-abcf-cc88a4ccf6f5?service=long&port=8444", Profile),
             {"content-length", Len2} = lists:keyfind("content-length",1,Head2),
 			Url1 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key1 ++ "?input=",
 			Url2 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key2 ++ "?input="
 	end,
-	Len = Len1 + Len2,
+	Len = list_to_integer(Len1) + list_to_integer(Len2),
 	Urls = [Url1, Url2],
     do_test(Profile, Len, Urls).
     
@@ -104,8 +104,8 @@ do_test(Profile, Len, Urls) ->
 	String = rstring(),
 	LLen = lists:map(fun(X) ->
                      {ok, {{_,200,_}, Head, _}} = httpc:request(X ++ String, Profile),
-                     {"content-length", Len} = lists:keyfind("content-length",1,Head),
-                     list_to_integer(Len)
+                     {"content-length", Len1} = lists:keyfind("content-length",1,Head),
+                     list_to_integer(Len1)
                  end,
                  Urls),
     FTime = now(),

@@ -16,8 +16,8 @@ cat <<EOF >/tmp/plotcmd
 set terminal postscript eps monochrome enhanced linewidth 2 dashlength 3 "Helvetica" 24
 #set style line 1 linetype 1 linecolor rgb "red" linewidth 2
 #set style line 2 linetype 1 linecolor rgb "blue" linewidth 2
-set yrange [0:15000]
-set xrange [0:200]
+set yrange [0:20000]
+set xrange [0:250]
 #set log y
 set ylabel "Response time (ms)"
 set xlabel "Test time (s)"
@@ -36,8 +36,8 @@ cat <<EOF >/tmp/plotcmd
 set terminal postscript eps monochrome enhanced linewidth 2 dashlength 3 "Helvetica" 24
 #set style line 1 linetype 1 linecolor rgb "red" linewidth 2
 #set style line 2 linetype 1 linecolor rgb "blue" linewidth 2
-set yrange [0:2000]
-set xrange [0:200]
+set yrange [0:10000]
+set xrange [0:250]
 #set log y
 set ylabel "Sent data (kByte/s)"
 set xlabel "Test time (s)"
