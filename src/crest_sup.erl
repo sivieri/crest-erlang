@@ -48,11 +48,21 @@ upgrade() ->
     ok.
 
 init([]) ->
+	Filename = crest_deps:local_path(["config", "web.config"]),
+	case file:consult(Filename) of
+		{ok, PortList} ->
+			{web, WebPort} = lists:keyfind(web, 1, PortList),
+			{web_ssl, WebSSLPort} = lists:keyfind(web_ssl, 1, PortList);
+		{error, Reason} ->
+			log4erl:info("Unable to load web configuration: ~p~n", [Reason]),
+			WebPort = 8080,
+			WebSSLPort = 8443
+	end,
     Ip = case os:getenv("MOCHIWEB_IP") of false -> "0.0.0.0"; Any -> Any end,   
     WebConfig = [
 				 {max, 1000000},
          		 {ip, Ip},
-                 {port, 8080},
+                 {port, WebPort},
                  {docroot, crest_deps:local_path(["priv", "www"])}],
     Web = {crest_web,
            {crest_web, start, [WebConfig]},
@@ -60,7 +70,7 @@ init([]) ->
 	WebConfigSSL = [
 			     {max, 1000000},
                  {ip, Ip},
-                 {port, 8443},
+                 {port, WebSSLPort},
                  {docroot, crest_deps:local_path(["priv", "www"])},
                  {ssl, true},
                  {ssl_opts, [
