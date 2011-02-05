@@ -3,7 +3,7 @@ ebin
 doc
 logs/*.txt
 logs/index
-logs/main.log
+logs/*.log
 logs/?
 logs/??
 erl_crash.dump

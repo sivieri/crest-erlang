@@ -36,14 +36,14 @@ factory() ->
         {Pid, [{"service", Input}, {"port", Port}]} ->
             case Input of
 				"short" ->
-					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, short) of
+					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, fun() -> short() end) of
 						{ok, Key} ->
 							Pid ! {self(), {"text/plain", Key}};
 						{error} ->
 							Pid ! {self(), {"text/plain", "Unable to spawn to localhost."}}
 					end;
 				"long" ->
-					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, long) of
+					case crest_operations:invoke_spawn("localhost", list_to_integer(Port), ?MODULE, fun() -> long() end) of
 						{ok, Key} ->
 							Pid ! {self(), {"text/plain", Key}};
 						{error} ->
