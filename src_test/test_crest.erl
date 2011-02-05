@@ -81,41 +81,39 @@ spawn_client(ClientNum) ->
 
 do_test(Profile, Time) ->
     timer:exit_after(timer:seconds(Time), elapsed_time),
-    do_test(Profile).
+	case ?TEST_TYPE of
+		"mochiweb" ->
+			Len1 = 0,
+			Len2 = 0,
+			Url1 = "http://" ++ ?HOST ++ ":8080/short?input=",
+			Url2 = "http://" ++ ?HOST ++ ":8080/long?input=";
+		"erlang" ->
+			{ok, {{_,200,_}, Head1, Key1}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/somekey?service=short&port=8444", Profile),
+            {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
+			{ok, {{_,200,_}, Head2, Key2}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/somekey?service=long&port=8444", Profile),
+            {"content-length", Len2} = lists:keyfind("content-length",1,Head2),
+			Url1 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key1 ++ "?input=",
+			Url2 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key2 ++ "?input="
+	end,
+	Len = Len1 + Len2,
+	Urls = [Url1, Url2],
+    do_test(Profile, Len, Urls).
     
-do_test(Profile) ->
+do_test(Profile, Len, Urls) ->
     ITime = now(),
-    case ?TEST_TYPE of
-        "mochiweb" ->
-            % MOCHIWEB PART
-			String = rstring(),
-            Urls = ["/short?input=" ++ String,"/long?input=" ++ String,"/short?input=" ++ String,"/long?input=" ++ String],
-            LLen = lists:map(fun(X) ->
-                     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
-                     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-                     list_to_integer(Len1)
-                 end,
-                 Urls);
-        "erlang" ->
-            % ERLANG PART
-			String = rstring(),
-			Urls = ["/crest/local/short", "/crest/local/long"],
-			LLen = lists:map(fun(X) ->
-                     {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
+	String = rstring(),
+	LLen = lists:map(fun(X) ->
+                     {ok, {{_,200,_}, Head, _}} = httpc:request(X ++ String, Profile),
                      {"content-length", Len} = lists:keyfind("content-length",1,Head),
-					 [_, Key] = string:tokens(Body,"{}[]:, \""),
-            		 {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/" ++ Key ++ "?input=" ++ String, Profile),
-					 {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-					 list_to_integer(Len) + list_to_integer(Len1)
+                     list_to_integer(Len)
                  end,
-                 Urls)
-    end,
-    % COMMON PART
+                 Urls),
     FTime = now(),
     ElapsedTime = timer:now_diff(FTime,ITime),
-    receiver ! {ElapsedTime, lists:sum(LLen)},
+	TLen = lists:sum(LLen) + Len,
+    receiver ! {ElapsedTime, TLen},
     timer:sleep(?CLIENT_SLEEP_TIME),
-    do_test(Profile).
+    do_test(Profile, Len, Urls).
 
 rstring() ->
 	StartList = lists:seq(97, 122),
