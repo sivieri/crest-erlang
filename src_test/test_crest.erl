@@ -22,7 +22,7 @@
 %% @copyright 2011 Alessandro Sivieri
 
 -module(test_crest).
--export([start/1, start_multiple/2, receiver/4, do_test/2]).
+-export([start/1, start_multiple/2, receiver/4, dumper/1, do_test/2]).
 -define(NUM_ROUNDS, 240).
 -define(INTERARRIVAL, 1).
 -define(TEST_TYPE, "mochiweb").
@@ -32,7 +32,9 @@
 start(Filename) ->
     inets:start(),
     {ok, FileId} = file:open(Filename,[append]),
+	{ok, DumpId} = file:open(Filename ++ ".dump", [write]),
     register(receiver, spawn(?MODULE, receiver, [0, 0, 0, FileId])),
+	register(dumper, spawn(?MODULE, dumper, [DumpId])),
     do_round(0).
 
 start_multiple(Filename, N) ->
@@ -53,6 +55,15 @@ receiver(TotTime, TotBytes, NumReceived, OutFile) ->
 	{Time, Bytes} ->
 	    receiver(TotTime+Time, TotBytes+Bytes, NumReceived+1,OutFile)
     end.
+
+dumper(DumpFile) ->
+	receive
+		{dump, Head, Body} ->
+			io:fwrite(DumpFile, "~p~n~p~n", [Head, Body]),
+			dumper(DumpFile);
+		stop ->
+			io:fwrite("Dump end~n", [])
+	end.
 
 do_round(Round) ->
     if
@@ -90,8 +101,10 @@ do_test(Profile, Time) ->
 		"erlang" ->
 			{ok, {{_,200,_}, Head1, Key1}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/8b36f797-ef74-4ff1-abcf-cc88a4ccf6f5?service=short&port=8444", Profile),
             {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
+			dumper ! {dump, Head1, Key1},
 			{ok, {{_,200,_}, Head2, Key2}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/8b36f797-ef74-4ff1-abcf-cc88a4ccf6f5?service=long&port=8444", Profile),
             {"content-length", Len2} = lists:keyfind("content-length",1,Head2),
+			dumper ! {dump, Head2, Key2},
 			Url1 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key1 ++ "?input=",
 			Url2 = "http://" ++ ?HOST ++ ":8081/crest/url/" ++ Key2 ++ "?input="
 	end,
@@ -103,8 +116,9 @@ do_test(Profile, Len, Urls) ->
     ITime = now(),
 	String = rstring(),
 	LLen = lists:map(fun(X) ->
-                     {ok, {{_,200,_}, Head, _}} = httpc:request(X ++ String, Profile),
+                     {ok, {{_,200,_}, Head, Body}} = httpc:request(X ++ String, Profile),
                      {"content-length", Len1} = lists:keyfind("content-length",1,Head),
+					 dumper ! {dump, Head, Body},
                      list_to_integer(Len1)
                  end,
                  Urls),
