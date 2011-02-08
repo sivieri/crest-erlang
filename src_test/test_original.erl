@@ -22,7 +22,7 @@
 %% @copyright 2011 Alessandro Sivieri
 
 -module(test_original).
--export([start/1, start_multiple/2, receiver/4, dumper/1, do_test/2]).
+-export([start/1, start_multiple/2, receiver/4, do_test/2]).
 -define(NUM_ROUNDS, 240).
 -define(INTERARRIVAL, 1).
 -define(TEST_TYPE, "erlang").
@@ -32,9 +32,7 @@
 start(Filename) ->
     inets:start(),
     {ok, FileId} = file:open(Filename,[append]),
-	{ok, DumpId} = file:open(Filename ++ ".dump", [write]),
     register(receiver, spawn(?MODULE, receiver, [0, 0, 0, FileId])),
-	register(dumper, spawn(?MODULE, dumper, [DumpId])),
     do_round(0).
 
 start_multiple(Filename, N) ->
@@ -56,15 +54,6 @@ receiver(TotTime, TotBytes, NumReceived, OutFile) ->
 	    receiver(TotTime+Time, TotBytes+Bytes, NumReceived+1,OutFile)
     end.
 
-dumper(DumpFile) ->
-	receive
-		{dump, Head, Body} ->
-			io:fwrite(DumpFile, "~p~n~p~n", [Head, Body]),
-			dumper(DumpFile);
-		stop ->
-			io:fwrite("Dump end~n", [])
-	end.
-
 do_round(Round) ->
     if
 	Round rem 30 == 0 ->
@@ -81,7 +70,6 @@ do_round(Round) ->
 	    do_round(Round+1);
 	true ->
 	    receiver ! stop,
-        dumper ! stop,
 	    timer:sleep(2000),
 	    inets:stop()
     end.
@@ -102,15 +90,13 @@ do_test(Profile) ->
             % SCHEME PART
             {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8081/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
-			dumper ! {dump, Head, Body},
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
             Urls = ["/static/dojo/demo/demo.html","/static/dojo/demo/dijit/themes/soria/images/titleBarActive.png","/static/dojo/demo/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, Body2}} = httpc:request("http://" ++ ?HOST ++ ":8081" ++ X, Profile),
+    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8081" ++ X, Profile),
     			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-					 dumper ! {dump, Head1, Body2},
     			     list_to_integer(Len1)
     		     end,
     		     Urls);
@@ -118,15 +104,13 @@ do_test(Profile) ->
             % MOCHIWEB PART
             {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/manager/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
-			dumper ! {dump, Head, Body},
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/mailbox/")==1],
             Urls = ["/demo.html","/dijit/themes/soria/images/titleBarActive.png","/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-                     {ok, {{_,200,_}, Head1, Body2}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
+                     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
                      {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-					 dumper ! {dump, Head1, Body2},
                      list_to_integer(Len1)
                  end,
                  Urls);
@@ -134,15 +118,13 @@ do_test(Profile) ->
             % ERLANG PART
             {ok, {{_,200,_}, Head, Body}} = httpc:request("http://" ++ ?HOST ++ ":8080/crest/url/c2723f0f-c123-4d30-91e0-a147576e311e/widget/manager/maps", Profile),
             {"content-length", L} = lists:keyfind("content-length",1,Head),
-			dumper ! {dump, Head, Body},
             Len = list_to_integer(L),
             Tok = string:tokens(Body,"{}[]:, \""),
             Widgets = [X || X <- Tok , string:str(X,"/crest/url/")==1],
             Urls = ["/original/demo.html","/original/dijit/themes/soria/images/titleBarActive.png","/original/dijit/themes/soria/images/buttonActive.png"]++Widgets,
             LLen = lists:map(fun(X) ->
-    			     {ok, {{_,200,_}, Head1, Body2}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
-    			     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
-					 dumper ! {dump, Head1, Body2},
+    			     {ok, {{_,200,_}, Head1, _}} = httpc:request("http://" ++ ?HOST ++ ":8080" ++ X, Profile),
+                     {"content-length", Len1} = lists:keyfind("content-length",1,Head1),
     			     list_to_integer(Len1)
     		     end,
     		     Urls)
