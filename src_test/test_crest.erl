@@ -128,7 +128,7 @@ do_test(Profile, Len, Urls) ->
 	TLen = lists:sum(LLen) + Len,
     receiver ! {ElapsedTime, TLen},
     timer:sleep(?CLIENT_SLEEP_TIME),
-    do_test(Profile, Len, Urls).
+    do_test(Profile, 0, Urls).
 
 rstring() ->
 	StartList = lists:seq(97, 122),
