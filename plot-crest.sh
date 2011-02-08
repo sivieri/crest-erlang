@@ -22,7 +22,7 @@ set xrange [0:250]
 set ylabel "Response number"
 set xlabel "Test time (s)"
 set key left top Left
-set output "restime$1.eps"
+set output "resnumber$1.eps"
 plot "/tmp/erlangcrest$1.data" using 1:2 title "CREST-Erlang" with lines ls 1,\
      "/tmp/mochiwebcrest$1.data" using 1:2 title "MochiWeb" with lines ls 2
 EOF
