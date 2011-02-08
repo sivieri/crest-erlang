@@ -36,7 +36,7 @@ start(Filename) ->
     do_round(0).
 
 start_multiple(Filename, N) ->
-	lists:foreach(fun(_) -> start(Filename) end, lists:seq(1, list_to_integer(N))).
+	lists:foreach(fun(_) -> start(Filename) end, lists:seq(1, N)).
 
 receiver(TotTime, TotBytes, NumReceived, OutFile) ->
     receive
