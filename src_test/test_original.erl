@@ -81,6 +81,7 @@ do_round(Round) ->
 	    do_round(Round+1);
 	true ->
 	    receiver ! stop,
+        dumper ! stop,
 	    timer:sleep(2000),
 	    inets:stop()
     end.
